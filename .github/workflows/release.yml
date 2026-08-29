@@ -81,5 +81,5 @@ jobs:
           git config user.email "admin@hyz.is"
           git add CHANGELOG.md
           git diff --cached --quiet && exit 0
-          git commit -m "Write ${TAG} into the changelog"
+          git commit -s -m "Write ${TAG} into the changelog"
           git push origin main
