@@ -109,3 +109,26 @@ func TestDoctorAndDevStayInsideExplicitEditorActions(t *testing.T) {
 		t.Fatal("dev execution must not concatenate shell text")
 	}
 }
+
+func TestTheDevelopmentViewUsesTheSameDoctorRefreshWithoutStartingProcesses(t *testing.T) {
+	raw, err := os.ReadFile(rootPath(t, "src/extension.ts"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	source := string(raw)
+	for _, seam := range []string{
+		`createTreeView("arandu.development"`,
+		`registerCommand("arandu.projectMap.refresh", () => this.refresh())`,
+		`registerCommand("arandu.doctor.run", () => this.refresh())`,
+		`void this.refreshGraph();`,
+	} {
+		if !strings.Contains(source, seam) {
+			t.Errorf("Development view adapter does not contain %q", seam)
+		}
+	}
+	for _, forbidden := range []string{"sendText(", `shellArgs: ["migrate"`, `shellArgs: ["seed"`, `shellArgs: ["generate"`} {
+		if strings.Contains(source, forbidden) {
+			t.Errorf("Development view introduced forbidden process execution %q", forbidden)
+		}
+	}
+}

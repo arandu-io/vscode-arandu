@@ -59,8 +59,14 @@ func TestTheExtensionStartsTheAranduLanguageClientAndProjectMap(t *testing.T) {
 				} `json:"activitybar"`
 			} `json:"viewsContainers"`
 			Views map[string][]struct {
-				ID string `json:"id"`
+				ID   string `json:"id"`
+				Name string `json:"name"`
 			} `json:"views"`
+			ViewsWelcome []struct {
+				View     string `json:"view"`
+				Contents string `json:"contents"`
+				When     string `json:"when"`
+			} `json:"viewsWelcome"`
 			Commands []struct {
 				Command string `json:"command"`
 			} `json:"commands"`
@@ -81,7 +87,7 @@ func TestTheExtensionStartsTheAranduLanguageClientAndProjectMap(t *testing.T) {
 	if manifest.Main != "./dist/extension.js" || manifest.Browser != "" {
 		t.Fatalf("extension host = main %q browser %q", manifest.Main, manifest.Browser)
 	}
-	for _, event := range []string{"onLanguage:kyse", "onView:arandu.projectMap", "workspaceContains:arandu.toml"} {
+	for _, event := range []string{"onLanguage:kyse", "onView:arandu.projectMap", "onView:arandu.development", "workspaceContains:arandu.toml"} {
 		if !contains(manifest.Activation, event) {
 			t.Errorf("activation events do not contain %q", event)
 		}
@@ -109,7 +115,8 @@ func TestTheExtensionStartsTheAranduLanguageClientAndProjectMap(t *testing.T) {
 	if len(manifest.Contributes.ViewContainers.ActivityBar) != 1 || manifest.Contributes.ViewContainers.ActivityBar[0].ID != "arandu" {
 		t.Fatalf("activity bar containers = %#v", manifest.Contributes.ViewContainers.ActivityBar)
 	}
-	if len(manifest.Contributes.Views["arandu"]) != 1 || manifest.Contributes.Views["arandu"][0].ID != "arandu.projectMap" {
+	views := manifest.Contributes.Views["arandu"]
+	if len(views) != 2 || views[0].ID != "arandu.projectMap" || views[1].ID != "arandu.development" || views[1].Name != "Development" {
 		t.Fatalf("Arandu views = %#v", manifest.Contributes.Views["arandu"])
 	}
 	for _, command := range []string{
@@ -119,6 +126,7 @@ func TestTheExtensionStartsTheAranduLanguageClientAndProjectMap(t *testing.T) {
 		"arandu.dev.start",
 		"arandu.dev.stop",
 		"arandu.dev.restart",
+		"arandu.doctor.run",
 	} {
 		found := false
 		for _, candidate := range manifest.Contributes.Commands {
@@ -171,6 +179,33 @@ func TestTheExtensionStartsTheAranduLanguageClientAndProjectMap(t *testing.T) {
 	}
 	if !strings.Contains(string(activity), `fill="currentColor"`) || strings.Contains(string(activity), `fill="white"`) {
 		t.Fatal("Activity Bar icon must follow the current VS Code theme")
+	}
+
+	welcomeByState := make(map[string]string, len(manifest.Contributes.ViewsWelcome))
+	for _, welcome := range manifest.Contributes.ViewsWelcome {
+		if welcome.View == "arandu.development" {
+			welcomeByState[welcome.When] = welcome.Contents
+		}
+	}
+	stopped := welcomeByState["!arandu.dev.running"]
+	for _, action := range []string{
+		"[Start aru dev](command:arandu.dev.start)",
+		"[Run Doctor](command:arandu.doctor.run)",
+		"[Configure Aru](command:arandu.aru.configure)",
+	} {
+		if !strings.Contains(stopped, action) {
+			t.Errorf("stopped Development view does not contain %q", action)
+		}
+	}
+	running := welcomeByState["arandu.dev.running"]
+	for _, action := range []string{
+		"[Stop](command:arandu.dev.stop)",
+		"[Restart](command:arandu.dev.restart)",
+		"[Run Doctor](command:arandu.doctor.run)",
+	} {
+		if !strings.Contains(running, action) {
+			t.Errorf("running Development view does not contain %q", action)
+		}
 	}
 }
 

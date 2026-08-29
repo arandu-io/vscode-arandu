@@ -13,6 +13,11 @@ const showOutputAction = "Show Output";
 
 let activeController: AranduController | undefined;
 
+const emptyDevelopmentProvider: vscode.TreeDataProvider<vscode.TreeItem> = {
+  getTreeItem: (item) => item,
+  getChildren: () => [],
+};
+
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   activeController = new AranduController(context);
   context.subscriptions.push(activeController);
@@ -29,6 +34,9 @@ class AranduController implements vscode.Disposable {
   private readonly doctorDiagnostics = vscode.languages.createDiagnosticCollection(adapterContract.diagnosticsCollection);
   private readonly provider = new ProjectMapProvider();
   private readonly tree = vscode.window.createTreeView("arandu.projectMap", { treeDataProvider: this.provider });
+  private readonly developmentTree = vscode.window.createTreeView("arandu.development", {
+    treeDataProvider: emptyDevelopmentProvider,
+  });
   private readonly status = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
   private readonly devStatus = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
   private readonly permanentDisposables: vscode.Disposable[] = [];
@@ -52,9 +60,11 @@ class AranduController implements vscode.Disposable {
       this.doctorDiagnostics,
       this.provider,
       this.tree,
+      this.developmentTree,
       this.status,
       this.devStatus,
       vscode.commands.registerCommand("arandu.projectMap.refresh", () => this.refresh()),
+      vscode.commands.registerCommand("arandu.doctor.run", () => this.refresh()),
       vscode.commands.registerCommand("arandu.languageServer.restart", () => this.restart()),
       vscode.commands.registerCommand("arandu.aru.configure", () => this.configureAruPath()),
       vscode.commands.registerCommand("arandu.output.show", () => this.output.show(true)),

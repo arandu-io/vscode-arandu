@@ -22,6 +22,7 @@
   "activationEvents": [
     "onLanguage:kyse",
     "onView:arandu.projectMap",
+    "onView:arandu.development",
     "workspaceContains:arandu.toml"
   ],
   "scripts": {
@@ -123,6 +124,11 @@
         "title": "Restart Development Server",
         "category": "Arandu",
         "icon": "$(debug-restart)"
+      },
+      {
+        "command": "arandu.doctor.run",
+        "title": "Run Doctor",
+        "category": "Arandu"
       }
     ],
     "viewsContainers": {
@@ -140,9 +146,26 @@
           "id": "arandu.projectMap",
           "name": "Project Map",
           "contextualTitle": "Arandu Project Map"
+        },
+        {
+          "id": "arandu.development",
+          "name": "Development",
+          "contextualTitle": "Arandu Development"
         }
       ]
     },
+    "viewsWelcome": [
+      {
+        "view": "arandu.development",
+        "contents": "Start the development server or inspect the project.\n[Start aru dev](command:arandu.dev.start)\n[Run Doctor](command:arandu.doctor.run)\n[Configure Aru](command:arandu.aru.configure)",
+        "when": "!arandu.dev.running"
+      },
+      {
+        "view": "arandu.development",
+        "contents": "The development server is running.\n[Stop](command:arandu.dev.stop)\n[Restart](command:arandu.dev.restart)\n[Run Doctor](command:arandu.doctor.run)",
+        "when": "arandu.dev.running"
+      }
+    ],
     "menus": {
       "view/title": [
         {
