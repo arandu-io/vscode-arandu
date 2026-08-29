@@ -19,15 +19,19 @@ comment and indentation rules, and snippets for complete views, layouts,
 control flow, composition, CSRF, and both interpolation forms. Its language
 client connects to `aru lsp` for completion and diagnostics.
 
-The Arandu activity view shows a native Project Map with application features,
-HTTP, database, views, async, console, native capabilities, community modules,
-and diagnostics. Located items open at their source line. Doctor findings also
-appear in VS Code Problems, with stale findings cleared on every refresh.
+The Arandu activity container has two native views. Project Map shows
+application features, HTTP, database, views, async, console, native
+capabilities, community modules, and diagnostics; located items open at their
+source line. Development exposes visible actions to start, stop, or restart
+`aru dev`, run Doctor immediately, and configure the Aru executable.
 
-The map refreshes from its toolbar or, with debounce, after relevant project
-files change. `Arandu: Start Development Server`, `Stop`, and `Restart` run
-`aru dev` in a dedicated terminal only after an explicit command; the
-extension never runs migrations, seeders, or generators.
+Doctor findings also appear in VS Code Problems, with stale findings cleared
+on every refresh. Doctor runs when the extension starts and, with debounce,
+after relevant project files are saved.
+
+The map also refreshes from its toolbar. `Arandu: Start Development Server`,
+`Stop`, and `Restart` run `aru dev` in a dedicated terminal only after an
+explicit command; the extension never runs migrations, seeders, or generators.
 
 ## Aru discovery
 
