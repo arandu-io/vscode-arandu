@@ -12,6 +12,22 @@
 <a href="LICENSE.md"><img src="https://img.shields.io/github/license/arandu-io/vscode-arandu" alt="License"></a>
 </p>
 
+## Installation
+
+Install the current Aru CLI first:
+
+```bash
+brew install arandu-io/tap/aru
+```
+
+The release process attaches a reproducible `arandu-*.vsix` to every
+[GitHub release](https://github.com/arandu-io/vscode-arandu/releases). Download
+it and install it from VS Code with **Extensions: Install from VSIX**, or run:
+
+```bash
+code --install-extension arandu-0.1.0.vsix
+```
+
 ## Preview
 
 The extension owns `.kyse.go` files and supplies Kyse syntax highlighting,
