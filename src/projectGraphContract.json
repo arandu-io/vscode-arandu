@@ -1,0 +1,42 @@
+{
+  "request": "arandu/projectGraph",
+  "schemaVersion": 1,
+  "groups": [
+    {
+      "id": "application-features",
+      "label": "Application Features"
+    },
+    {
+      "id": "http",
+      "label": "HTTP"
+    },
+    {
+      "id": "database",
+      "label": "Database"
+    },
+    {
+      "id": "views",
+      "label": "Views"
+    },
+    {
+      "id": "async",
+      "label": "Async"
+    },
+    {
+      "id": "console",
+      "label": "Console"
+    },
+    {
+      "id": "native-capabilities",
+      "label": "Native Capabilities"
+    },
+    {
+      "id": "community-modules",
+      "label": "Community Modules"
+    },
+    {
+      "id": "diagnostics",
+      "label": "Diagnostics"
+    }
+  ]
+}

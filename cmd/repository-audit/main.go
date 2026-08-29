@@ -1,4 +1,4 @@
-// Command repository-audit keeps runtime and test tooling out of the declarative extension.
+// Command repository-audit confines Node and TypeScript to the editor adapter.
 package main
 
 import (
@@ -16,9 +16,7 @@ var forbiddenNames = map[string]struct{}{
 	".python-version":     {},
 	"Pipfile":             {},
 	"__pycache__":         {},
-	"node_modules":        {},
 	"npm-shrinkwrap.json": {},
-	"package-lock.json":   {},
 	"pnpm-lock.yaml":      {},
 	"poetry.lock":         {},
 	"pyproject.toml":      {},
@@ -51,11 +49,11 @@ func main() {
 	}
 	if len(violations) != 0 {
 		for _, violation := range violations {
-			fmt.Fprintf(os.Stderr, "declarative extension contains forbidden tooling: %s\n", violation)
+			fmt.Fprintf(os.Stderr, "repository contains tooling outside the editor adapter: %s\n", violation)
 		}
 		os.Exit(1)
 	}
-	fmt.Println("Repository contains only declarative extension assets and Go auditors.")
+	fmt.Println("Node and TypeScript are confined to the bundled editor adapter; Python is absent.")
 }
 
 func audit(root string) ([]string, error) {
@@ -69,7 +67,7 @@ func audit(root string) ([]string, error) {
 			return walkErr
 		}
 		name := entry.Name()
-		if entry.IsDir() && (name == ".git" || name == "dist") {
+		if entry.IsDir() && (name == ".git" || name == "node_modules") {
 			return filepath.SkipDir
 		}
 		relative, err := filepath.Rel(root, path)
@@ -90,10 +88,14 @@ func audit(root string) ([]string, error) {
 			violations = append(violations, filepath.ToSlash(relative))
 			return nil
 		}
-		if _, forbidden := forbiddenExtensions[strings.ToLower(filepath.Ext(name))]; forbidden {
+		extension := strings.ToLower(filepath.Ext(name))
+		if _, forbidden := forbiddenExtensions[extension]; forbidden && !allowedAdapterFile(filepath.ToSlash(relative), extension) {
 			violations = append(violations, filepath.ToSlash(relative))
 		}
 		if name == "package.json" && relative != "package.json" {
+			violations = append(violations, filepath.ToSlash(relative))
+		}
+		if name == "package-lock.json" && relative != "package-lock.json" {
 			violations = append(violations, filepath.ToSlash(relative))
 		}
 		return nil
@@ -103,4 +105,14 @@ func audit(root string) ([]string, error) {
 	}
 	sort.Strings(violations)
 	return violations, nil
+}
+
+func allowedAdapterFile(relative, extension string) bool {
+	if extension == ".ts" {
+		return strings.HasPrefix(relative, "src/")
+	}
+	if extension == ".js" {
+		return relative == "dist/extension.js"
+	}
+	return false
 }

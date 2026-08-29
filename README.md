@@ -4,7 +4,7 @@
 
 <h1 align="center">Arandu for Visual Studio Code</h1>
 
-<p align="center">First-party Kyse language support for Arandu projects.</p>
+<p align="center">First-party Kyse language intelligence and project navigation for Arandu.</p>
 
 <p align="center">
 <a href="https://github.com/arandu-io/vscode-arandu/actions/workflows/ci.yml"><img src="https://github.com/arandu-io/vscode-arandu/actions/workflows/ci.yml/badge.svg" alt="Build Status"></a>
@@ -16,12 +16,33 @@
 
 The extension owns `.kyse.go` files and supplies Kyse syntax highlighting,
 comment and indentation rules, and snippets for complete views, layouts,
-control flow, composition, CSRF, and both interpolation forms.
+control flow, composition, CSRF, and both interpolation forms. Its language
+client connects to `aru lsp` for completion and diagnostics.
 
-This first release is declarative: it has no extension-host runtime and no
-local Node dependency graph. Language intelligence remains in the Aru
-toolchain and will connect through the editor adapter as that public contract
-lands.
+The Arandu activity view shows a native Project Map with application features,
+HTTP, database, views, async, console, native capabilities, community modules,
+and diagnostics. Located items open at their source line. Doctor findings also
+appear in VS Code Problems, with stale findings cleared on every refresh.
+
+The map refreshes from its toolbar or, with debounce, after relevant project
+files change. `Arandu: Start Development Server`, `Stop`, and `Restart` run
+`aru dev` in a dedicated terminal only after an explicit command; the
+extension never runs migrations, seeders, or generators.
+
+## Aru discovery
+
+Open a trusted local workspace whose root contains `arandu.toml`. The adapter
+resolves `aru` in this order:
+
+1. The workspace setting `arandu.aru.path`.
+2. `PATH`.
+3. `/opt/homebrew/bin/aru` (Apple Silicon Homebrew).
+4. `/usr/local/bin/aru` (Intel Homebrew).
+
+Use `Arandu: Configure Aru Path` when the executable lives elsewhere. The
+status bar reports language-server startup, readiness, failures, and whether
+the development server is running. Untrusted or virtual workspaces never
+start an Aru process.
 
 ## Contributing
 

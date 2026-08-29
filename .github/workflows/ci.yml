@@ -23,6 +23,12 @@ jobs:
         with:
           node-version: 24
 
+      - name: Install pinned editor adapter dependencies
+        run: npm ci
+
+      - name: Audit editor adapter dependencies
+        run: npm audit --audit-level=low
+
       - name: Formatting
         run: make format-check
 
@@ -37,6 +43,12 @@ jobs:
 
       - name: Repository boundary
         run: make audit
+
+      - name: TypeScript contract
+        run: make typecheck
+
+      - name: Reproducible extension-host bundle
+        run: make bundle
 
       - name: Known vulnerabilities
         run: |

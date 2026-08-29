@@ -1,7 +1,7 @@
 {
   "name": "arandu",
   "displayName": "Arandu",
-  "description": "Kyse language support for Arandu.",
+  "description": "Kyse language intelligence and project navigation for Arandu.",
   "version": "0.1.0",
   "preview": true,
   "publisher": "arandu-io",
@@ -15,10 +15,25 @@
     "url": "https://github.com/arandu-io/vscode-arandu/issues"
   },
   "homepage": "https://github.com/arandu-io/vscode-arandu",
+  "main": "./dist/extension.js",
+  "extensionKind": [
+    "workspace"
+  ],
+  "activationEvents": [
+    "onLanguage:kyse",
+    "onView:arandu.projectMap",
+    "workspaceContains:arandu.toml"
+  ],
+  "scripts": {
+    "bundle": "esbuild src/extension.ts --bundle --platform=node --format=cjs --target=node20 --external:vscode --legal-comments=eof --outfile=dist/extension.js",
+    "typecheck": "tsc --noEmit"
+  },
   "files": [
     "CHANGELOG.md",
     "LICENSE.md",
     "README.md",
+    "dist/extension.js",
+    "images/activity.svg",
     "images/icon.png",
     "language-configuration.json",
     "snippets/kyse.json",
@@ -40,13 +55,123 @@
   ],
   "capabilities": {
     "untrustedWorkspaces": {
-      "supported": true
+      "supported": "limited",
+      "description": "The Project Map and language server start after the workspace is trusted.",
+      "restrictedConfigurations": [
+        "arandu.aru.path"
+      ]
     },
     "virtualWorkspaces": {
-      "supported": true
+      "supported": false,
+      "description": "Aru reads an Arandu project from the local filesystem."
     }
   },
+  "dependencies": {
+    "vscode-languageclient": "10.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "20.19.43",
+    "@types/vscode": "1.96.0",
+    "@vscode/vsce": "3.9.2",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
+  },
   "contributes": {
+    "configuration": {
+      "title": "Arandu",
+      "properties": {
+        "arandu.aru.path": {
+          "type": "string",
+          "default": "",
+          "scope": "resource",
+          "description": "Absolute path to the Aru executable. Leave empty to search PATH and Homebrew."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "arandu.projectMap.refresh",
+        "title": "Refresh Project Map",
+        "category": "Arandu",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "arandu.languageServer.restart",
+        "title": "Restart Language Server",
+        "category": "Arandu",
+        "icon": "$(debug-restart)"
+      },
+      {
+        "command": "arandu.aru.configure",
+        "title": "Configure Aru Path",
+        "category": "Arandu"
+      },
+      {
+        "command": "arandu.dev.start",
+        "title": "Start Development Server",
+        "category": "Arandu",
+        "icon": "$(play)"
+      },
+      {
+        "command": "arandu.dev.stop",
+        "title": "Stop Development Server",
+        "category": "Arandu",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "arandu.dev.restart",
+        "title": "Restart Development Server",
+        "category": "Arandu",
+        "icon": "$(debug-restart)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "arandu",
+          "title": "Arandu",
+          "icon": "images/activity.svg"
+        }
+      ]
+    },
+    "views": {
+      "arandu": [
+        {
+          "id": "arandu.projectMap",
+          "name": "Project Map",
+          "contextualTitle": "Arandu Project Map"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "arandu.projectMap.refresh",
+          "when": "view == arandu.projectMap",
+          "group": "navigation@1"
+        },
+        {
+          "command": "arandu.languageServer.restart",
+          "when": "view == arandu.projectMap",
+          "group": "navigation@2"
+        },
+        {
+          "command": "arandu.dev.start",
+          "when": "view == arandu.projectMap && !arandu.dev.running",
+          "group": "navigation@3"
+        },
+        {
+          "command": "arandu.dev.stop",
+          "when": "view == arandu.projectMap && arandu.dev.running",
+          "group": "navigation@3"
+        },
+        {
+          "command": "arandu.dev.restart",
+          "when": "view == arandu.projectMap && arandu.dev.running",
+          "group": "navigation@4"
+        }
+      ]
+    },
     "languages": [
       {
         "id": "kyse",

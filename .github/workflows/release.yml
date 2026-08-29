@@ -24,6 +24,11 @@ jobs:
         with:
           node-version: 24
 
+      - name: Install and audit pinned editor adapter dependencies
+        run: |
+          npm ci
+          npm audit --audit-level=low
+
       - name: Build and audit the VSIX
         run: make check
 

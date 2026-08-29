@@ -1,0 +1,35 @@
+{
+  "serverArgs": [
+    "lsp"
+  ],
+  "aruPathOrder": [
+    "configuration",
+    "PATH",
+    "/opt/homebrew/bin/aru",
+    "/usr/local/bin/aru"
+  ],
+  "trustedWorkspacesOnly": true,
+  "filesystemWorkspacesOnly": true,
+  "debounceMilliseconds": 300,
+  "diagnosticsCollection": "Arandu Doctor",
+  "devArgs": [
+    "dev"
+  ],
+  "manualDevOnly": true,
+  "relevantPaths": [
+    "arandu.toml",
+    "go.mod",
+    "go.sum",
+    "arandu.mod.toml",
+    "main.go",
+    "app/",
+    "bootstrap/",
+    "config/",
+    "database/",
+    "resources/views/",
+    "routes/",
+    "cmd/",
+    "modules/",
+    "framework/modules/"
+  ]
+}

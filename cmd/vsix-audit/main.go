@@ -15,6 +15,8 @@ var releaseFiles = map[string]struct{}{
 	"extension.vsixmanifest":                  {},
 	"extension/LICENSE.md":                    {},
 	"extension/changelog.md":                  {},
+	"extension/dist/extension.js":             {},
+	"extension/images/activity.svg":           {},
 	"extension/images/icon.png":               {},
 	"extension/language-configuration.json":   {},
 	"extension/package.json":                  {},
