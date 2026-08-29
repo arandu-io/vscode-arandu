@@ -1,0 +1,10 @@
+# Reproducible release artifacts are built locally and by CI.
+/dist/
+*.vsix
+
+# The extension has no local Node dependency graph. This entry prevents an
+# accidental npx configuration from entering a commit.
+node_modules/
+
+# Harness configuration lives at the workspace root, never in a repository.
+.claude/

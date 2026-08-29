@@ -1,0 +1,153 @@
+{
+  "Complete Kyse view": {
+    "prefix": "view",
+    "body": [
+      "//go:build kyse",
+      "",
+      "package ${1:views}",
+      "",
+      "@go",
+      "type ${2:PageData} struct {",
+      "\t${3:Title string}",
+      "}",
+      "@endgo",
+      "",
+      "@extends('${4:layouts.app}')",
+      "",
+      "@section('${5:content}')",
+      "\t${0}",
+      "@endsection"
+    ],
+    "description": "Create a typed Kyse view that extends a layout"
+  },
+  "Complete Kyse layout": {
+    "prefix": "layout",
+    "body": [
+      "//go:build kyse",
+      "",
+      "package ${1:layouts}",
+      "",
+      "<!doctype html>",
+      "<html lang=\"${2:en}\">",
+      "\t<body>",
+      "\t\t@yield('${3:content}')",
+      "\t</body>",
+      "</html>",
+      "${0}"
+    ],
+    "description": "Create a Kyse layout"
+  },
+  "If block": {
+    "prefix": "if",
+    "body": [
+      "@if(${1:.Ready})",
+      "\t${2}",
+      "@else",
+      "\t${0}",
+      "@endif"
+    ],
+    "description": "Add an if block"
+  },
+  "Else-if branch": {
+    "prefix": "elseif",
+    "body": "@elseif(${1:.Ready})",
+    "description": "Add an else-if branch"
+  },
+  "For-each block": {
+    "prefix": "foreach",
+    "body": [
+      "@foreach(${1:.Items} as ${2:item})",
+      "\t${0}",
+      "@endforeach"
+    ],
+    "description": "Iterate over a collection"
+  },
+  "For-else block": {
+    "prefix": "forelse",
+    "body": [
+      "@forelse(${1:.Items} as ${2:item})",
+      "\t${3}",
+      "@empty",
+      "\t${0}",
+      "@endforelse"
+    ],
+    "description": "Iterate over a collection with an empty branch"
+  },
+  "For block": {
+    "prefix": "for",
+    "body": [
+      "@for(${1:i} := 0; ${1:i} < len(${2:.Items}); ${1:i}++)",
+      "\t${0}",
+      "@endfor"
+    ],
+    "description": "Add a Go-style for block"
+  },
+  "While block": {
+    "prefix": "while",
+    "body": [
+      "@while(${1:.Ready})",
+      "\t${0}",
+      "@endwhile"
+    ],
+    "description": "Add a while block"
+  },
+  "Go block": {
+    "prefix": "go",
+    "body": [
+      "@go",
+      "${1:type PageData struct {}}",
+      "@endgo",
+      "${0}"
+    ],
+    "description": "Embed Go declarations in a view"
+  },
+  "Extend layout": {
+    "prefix": "extends",
+    "body": "@extends('${1:layouts.app}')",
+    "description": "Extend a layout"
+  },
+  "Section block": {
+    "prefix": "section",
+    "body": [
+      "@section('${1:content}')",
+      "\t${0}",
+      "@endsection"
+    ],
+    "description": "Declare a layout section"
+  },
+  "Yield section": {
+    "prefix": "yield",
+    "body": "@yield('${1:content}')",
+    "description": "Render a section from a child view"
+  },
+  "Include partial": {
+    "prefix": "include",
+    "body": "@include('${1:partials.name}')",
+    "description": "Include a partial view"
+  },
+  "CSRF field": {
+    "prefix": "csrf",
+    "body": "@csrf",
+    "description": "Render the CSRF form field"
+  },
+  "Escaped interpolation": {
+    "prefix": "echo",
+    "body": "{{ ${1:.Value} }}",
+    "description": "Render an escaped value"
+  },
+  "Raw interpolation": {
+    "prefix": "raw",
+    "body": "{!! ${1:.Markup} !!}",
+    "description": "Render trusted markup without escaping"
+  },
+  "Continue loop": {
+    "prefix": "continue",
+    "body": "@continue",
+    "description": "Continue the nearest loop"
+  },
+  "Break loop": {
+    "prefix": "break",
+    "body": "@break",
+    "description": "Break the nearest loop"
+  }
+}

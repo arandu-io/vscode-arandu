@@ -1,0 +1,90 @@
+{
+  "name": "arandu",
+  "displayName": "Arandu",
+  "description": "Kyse language support for Arandu.",
+  "version": "0.1.0",
+  "preview": true,
+  "publisher": "arandu-io",
+  "license": "MIT",
+  "icon": "images/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arandu-io/vscode-arandu.git"
+  },
+  "bugs": {
+    "url": "https://github.com/arandu-io/vscode-arandu/issues"
+  },
+  "homepage": "https://github.com/arandu-io/vscode-arandu",
+  "files": [
+    "CHANGELOG.md",
+    "LICENSE.md",
+    "README.md",
+    "images/icon.png",
+    "language-configuration.json",
+    "snippets/kyse.json",
+    "syntaxes/kyse.tmLanguage.json"
+  ],
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets"
+  ],
+  "keywords": [
+    "arandu",
+    "go",
+    "htmx",
+    "kyse",
+    "templates"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": {
+      "supported": true
+    }
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "kyse",
+        "aliases": [
+          "Kyse",
+          "kyse"
+        ],
+        "extensions": [
+          ".kyse.go"
+        ],
+        "firstLine": "^//go:build\\s+kyse$",
+        "configuration": "language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "kyse",
+        "scopeName": "source.kyse",
+        "path": "syntaxes/kyse.tmLanguage.json",
+        "embeddedLanguages": {
+          "meta.embedded.block.go": "go",
+          "meta.embedded.expression.go": "go",
+          "meta.embedded.html.kyse": "html"
+        }
+      }
+    ],
+    "snippets": [
+      {
+        "language": "kyse",
+        "path": "snippets/kyse.json"
+      }
+    ],
+    "configurationDefaults": {
+      "[kyse]": {
+        "editor.formatOnSave": false,
+        "editor.insertSpaces": true,
+        "editor.tabSize": 4
+      }
+    }
+  }
+}

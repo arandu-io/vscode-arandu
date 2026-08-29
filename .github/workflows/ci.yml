@@ -1,0 +1,53 @@
+name: ci
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: stable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Formatting
+        run: make format-check
+
+      - name: Vet
+        run: make vet
+
+      - name: Test
+        run: make test
+
+      - name: JSON contracts
+        run: make json-contracts
+
+      - name: Repository boundary
+        run: make audit
+
+      - name: Known vulnerabilities
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck ./...
+
+      - name: Reproducible VSIX and release allowlist
+        run: make package
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: arandu-vsix
+          path: dist/arandu-*.vsix
+          if-no-files-found: error

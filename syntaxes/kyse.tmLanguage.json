@@ -1,0 +1,296 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Kyse",
+  "scopeName": "source.kyse",
+  "patterns": [
+    {
+      "include": "#header"
+    },
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#go-block"
+    },
+    {
+      "include": "#interpolation"
+    },
+    {
+      "include": "#known-directives"
+    },
+    {
+      "include": "#unknown-directive"
+    },
+    {
+      "include": "#html"
+    }
+  ],
+  "repository": {
+    "header": {
+      "patterns": [
+        {
+          "match": "^\\s*(//go:build)\\s+(kyse)\\s*$",
+          "captures": {
+            "1": {
+              "name": "keyword.control.directive.go"
+            },
+            "2": {
+              "name": "constant.language.kyse"
+            }
+          }
+        },
+        {
+          "match": "^\\s*(package)\\s+([a-z][A-Za-z0-9_]*)\\s*$",
+          "captures": {
+            "1": {
+              "name": "keyword.control.package.go"
+            },
+            "2": {
+              "name": "entity.name.namespace.go"
+            }
+          }
+        },
+        {
+          "begin": "^\\s*(import)\\s*(\\()\\s*$",
+          "end": "^\\s*(\\))\\s*$",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.control.import.go"
+            },
+            "2": {
+              "name": "punctuation.definition.parameters.begin.go"
+            }
+          },
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.parameters.end.go"
+            }
+          },
+          "name": "meta.import.block.go",
+          "patterns": [
+            {
+              "include": "source.go"
+            }
+          ]
+        },
+        {
+          "begin": "^\\s*(import)\\s+",
+          "end": "$",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.control.import.go"
+            }
+          },
+          "name": "meta.import.single.go",
+          "patterns": [
+            {
+              "include": "source.go"
+            }
+          ]
+        },
+        {
+          "match": "^\\s*//.*$",
+          "name": "comment.line.double-slash.go"
+        }
+      ]
+    },
+    "comments": {
+      "begin": "\\{\\{--",
+      "end": "--\\}\\}",
+      "name": "comment.block.kyse"
+    },
+    "go-block": {
+      "begin": "^\\s*(@go)\\s*$",
+      "end": "^\\s*(@endgo)\\s*$",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.kyse"
+        }
+      },
+      "endCaptures": {
+        "1": {
+          "name": "keyword.control.kyse"
+        }
+      },
+      "name": "meta.embedded.block.go",
+      "patterns": [
+        {
+          "include": "source.go"
+        }
+      ]
+    },
+    "interpolation": {
+      "patterns": [
+        {
+          "begin": "\\{!!",
+          "end": "!!\\}",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.section.interpolation.raw.begin.kyse"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.section.interpolation.raw.end.kyse"
+            }
+          },
+          "name": "meta.interpolation.raw.kyse",
+          "patterns": [
+            {
+              "include": "#expression"
+            }
+          ]
+        },
+        {
+          "begin": "\\{\\{",
+          "end": "\\}\\}",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.section.interpolation.escaped.begin.kyse"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.section.interpolation.escaped.end.kyse"
+            }
+          },
+          "name": "meta.interpolation.escaped.kyse",
+          "patterns": [
+            {
+              "include": "#expression"
+            }
+          ]
+        }
+      ]
+    },
+    "expression": {
+      "name": "meta.embedded.expression.go",
+      "patterns": [
+        {
+          "match": "\\.[A-Za-z_][A-Za-z0-9_.]*",
+          "name": "variable.other.member.go"
+        },
+        {
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b(?=\\()",
+          "name": "entity.name.function.go"
+        },
+        {
+          "match": "\\b(?:true|false|nil)\\b",
+          "name": "constant.language.go"
+        },
+        {
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b",
+          "name": "variable.other.go"
+        }
+      ]
+    },
+    "known-directives": {
+      "patterns": [
+        {
+          "match": "@break\\b",
+          "name": "keyword.control.kyse"
+        },
+        {
+          "match": "@continue\\b",
+          "name": "keyword.control.kyse"
+        },
+        {
+          "match": "@csrf\\b",
+          "name": "keyword.control.kyse"
+        },
+        {
+          "match": "@else\\b",
+          "name": "keyword.control.kyse"
+        },
+        {
+          "match": "@elseif\\b",
+          "name": "keyword.control.kyse"
+        },
+        {
+          "match": "@empty\\b",
+          "name": "keyword.control.kyse"
+        },
+        {
+          "match": "@endfor\\b",
+          "name": "keyword.control.kyse"
+        },
+        {
+          "match": "@endforeach\\b",
+          "name": "keyword.control.kyse"
+        },
+        {
+          "match": "@endforelse\\b",
+          "name": "keyword.control.kyse"
+        },
+        {
+          "match": "@endgo\\b",
+          "name": "keyword.control.kyse"
+        },
+        {
+          "match": "@endif\\b",
+          "name": "keyword.control.kyse"
+        },
+        {
+          "match": "@endsection\\b",
+          "name": "keyword.control.kyse"
+        },
+        {
+          "match": "@endwhile\\b",
+          "name": "keyword.control.kyse"
+        },
+        {
+          "match": "@extends\\b",
+          "name": "keyword.control.kyse"
+        },
+        {
+          "match": "@for\\b",
+          "name": "keyword.control.kyse"
+        },
+        {
+          "match": "@foreach\\b",
+          "name": "keyword.control.kyse"
+        },
+        {
+          "match": "@forelse\\b",
+          "name": "keyword.control.kyse"
+        },
+        {
+          "match": "@go\\b",
+          "name": "keyword.control.kyse"
+        },
+        {
+          "match": "@if\\b",
+          "name": "keyword.control.kyse"
+        },
+        {
+          "match": "@include\\b",
+          "name": "keyword.control.kyse"
+        },
+        {
+          "match": "@section\\b",
+          "name": "keyword.control.kyse"
+        },
+        {
+          "match": "@while\\b",
+          "name": "keyword.control.kyse"
+        },
+        {
+          "match": "@yield\\b",
+          "name": "keyword.control.kyse"
+        }
+      ]
+    },
+    "unknown-directive": {
+      "match": "@[A-Za-z]+\\b",
+      "name": "invalid.illegal.unknown-directive.kyse"
+    },
+    "html": {
+      "name": "meta.embedded.html.kyse",
+      "patterns": [
+        {
+          "include": "text.html.basic"
+        }
+      ]
+    }
+  }
+}
