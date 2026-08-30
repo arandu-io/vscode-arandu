@@ -2,7 +2,7 @@
   "name": "arandu",
   "displayName": "Arandu",
   "description": "Kyse language intelligence and project navigation for Arandu.",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "preview": true,
   "publisher": "arandu-io",
   "license": "MIT",
