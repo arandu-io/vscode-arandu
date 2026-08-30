@@ -1,6 +1,12 @@
 import * as vscode from "vscode";
 import contract from "./projectGraphContract.json";
+import type { AranduProject } from "./projects";
 import type { ProjectGraph, ProjectGraphNode } from "./projectGraphSchema";
+
+interface ProjectEntry {
+  readonly type: "project";
+  readonly project: AranduProject | undefined;
+}
 
 interface GroupEntry {
   readonly type: "group";
@@ -13,18 +19,24 @@ interface NodeEntry {
   readonly node: ProjectGraphNode;
 }
 
-type ProjectMapEntry = GroupEntry | NodeEntry;
+type ProjectMapEntry = ProjectEntry | GroupEntry | NodeEntry;
 
 export class ProjectMapProvider implements vscode.TreeDataProvider<ProjectMapEntry> {
   private readonly changed = new vscode.EventEmitter<ProjectMapEntry | undefined | null | void>();
   private graph: ProjectGraph | undefined;
   private readonly nodes = new Map<string, ProjectGraphNode>();
   private readonly childIDs = new Map<string, readonly string[]>();
+  private project: AranduProject | undefined;
 
   public readonly onDidChangeTreeData = this.changed.event;
 
   public dispose(): void {
     this.changed.dispose();
+  }
+
+  public setProject(project: AranduProject | undefined): void {
+    this.project = project;
+    this.changed.fire();
   }
 
   public setGraph(graph: ProjectGraph | undefined): void {
@@ -49,6 +61,21 @@ export class ProjectMapProvider implements vscode.TreeDataProvider<ProjectMapEnt
   }
 
   public getTreeItem(entry: ProjectMapEntry): vscode.TreeItem {
+    if (entry.type === "project") {
+      const item = new vscode.TreeItem(
+        entry.project?.label ?? "Select Arandu Project",
+        vscode.TreeItemCollapsibleState.None,
+      );
+      item.contextValue = "aranduProjectSelector";
+      item.description = entry.project?.description ?? "Required";
+      item.tooltip = entry.project?.root.fsPath ?? "Choose which Arandu project this workspace uses.";
+      item.iconPath = new vscode.ThemeIcon("root-folder");
+      item.command = {
+        command: "arandu.project.select",
+        title: "Select Arandu Project",
+      };
+      return item;
+    }
     if (entry.type === "group") {
       const nodeCount = this.groupNodeIDs(entry.id).length;
       const item = new vscode.TreeItem(
@@ -87,7 +114,13 @@ export class ProjectMapProvider implements vscode.TreeDataProvider<ProjectMapEnt
 
   public getChildren(entry?: ProjectMapEntry): ProjectMapEntry[] {
     if (entry === undefined) {
-      return contract.groups.map((group) => ({ type: "group", id: group.id, label: group.label }));
+      return [
+        { type: "project", project: this.project },
+        ...contract.groups.map((group) => ({ type: "group" as const, id: group.id, label: group.label })),
+      ];
+    }
+    if (entry.type === "project") {
+      return [];
     }
     if (entry.type === "group") {
       return this.groupNodeIDs(entry.id).flatMap((id) => {

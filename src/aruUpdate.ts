@@ -142,7 +142,7 @@ export class AruUpdateManager implements vscode.Disposable {
       folder,
       "Update Aru with Homebrew",
       "Arandu",
-      new vscode.ProcessExecution(brew.executable, updateContract.brewUpgradeArgs),
+      new vscode.ProcessExecution(brew.executable, updateContract.brewUpgradeArgs, { cwd: folder.uri.fsPath }),
     );
     task.presentationOptions = {
       clear: true,

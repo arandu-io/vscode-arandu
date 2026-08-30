@@ -35,15 +35,16 @@ comment and indentation rules, and snippets for complete views, layouts,
 control flow, composition, CSRF, and both interpolation forms. Its language
 client connects to `aru lsp` for completion and diagnostics.
 
-The Arandu activity container has two native views. Project Map shows
-application features, HTTP, database, views, async, console, native
-capabilities, community modules, and diagnostics; located items open at their
-source line. Development exposes visible actions to start, stop, or restart
-`aru dev`, run Doctor immediately, and configure the Aru executable.
+The Arandu activity container has two native views. Project Map starts with the
+active-project selector, then shows application features, HTTP, database,
+views, async, console, native capabilities, community modules, and diagnostics;
+located items open at their source line. Development exposes visible actions to
+select the project, start, stop, or restart `aru dev`, run Doctor immediately,
+and configure the Aru executable.
 
-Doctor findings also appear in VS Code Problems, with stale findings cleared
-on every refresh. Doctor runs when the extension starts and, with debounce,
-after relevant project files are saved.
+Doctor findings for the selected project also appear in VS Code Problems, with
+stale findings cleared on every refresh. Doctor runs when the extension starts
+and, with debounce, after relevant files in that project are saved.
 
 The map also refreshes from its toolbar. `Arandu: Start Development Server`,
 `Stop`, and `Restart` run `aru dev` in a dedicated terminal only after an
@@ -51,8 +52,14 @@ explicit command; the extension never runs migrations, seeders, or generators.
 
 ## Aru discovery
 
-Open a trusted local workspace whose root contains `arandu.toml`. The adapter
-resolves `aru` in this order:
+Open a trusted local workspace containing one or more `arandu.toml` files. The
+extension discovers projects nested below every filesystem workspace folder. A
+single project is selected automatically; when several exist, choose one from
+the Project Map row or either view toolbar. The choice is remembered for that
+workspace and becomes the single root for the language server, Project Map,
+Doctor, file watcher, Development terminal, and visible Homebrew task.
+
+For the selected project, the adapter resolves `aru` in this order:
 
 1. The workspace setting `arandu.aru.path`.
 2. `PATH`.

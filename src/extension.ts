@@ -5,6 +5,8 @@ import adapterContract from "./adapterContract.json";
 import { resolveAruExecutable } from "./aru";
 import { AruUpdateManager } from "./aruUpdate";
 import { ProjectMapProvider } from "./projectMap";
+import { AranduProjects } from "./projects";
+import type { AranduProject } from "./projects";
 import graphContract from "./projectGraphContract.json";
 import { parseProjectGraph } from "./projectGraphSchema";
 
@@ -40,6 +42,7 @@ class AranduController implements vscode.Disposable {
   });
   private readonly status = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
   private readonly devStatus = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
+  private readonly projects: AranduProjects;
   private readonly aruUpdates: AruUpdateManager;
   private readonly permanentDisposables: vscode.Disposable[] = [];
   private runtimeDisposables: vscode.Disposable[] = [];
@@ -52,7 +55,8 @@ class AranduController implements vscode.Disposable {
   private disposed = false;
 
   public constructor(context: vscode.ExtensionContext) {
-    this.aruUpdates = new AruUpdateManager(context, this.output, findAranduWorkspace);
+    this.projects = new AranduProjects(context);
+    this.aruUpdates = new AruUpdateManager(context, this.output, async () => this.projects.active?.folder);
     this.status.name = "Arandu";
     this.status.show();
     this.devStatus.name = "Arandu Development Server";
@@ -67,6 +71,7 @@ class AranduController implements vscode.Disposable {
       this.status,
       this.devStatus,
       this.aruUpdates,
+      vscode.commands.registerCommand("arandu.project.select", () => this.selectProject()),
       vscode.commands.registerCommand("arandu.projectMap.refresh", () => this.refresh()),
       vscode.commands.registerCommand("arandu.doctor.run", () => this.refresh()),
       vscode.commands.registerCommand("arandu.languageServer.restart", () => this.restart()),
@@ -124,13 +129,20 @@ class AranduController implements vscode.Disposable {
   }
 
   private async startRuntime(): Promise<void> {
-    const folder = await findAranduWorkspace();
+    const previousProjectKey = this.projects.active?.key;
+    const project = await this.projects.resolve();
+    this.syncProject(project);
     this.provider.setGraph(undefined);
     this.doctorDiagnostics.clear();
-    if (folder === undefined) {
-      this.setInactive("$(circle-slash) Arandu: no project", "Open a filesystem workspace containing arandu.toml.");
+    if (previousProjectKey !== undefined && previousProjectKey !== project?.key) {
+      this.stopDev();
+    }
+    if (project === undefined) {
+      this.setInactive("$(circle-slash) Arandu: select project", "Select the Arandu project to use in this workspace.");
+      this.status.command = "arandu.project.select";
       return;
     }
+    const folder = project.folder;
     if (adapterContract.trustedWorkspacesOnly && !vscode.workspace.isTrusted) {
       this.setInactive("$(lock) Arandu: trust required", "Trust this workspace to start aru lsp.");
       this.status.command = "workbench.trust.manage";
@@ -153,7 +165,11 @@ class AranduController implements vscode.Disposable {
       options: { cwd: folder.uri.fsPath, shell: false },
     };
     const clientOptions: LanguageClientOptions = {
-      documentSelector: [{ language: "kyse", scheme: "file" }],
+      documentSelector: [{
+        language: "kyse",
+        scheme: "file",
+        pattern: { baseUri: folder.uri.toString(), pattern: "**/*.kyse.go" },
+      }],
       diagnosticCollectionName: "arandu",
       outputChannel: this.output,
       workspaceFolder: folder,
@@ -265,9 +281,37 @@ class AranduController implements vscode.Disposable {
 
   private setReady(executable: string): void {
     this.status.text = "$(check) Arandu: ready";
-    this.status.tooltip = `Language intelligence and Project Map are ready via ${executable}.`;
+    this.status.tooltip = `Language intelligence and Project Map are ready via ${executable} for ${this.projects.active?.root.fsPath ?? "the selected project"}.`;
     this.status.command = "arandu.projectMap.refresh";
     this.tree.message = undefined;
+  }
+
+  private syncProject(project: AranduProject | undefined): void {
+    this.provider.setProject(project);
+    this.tree.description = project?.label;
+    this.developmentTree.description = project?.label;
+    this.developmentTree.message = project === undefined
+      ? "Select the Arandu project used by Development actions."
+      : undefined;
+    void vscode.commands.executeCommand("setContext", "arandu.project.selected", project !== undefined);
+    void vscode.commands.executeCommand("setContext", "arandu.projects.multiple", this.projects.availableCount > 1);
+  }
+
+  private async selectProject(): Promise<void> {
+    const previousProjectKey = this.projects.active?.key;
+    const project = await this.projects.choose();
+    if (project === undefined) {
+      return;
+    }
+    this.syncProject(project);
+    if (project.key === previousProjectKey) {
+      return;
+    }
+    if (adapterContract.projectSwitchStartsDev) {
+      throw new Error("Selecting an Arandu project must not start its development server.");
+    }
+    this.stopDev();
+    await this.restart();
   }
 
   private setInactive(text: string, tooltip: string): void {
@@ -310,11 +354,13 @@ class AranduController implements vscode.Disposable {
   }
 
   private async configureAruPath(): Promise<void> {
-    const folder = await findAranduWorkspace();
-    if (folder === undefined) {
-      await vscode.window.showWarningMessage("Open an Arandu filesystem workspace before configuring Aru.");
+    const project = this.projects.active ?? await this.projects.resolve();
+    this.syncProject(project);
+    if (project === undefined) {
+      await vscode.window.showWarningMessage("Select an Arandu filesystem project before configuring Aru.");
       return;
     }
+    const folder = project.folder;
     const selection = await vscode.window.showOpenDialog({
       canSelectFiles: true,
       canSelectFolders: false,
@@ -342,11 +388,13 @@ class AranduController implements vscode.Disposable {
     if (!adapterContract.manualDevOnly) {
       throw new Error("The Arandu development server must remain an explicit editor action.");
     }
-    const folder = await findAranduWorkspace();
-    if (folder === undefined) {
-      await vscode.window.showErrorMessage("Open an Arandu filesystem workspace before starting aru dev.");
+    const project = this.projects.active ?? await this.projects.resolve();
+    this.syncProject(project);
+    if (project === undefined) {
+      await vscode.window.showErrorMessage("Select an Arandu filesystem project before starting aru dev.");
       return;
     }
+    const folder = project.folder;
     if (!vscode.workspace.isTrusted) {
       await vscode.window.showErrorMessage("Trust this workspace before starting aru dev.");
       return;
@@ -437,21 +485,6 @@ class AranduController implements vscode.Disposable {
       this.doctorDiagnostics.set(entry.uri, entry.diagnostics);
     }
   }
-}
-
-async function findAranduWorkspace(): Promise<vscode.WorkspaceFolder | undefined> {
-  for (const folder of vscode.workspace.workspaceFolders ?? []) {
-    if (folder.uri.scheme !== "file") {
-      continue;
-    }
-    try {
-      await vscode.workspace.fs.stat(vscode.Uri.joinPath(folder.uri, "arandu.toml"));
-      return folder;
-    } catch {
-      // This workspace folder is not an Arandu project root.
-    }
-  }
-  return undefined;
 }
 
 function isRelevantProjectPath(folder: vscode.WorkspaceFolder, uri: vscode.Uri): boolean {

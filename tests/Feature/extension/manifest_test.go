@@ -87,7 +87,7 @@ func TestTheExtensionStartsTheAranduLanguageClientAndProjectMap(t *testing.T) {
 	if manifest.Main != "./dist/extension.js" || manifest.Browser != "" {
 		t.Fatalf("extension host = main %q browser %q", manifest.Main, manifest.Browser)
 	}
-	for _, event := range []string{"onLanguage:kyse", "onView:arandu.projectMap", "onView:arandu.development", "workspaceContains:arandu.toml"} {
+	for _, event := range []string{"onLanguage:kyse", "onView:arandu.projectMap", "onView:arandu.development", "workspaceContains:**/arandu.toml"} {
 		if !contains(manifest.Activation, event) {
 			t.Errorf("activation events do not contain %q", event)
 		}
@@ -120,6 +120,7 @@ func TestTheExtensionStartsTheAranduLanguageClientAndProjectMap(t *testing.T) {
 		t.Fatalf("Arandu views = %#v", manifest.Contributes.Views["arandu"])
 	}
 	for _, command := range []string{
+		"arandu.project.select",
 		"arandu.projectMap.refresh",
 		"arandu.languageServer.restart",
 		"arandu.aru.configure",
@@ -188,7 +189,7 @@ func TestTheExtensionStartsTheAranduLanguageClientAndProjectMap(t *testing.T) {
 			welcomeByState[welcome.When] = welcome.Contents
 		}
 	}
-	stopped := welcomeByState["!arandu.dev.running"]
+	stopped := welcomeByState["arandu.project.selected && !arandu.dev.running"]
 	for _, action := range []string{
 		"[Start aru dev](command:arandu.dev.start)",
 		"[Run Doctor](command:arandu.doctor.run)",
@@ -198,7 +199,7 @@ func TestTheExtensionStartsTheAranduLanguageClientAndProjectMap(t *testing.T) {
 			t.Errorf("stopped Development view does not contain %q", action)
 		}
 	}
-	running := welcomeByState["arandu.dev.running"]
+	running := welcomeByState["arandu.project.selected && arandu.dev.running"]
 	for _, action := range []string{
 		"[Stop](command:arandu.dev.stop)",
 		"[Restart](command:arandu.dev.restart)",

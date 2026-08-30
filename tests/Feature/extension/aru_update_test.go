@@ -63,7 +63,7 @@ func TestTheExtensionOffersAVisibleHomebrewUpdateOnlyAfterUserAction(t *testing.
 		"context.globalState",
 		"showWarningMessage",
 		"updateContract.updateAction",
-		"new vscode.ProcessExecution(brew.executable, updateContract.brewUpgradeArgs)",
+		"new vscode.ProcessExecution(brew.executable, updateContract.brewUpgradeArgs, { cwd: folder.uri.fsPath })",
 		"vscode.TaskRevealKind.Always",
 	} {
 		if !strings.Contains(source, seam) {
@@ -85,7 +85,7 @@ func TestTheExtensionChecksForAruUpdatesAsSoonAsAruIsResolved(t *testing.T) {
 	source := string(raw)
 	for _, seam := range []string{
 		`import { AruUpdateManager } from "./aruUpdate"`,
-		"new AruUpdateManager(context, this.output, findAranduWorkspace)",
+		"new AruUpdateManager(context, this.output, async () => this.projects.active?.folder)",
 		"void this.aruUpdates.check(aru.executable)",
 	} {
 		if !strings.Contains(source, seam) {

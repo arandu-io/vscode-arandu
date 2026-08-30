@@ -23,7 +23,7 @@
     "onLanguage:kyse",
     "onView:arandu.projectMap",
     "onView:arandu.development",
-    "workspaceContains:arandu.toml"
+    "workspaceContains:**/arandu.toml"
   ],
   "scripts": {
     "bundle": "esbuild src/extension.ts --bundle --platform=node --format=cjs --target=node20 --external:vscode --legal-comments=eof --outfile=dist/extension.js",
@@ -90,6 +90,12 @@
       }
     },
     "commands": [
+      {
+        "command": "arandu.project.select",
+        "title": "Select Project",
+        "category": "Arandu",
+        "icon": "$(root-folder)"
+      },
       {
         "command": "arandu.projectMap.refresh",
         "title": "Refresh Project Map",
@@ -162,41 +168,51 @@
     "viewsWelcome": [
       {
         "view": "arandu.development",
+        "contents": "Choose the Arandu project used by Project Map, Doctor, and Development.\n[Select Project](command:arandu.project.select)",
+        "when": "!arandu.project.selected"
+      },
+      {
+        "view": "arandu.development",
         "contents": "Start the development server or inspect the project.\n[Start aru dev](command:arandu.dev.start)\n[Run Doctor](command:arandu.doctor.run)\n[Configure Aru](command:arandu.aru.configure)",
-        "when": "!arandu.dev.running"
+        "when": "arandu.project.selected && !arandu.dev.running"
       },
       {
         "view": "arandu.development",
         "contents": "The development server is running.\n[Stop](command:arandu.dev.stop)\n[Restart](command:arandu.dev.restart)\n[Run Doctor](command:arandu.doctor.run)",
-        "when": "arandu.dev.running"
+        "when": "arandu.project.selected && arandu.dev.running"
       }
     ],
     "menus": {
       "view/title": [
         {
-          "command": "arandu.projectMap.refresh",
-          "when": "view == arandu.projectMap",
+          "command": "arandu.project.select",
+          "when": "view == arandu.projectMap || view == arandu.development",
           "group": "navigation@1"
         },
         {
-          "command": "arandu.languageServer.restart",
+          "command": "arandu.projectMap.refresh",
           "when": "view == arandu.projectMap",
           "group": "navigation@2"
         },
         {
-          "command": "arandu.dev.start",
-          "when": "view == arandu.projectMap && !arandu.dev.running",
+          "command": "arandu.languageServer.restart",
+          "when": "view == arandu.projectMap",
           "group": "navigation@3"
+        },
+        {
+          "command": "arandu.dev.start",
+          "when": "view == arandu.projectMap && arandu.project.selected && !arandu.dev.running",
+          "group": "navigation@4"
         },
         {
           "command": "arandu.dev.stop",
-          "when": "view == arandu.projectMap && arandu.dev.running",
-          "group": "navigation@3"
+          "when": "view == arandu.projectMap && arandu.project.selected && arandu.dev.running",
+          "group": "navigation@4"
         },
         {
           "command": "arandu.dev.restart",
-          "when": "view == arandu.projectMap && arandu.dev.running",
-          "group": "navigation@4"
+          "when": "view == arandu.projectMap && arandu.project.selected && arandu.dev.running",
+          "group": "navigation@5"
         }
       ]
     },

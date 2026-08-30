@@ -10,6 +10,12 @@
   ],
   "trustedWorkspacesOnly": true,
   "filesystemWorkspacesOnly": true,
+  "projectMarker": "arandu.toml",
+  "projectDiscoveryGlob": "**/arandu.toml",
+  "projectDiscoveryExclude": "{**/.git/**,**/dist/**,**/node_modules/**,**/storage/**,**/vendor/**}",
+  "activeProjectStateKey": "arandu.activeProjectUri",
+  "explicitProjectSelectionWhenMultiple": true,
+  "projectSwitchStartsDev": false,
   "debounceMilliseconds": 300,
   "diagnosticsCollection": "Arandu Doctor",
   "devArgs": [
