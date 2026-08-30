@@ -81,8 +81,8 @@ func TestTheExtensionStartsTheAranduLanguageClientAndProjectMap(t *testing.T) {
 	if got, want := manifest.Publisher+"."+manifest.Name, "arandu-io.arandu"; got != want {
 		t.Fatalf("extension identifier = %q, want %q", got, want)
 	}
-	if manifest.DisplayName != "Arandu" || manifest.Version != "0.1.1" || !manifest.Preview {
-		t.Fatalf("identity = %q %q preview=%t, want Arandu 0.1.1 preview=true", manifest.DisplayName, manifest.Version, manifest.Preview)
+	if manifest.DisplayName != "Arandu" || manifest.Version != "0.1.2" || !manifest.Preview {
+		t.Fatalf("identity = %q %q preview=%t, want Arandu 0.1.2 preview=true", manifest.DisplayName, manifest.Version, manifest.Preview)
 	}
 	if manifest.Main != "./dist/extension.js" || manifest.Browser != "" {
 		t.Fatalf("extension host = main %q browser %q", manifest.Main, manifest.Browser)
