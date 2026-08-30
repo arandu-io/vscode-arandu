@@ -156,7 +156,7 @@ class AranduController implements vscode.Disposable {
 
     this.setStarting();
     const aru = await resolveAruExecutable(folder);
-    void this.aruUpdates.check(aru.executable);
+    void this.aruUpdates.check(aru);
     this.output.info(`Starting ${aru.executable} lsp in ${folder.uri.fsPath} (${aru.source}).`);
     const watcher = this.createProjectWatcher(folder);
     const serverOptions: ServerOptions = {
@@ -299,10 +299,17 @@ class AranduController implements vscode.Disposable {
 
   private async selectProject(): Promise<void> {
     const previousProjectKey = this.projects.active?.key;
-    const project = await this.projects.choose();
-    if (project === undefined) {
+    const choice = await this.projects.choose();
+    if (choice.kind === "cancelled") {
       return;
     }
+    if (choice.kind === "empty") {
+      this.syncProject(undefined);
+      this.stopDev();
+      await this.restart();
+      return;
+    }
+    const project = choice.project;
     this.syncProject(project);
     if (project.key === previousProjectKey) {
       return;

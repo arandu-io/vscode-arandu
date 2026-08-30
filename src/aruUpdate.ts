@@ -1,7 +1,7 @@
 import { execFile } from "node:child_process";
 import * as https from "node:https";
 import * as vscode from "vscode";
-import { resolveHomebrewExecutable } from "./aru";
+import { resolveAruExecutable, resolveHomebrewExecutable, type AruResolution } from "./aru";
 import { isNewerStableVersion, parseStableVersion } from "./semver";
 import updateContract from "./updateContract.json";
 
@@ -11,12 +11,13 @@ interface CachedRelease {
 }
 
 interface AvailableUpdate {
-  readonly executable: string;
+  readonly resolution: AruResolution;
   readonly installed: string;
   readonly latest: string;
 }
 
 const notNowAction = "Not Now";
+const configureAction = "Configure Aru Path";
 
 export class AruUpdateManager implements vscode.Disposable {
   private readonly status = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 98);
@@ -35,7 +36,6 @@ export class AruUpdateManager implements vscode.Disposable {
   ) {
     this.globalState = context.globalState;
     this.status.name = "Aru Update";
-    this.status.command = "arandu.aru.updateWithHomebrew";
     this.disposables.push(
       this.status,
       vscode.commands.registerCommand("arandu.aru.updateWithHomebrew", () => this.updateWithHomebrew()),
@@ -49,20 +49,20 @@ export class AruUpdateManager implements vscode.Disposable {
     }
   }
 
-  public check(executable: string): Promise<void> {
+  public check(resolution: AruResolution): Promise<void> {
     this.checkQueue = this.checkQueue
-      .then(() => this.performCheck(executable))
+      .then(() => this.performCheck(resolution))
       .catch((error: unknown) => {
         this.output.debug(`Aru update check skipped: ${errorMessage(error)}`);
       });
     return this.checkQueue;
   }
 
-  private async performCheck(executable: string): Promise<void> {
+  private async performCheck(resolution: AruResolution): Promise<void> {
     if (this.disposed) {
       return;
     }
-    const reported = await readAruVersion(executable);
+    const reported = await readAruVersion(resolution.executable);
     const installed = reported === undefined ? undefined : parseStableVersion(reported);
     if (installed === undefined) {
       this.clearAvailableUpdate();
@@ -77,9 +77,16 @@ export class AruUpdateManager implements vscode.Disposable {
       return;
     }
 
-    this.available = { executable, installed: installed.text, latest };
+    this.available = { resolution, installed: installed.text, latest };
+    const updateAction = resolution.managedByHomebrew ? updateContract.updateAction : configureAction;
+    const message = resolution.managedByHomebrew
+      ? `Aru ${latest} is available; ${installed.text} is installed.`
+      : `Aru ${latest} is available; ${installed.text} at ${resolution.executable} is not managed by Homebrew.`;
     this.status.text = `$(cloud-download) Aru ${latest} available`;
-    this.status.tooltip = `Aru ${latest} is available; ${installed.text} is installed. Update only when you choose.`;
+    this.status.tooltip = resolution.managedByHomebrew
+      ? `${message} Update only when you choose.`
+      : `${message} Configure Aru Path to use an updated executable.`;
+    this.status.command = resolution.managedByHomebrew ? "arandu.aru.updateWithHomebrew" : "arandu.aru.configure";
     this.status.show();
 
     const dismissed = this.globalState.get<string>(updateContract.dismissedVersionKey);
@@ -89,8 +96,8 @@ export class AruUpdateManager implements vscode.Disposable {
     this.promptOpen = true;
     try {
       const action = await vscode.window.showWarningMessage(
-        `Aru ${latest} is available; ${installed.text} is installed.`,
-        updateContract.updateAction,
+        message,
+        updateAction,
         notNowAction,
       );
       try {
@@ -100,6 +107,8 @@ export class AruUpdateManager implements vscode.Disposable {
       }
       if (action === updateContract.updateAction) {
         await this.updateWithHomebrew();
+      } else if (action === configureAction) {
+        await vscode.commands.executeCommand("arandu.aru.configure");
       }
     } finally {
       this.promptOpen = false;
@@ -119,6 +128,21 @@ export class AruUpdateManager implements vscode.Disposable {
       await vscode.window.showInformationMessage("The Homebrew update for Aru is already running.");
       return;
     }
+    const available = this.available;
+    if (available === undefined) {
+      await vscode.window.showInformationMessage("No Aru update is currently available.");
+      return;
+    }
+    if (!available.resolution.managedByHomebrew) {
+      const action = await vscode.window.showWarningMessage(
+        "The active Aru executable is not managed by Homebrew. Configure Aru Path to use an updated executable.",
+        configureAction,
+      );
+      if (action === configureAction) {
+        await vscode.commands.executeCommand("arandu.aru.configure");
+      }
+      return;
+    }
     if (!vscode.workspace.isTrusted) {
       await vscode.window.showWarningMessage("Trust this workspace before updating Aru with Homebrew.");
       return;
@@ -126,6 +150,18 @@ export class AruUpdateManager implements vscode.Disposable {
     const folder = await this.findWorkspace();
     if (folder === undefined) {
       await vscode.window.showWarningMessage("Open an Arandu filesystem workspace before updating Aru.");
+      return;
+    }
+
+    let active: AruResolution;
+    try {
+      active = await resolveAruExecutable(folder);
+    } catch (error: unknown) {
+      await vscode.window.showErrorMessage(`Arandu: ${errorMessage(error)}`);
+      return;
+    }
+    if (active.executable !== available.resolution.executable || !active.managedByHomebrew) {
+      await vscode.window.showWarningMessage("The active Aru executable changed. Wait for its update check before updating with Homebrew.");
       return;
     }
 
@@ -162,10 +198,7 @@ export class AruUpdateManager implements vscode.Disposable {
         return;
       }
       await vscode.window.showInformationMessage("Homebrew finished updating Aru.");
-      const executable = this.available?.executable;
-      if (executable !== undefined) {
-        await this.performCheck(executable);
-      }
+      await this.performCheck(active);
     } catch (error: unknown) {
       await vscode.window.showErrorMessage(`Cannot update Aru with Homebrew: ${errorMessage(error)}`);
     } finally {

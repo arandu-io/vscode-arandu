@@ -82,7 +82,7 @@ func TestTheProjectMapRequiresExplicitSelectionWhenSeveralProjectsAreAvailable(t
 	if strings.Contains(source[resolveStart:chooseStart], "this.pick(") {
 		t.Fatal("project discovery must not open a picker automatically")
 	}
-	if !strings.Contains(source[chooseStart:], "return this.pick(projects)") {
+	if !strings.Contains(source[chooseStart:], "await this.pick(projects)") {
 		t.Fatal("only the explicit project selection command may open the picker")
 	}
 }
@@ -228,5 +228,50 @@ func TestTheProjectMapSwitchStopsTheOldServerWithoutStartingAnother(t *testing.T
 	}
 	if strings.Contains(handler, "startDev(") || strings.Contains(handler, "restartDev(") {
 		t.Fatal("project switching starts a development server without an explicit Start command")
+	}
+}
+
+func TestTheProjectSelectorTreatsEmptyDiscoveryAndCancellationDifferently(t *testing.T) {
+	projectsRaw, err := os.ReadFile(rootPath(t, "src/projects.ts"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	projects := string(projectsRaw)
+	for _, seam := range []string{
+		`readonly kind: "selected"`,
+		`readonly kind: "cancelled"`,
+		`readonly kind: "empty"`,
+		`return { kind: "empty" }`,
+		`return { kind: "cancelled" }`,
+	} {
+		if !strings.Contains(projects, seam) {
+			t.Errorf("project selection result does not distinguish its outcome with %q", seam)
+		}
+	}
+
+	extensionRaw, err := os.ReadFile(rootPath(t, "src/extension.ts"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	extension := string(extensionRaw)
+	start := strings.Index(extension, "private async selectProject()")
+	end := strings.Index(extension, "private setInactive(")
+	if start < 0 || end < 0 || start >= end {
+		t.Fatal("cannot locate the explicit project selection handler")
+	}
+	handler := extension[start:end]
+	cancelled := strings.Index(handler, `choice.kind === "cancelled"`)
+	empty := strings.Index(handler, `choice.kind === "empty"`)
+	stopDev := strings.Index(handler, "this.stopDev()")
+	restart := strings.Index(handler, "await this.restart()")
+	if cancelled < 0 {
+		t.Fatal("cancelling the project picker is not modeled explicitly")
+	}
+	if empty < 0 || stopDev < empty || restart < stopDev {
+		t.Fatal("empty project discovery must stop aru dev and restart into the no-project state")
+	}
+	if strings.Contains(handler[cancelled:empty], "this.stopDev()") ||
+		strings.Contains(handler[cancelled:empty], "await this.restart()") {
+		t.Fatal("cancelling the project picker must preserve the current runtime")
 	}
 }

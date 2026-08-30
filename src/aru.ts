@@ -8,6 +8,7 @@ import updateContract from "./updateContract.json";
 export interface AruResolution {
   readonly executable: string;
   readonly source: string;
+  readonly managedByHomebrew: boolean;
 }
 
 export async function resolveAruExecutable(folder: vscode.WorkspaceFolder): Promise<AruResolution> {
@@ -22,7 +23,11 @@ export async function resolveAruExecutable(folder: vscode.WorkspaceFolder): Prom
     if (!(await isExecutable(configured))) {
       throw new Error(`The configured Aru executable is not executable: ${configured}`);
     }
-    return { executable: configured, source: adapterContract.aruPathOrder[0] };
+    return {
+      executable: configured,
+      source: adapterContract.aruPathOrder[0],
+      managedByHomebrew: isHomebrewManagedAru(configured),
+    };
   }
 
   const candidates: Array<{ executable: string; source: string }> = [];
@@ -39,7 +44,10 @@ export async function resolveAruExecutable(folder: vscode.WorkspaceFolder): Prom
   const seen = new Set<string>();
   for (const candidate of candidates) {
     if (!seen.has(candidate.executable) && (await isExecutable(candidate.executable))) {
-      return candidate;
+      return {
+        ...candidate,
+        managedByHomebrew: isHomebrewManagedAru(candidate.executable),
+      };
     }
     seen.add(candidate.executable);
   }
@@ -48,8 +56,8 @@ export async function resolveAruExecutable(folder: vscode.WorkspaceFolder): Prom
   );
 }
 
-export async function resolveHomebrewExecutable(): Promise<AruResolution> {
-  const candidates: AruResolution[] = [];
+export async function resolveHomebrewExecutable(): Promise<{ readonly executable: string; readonly source: string }> {
+  const candidates: Array<{ readonly executable: string; readonly source: string }> = [];
   for (const directory of (process.env.PATH ?? "").split(path.delimiter)) {
     if (directory !== "") {
       candidates.push({ executable: path.join(directory, "brew"), source: updateContract.brewPathOrder[0] });
@@ -67,6 +75,13 @@ export async function resolveHomebrewExecutable(): Promise<AruResolution> {
     seen.add(candidate.executable);
   }
   throw new Error("Homebrew was not found in PATH, /opt/homebrew/bin/brew, or /usr/local/bin/brew.");
+}
+
+function isHomebrewManagedAru(executable: string): boolean {
+  const normalized = path.normalize(executable);
+  return adapterContract.aruPathOrder
+    .slice(2)
+    .some((candidate) => path.normalize(candidate) === normalized);
 }
 
 async function isExecutable(candidate: string): Promise<boolean> {

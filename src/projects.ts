@@ -10,6 +10,11 @@ export interface AranduProject {
   readonly folder: vscode.WorkspaceFolder;
 }
 
+export type AranduProjectChoice =
+  | { readonly kind: "selected"; readonly project: AranduProject }
+  | { readonly kind: "cancelled" }
+  | { readonly kind: "empty" };
+
 interface AranduProjectPick extends vscode.QuickPickItem {
   readonly project: AranduProject;
 }
@@ -60,14 +65,18 @@ export class AranduProjects {
     return undefined;
   }
 
-  public async choose(): Promise<AranduProject | undefined> {
+  public async choose(): Promise<AranduProjectChoice> {
     const projects = await discoverAranduProjects();
     this.discoveredCount = projects.length;
     if (projects.length === 0) {
       await this.remember(undefined);
-      return undefined;
+      return { kind: "empty" };
     }
-    return this.pick(projects);
+    const project = await this.pick(projects);
+    if (project === undefined) {
+      return { kind: "cancelled" };
+    }
+    return { kind: "selected", project };
   }
 
   private async pick(projects: readonly AranduProject[]): Promise<AranduProject | undefined> {

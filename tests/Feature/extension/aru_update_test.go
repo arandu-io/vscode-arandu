@@ -86,15 +86,84 @@ func TestTheExtensionChecksForAruUpdatesAsSoonAsAruIsResolved(t *testing.T) {
 	for _, seam := range []string{
 		`import { AruUpdateManager } from "./aruUpdate"`,
 		"new AruUpdateManager(context, this.output, async () => this.projects.active?.folder)",
-		"void this.aruUpdates.check(aru.executable)",
+		"void this.aruUpdates.check(aru)",
 	} {
 		if !strings.Contains(source, seam) {
 			t.Errorf("extension activation does not contain %q", seam)
 		}
 	}
-	checkAt := strings.Index(source, "void this.aruUpdates.check(aru.executable)")
+	checkAt := strings.Index(source, "void this.aruUpdates.check(aru)")
 	serverAt := strings.Index(source, "await client.start()")
 	if checkAt < 0 || serverAt < 0 || checkAt > serverAt {
 		t.Fatal("Aru update discovery must not depend on the installed CLI supporting the language server")
+	}
+}
+
+func TestTheHomebrewActionTargetsTheActiveAruBinary(t *testing.T) {
+	aruRaw, err := os.ReadFile(rootPath(t, "src/aru.ts"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	aru := string(aruRaw)
+	for _, seam := range []string{
+		"readonly managedByHomebrew: boolean",
+		"managedByHomebrew: isHomebrewManagedAru(configured)",
+		"managedByHomebrew: isHomebrewManagedAru(candidate.executable)",
+		".slice(2)",
+		"path.normalize(candidate) === normalized",
+	} {
+		if !strings.Contains(aru, seam) {
+			t.Errorf("Aru resolution does not declare Homebrew ownership with %q", seam)
+		}
+	}
+
+	extensionRaw, err := os.ReadFile(rootPath(t, "src/extension.ts"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(extensionRaw), "this.aruUpdates.check(aru)") {
+		t.Fatal("the updater must receive the complete active Aru resolution")
+	}
+
+	updateRaw, err := os.ReadFile(rootPath(t, "src/aruUpdate.ts"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	update := string(updateRaw)
+	for _, seam := range []string{
+		`import { resolveAruExecutable, resolveHomebrewExecutable, type AruResolution } from "./aru"`,
+		"public check(resolution: AruResolution)",
+		"await resolveAruExecutable(folder)",
+		"active.executable !== available.resolution.executable",
+		"!active.managedByHomebrew",
+	} {
+		if !strings.Contains(update, seam) {
+			t.Errorf("Homebrew execution is not bound to the active Aru resolution with %q", seam)
+		}
+	}
+}
+
+func TestAnUnmanagedAruReportsTheUpdateWithoutRunningHomebrew(t *testing.T) {
+	raw, err := os.ReadFile(rootPath(t, "src/aruUpdate.ts"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	source := string(raw)
+	for _, seam := range []string{
+		`const configureAction = "Configure Aru Path"`,
+		"readAruVersion(resolution.executable)",
+		`resolution.managedByHomebrew ? "arandu.aru.updateWithHomebrew" : "arandu.aru.configure"`,
+		"resolution.managedByHomebrew ? updateContract.updateAction : configureAction",
+		`vscode.commands.executeCommand("arandu.aru.configure")`,
+	} {
+		if !strings.Contains(source, seam) {
+			t.Errorf("unmanaged Aru update notice does not contain the safe seam %q", seam)
+		}
+	}
+
+	guard := strings.Index(source, "if (!available.resolution.managedByHomebrew)")
+	brew := strings.Index(source, "await resolveHomebrewExecutable()")
+	if guard < 0 || brew < 0 || guard > brew {
+		t.Fatal("an unmanaged active Aru can reach Homebrew execution")
 	}
 }
