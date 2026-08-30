@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import { LanguageClient, State, type LanguageClientOptions, type ServerOptions } from "vscode-languageclient/node";
 import adapterContract from "./adapterContract.json";
 import { resolveAruExecutable } from "./aru";
+import { AruUpdateManager } from "./aruUpdate";
 import { ProjectMapProvider } from "./projectMap";
 import graphContract from "./projectGraphContract.json";
 import { parseProjectGraph } from "./projectGraphSchema";
@@ -39,6 +40,7 @@ class AranduController implements vscode.Disposable {
   });
   private readonly status = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
   private readonly devStatus = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
+  private readonly aruUpdates: AruUpdateManager;
   private readonly permanentDisposables: vscode.Disposable[] = [];
   private runtimeDisposables: vscode.Disposable[] = [];
   private client: LanguageClient | undefined;
@@ -49,7 +51,8 @@ class AranduController implements vscode.Disposable {
   private failurePromptOpen = false;
   private disposed = false;
 
-  public constructor(_context: vscode.ExtensionContext) {
+  public constructor(context: vscode.ExtensionContext) {
+    this.aruUpdates = new AruUpdateManager(context, this.output, findAranduWorkspace);
     this.status.name = "Arandu";
     this.status.show();
     this.devStatus.name = "Arandu Development Server";
@@ -63,6 +66,7 @@ class AranduController implements vscode.Disposable {
       this.developmentTree,
       this.status,
       this.devStatus,
+      this.aruUpdates,
       vscode.commands.registerCommand("arandu.projectMap.refresh", () => this.refresh()),
       vscode.commands.registerCommand("arandu.doctor.run", () => this.refresh()),
       vscode.commands.registerCommand("arandu.languageServer.restart", () => this.restart()),
@@ -140,6 +144,7 @@ class AranduController implements vscode.Disposable {
 
     this.setStarting();
     const aru = await resolveAruExecutable(folder);
+    void this.aruUpdates.check(aru.executable);
     this.output.info(`Starting ${aru.executable} lsp in ${folder.uri.fsPath} (${aru.source}).`);
     const watcher = this.createProjectWatcher(folder);
     const serverOptions: ServerOptions = {

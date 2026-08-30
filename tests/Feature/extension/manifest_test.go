@@ -127,6 +127,7 @@ func TestTheExtensionStartsTheAranduLanguageClientAndProjectMap(t *testing.T) {
 		"arandu.dev.stop",
 		"arandu.dev.restart",
 		"arandu.doctor.run",
+		"arandu.aru.updateWithHomebrew",
 	} {
 		found := false
 		for _, candidate := range manifest.Contributes.Commands {

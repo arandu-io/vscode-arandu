@@ -129,6 +129,11 @@
         "command": "arandu.doctor.run",
         "title": "Run Doctor",
         "category": "Arandu"
+      },
+      {
+        "command": "arandu.aru.updateWithHomebrew",
+        "title": "Update with Homebrew",
+        "category": "Arandu"
       }
     ],
     "viewsContainers": {

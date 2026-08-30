@@ -64,6 +64,12 @@ status bar reports language-server startup, readiness, failures, and whether
 the development server is running. Untrusted or virtual workspaces never
 start an Aru process.
 
+The extension checks the official stable Aru release at most once every 24
+hours. When the installed CLI is older, the status bar and one version-specific
+warning offer **Update with Homebrew**. Choosing it runs `brew upgrade
+arandu-io/tap/aru` as a visible VS Code task; dismissing the warning suppresses
+it for that release, and the extension never updates the CLI automatically.
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). CI runs the same Go contracts and VSIX

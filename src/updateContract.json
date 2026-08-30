@@ -1,0 +1,19 @@
+{
+  "latestReleaseURL": "https://api.github.com/repos/arandu-io/aru/releases/latest",
+  "cacheMilliseconds": 86400000,
+  "requestTimeoutMilliseconds": 5000,
+  "versionTimeoutMilliseconds": 3000,
+  "cacheKey": "aru.update.latestStable",
+  "dismissedVersionKey": "aru.update.dismissedVersion",
+  "brewPathOrder": [
+    "PATH",
+    "/opt/homebrew/bin/brew",
+    "/usr/local/bin/brew"
+  ],
+  "brewUpgradeArgs": [
+    "upgrade",
+    "arandu-io/tap/aru"
+  ],
+  "updateAction": "Update with Homebrew",
+  "manualUpdateOnly": true
+}
