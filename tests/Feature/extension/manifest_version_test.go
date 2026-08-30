@@ -13,7 +13,7 @@ func TestTheReleaseVersionComesFromTheExtensionManifest(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read manifest version: %v\n%s", err, output)
 	}
-	if got, want := strings.TrimSpace(string(output)), "0.1.0"; got != want {
+	if got, want := strings.TrimSpace(string(output)), "0.1.1"; got != want {
 		t.Fatalf("manifest version = %q, want %q", got, want)
 	}
 }
