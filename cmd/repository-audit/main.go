@@ -53,7 +53,7 @@ func main() {
 		}
 		os.Exit(1)
 	}
-	fmt.Println("Node and TypeScript are confined to the bundled editor adapter; Python is absent.")
+	fmt.Println("Node and TypeScript are confined to the bundled editor adapter; no disallowed runtime is present.")
 }
 
 func audit(root string) ([]string, error) {

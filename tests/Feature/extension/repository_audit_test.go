@@ -32,8 +32,12 @@ func TestTheRepositoryAuditorAllowsThePinnedEditorAdapter(t *testing.T) {
 	writeAuditFile(t, root, "dist/extension.js", "exports.activate = () => {};\n")
 	command := exec.Command("go", "run", "./cmd/repository-audit", root)
 	command.Dir = rootPath(t)
-	if output, err := command.CombinedOutput(); err != nil {
+	output, err := command.CombinedOutput()
+	if err != nil {
 		t.Fatalf("repository audit rejected the confined editor adapter: %v\n%s", err, output)
+	}
+	if !strings.Contains(string(output), "no disallowed runtime is present") {
+		t.Fatalf("repository audit success did not use the no-runtime contract:\n%s", output)
 	}
 }
 
