@@ -1,7 +1,7 @@
 {
   "name": "arandu",
-  "displayName": "Arandu",
-  "description": "Kyse language intelligence and project navigation for Arandu.",
+  "displayName": "Arandu Intelligence",
+  "description": "Language intelligence, project navigation, and development tools for Arandu.",
   "version": "0.1.5",
   "preview": true,
   "publisher": "arandu-io",
@@ -34,7 +34,7 @@
     "LICENSE.md",
     "README.md",
     "dist/extension.js",
-    "images/activity.svg",
+    "images/aru.svg",
     "images/icon.png",
     "images/logo.png",
     "language-configuration.json",
@@ -80,7 +80,7 @@
   },
   "contributes": {
     "configuration": {
-      "title": "Arandu",
+      "title": "Arandu Intelligence",
       "properties": {
         "arandu.aru.path": {
           "type": "string",
@@ -94,61 +94,61 @@
       {
         "command": "arandu.project.select",
         "title": "Select Project",
-        "category": "Arandu",
+        "category": "Arandu Intelligence",
         "icon": "$(root-folder)"
       },
       {
         "command": "arandu.projectMap.refresh",
         "title": "Refresh Project Map",
-        "category": "Arandu",
+        "category": "Arandu Intelligence",
         "icon": "$(refresh)"
       },
       {
         "command": "arandu.languageServer.restart",
         "title": "Restart Language Server",
-        "category": "Arandu",
+        "category": "Arandu Intelligence",
         "icon": "$(debug-restart)"
       },
       {
         "command": "arandu.aru.configure",
         "title": "Configure Aru Path",
-        "category": "Arandu"
+        "category": "Arandu Intelligence"
       },
       {
         "command": "arandu.dev.start",
         "title": "Start Development Server",
-        "category": "Arandu",
+        "category": "Arandu Intelligence",
         "icon": "$(play)"
       },
       {
         "command": "arandu.dev.stop",
         "title": "Stop Development Server",
-        "category": "Arandu",
+        "category": "Arandu Intelligence",
         "icon": "$(debug-stop)"
       },
       {
         "command": "arandu.dev.restart",
         "title": "Restart Development Server",
-        "category": "Arandu",
+        "category": "Arandu Intelligence",
         "icon": "$(debug-restart)"
       },
       {
         "command": "arandu.doctor.run",
         "title": "Run Doctor",
-        "category": "Arandu"
+        "category": "Arandu Intelligence"
       },
       {
         "command": "arandu.aru.updateWithHomebrew",
         "title": "Update with Homebrew",
-        "category": "Arandu"
+        "category": "Arandu Intelligence"
       }
     ],
     "viewsContainers": {
       "activitybar": [
         {
           "id": "arandu",
-          "title": "Arandu",
-          "icon": "images/activity.svg"
+          "title": "Arandu Intelligence",
+          "icon": "images/aru.svg"
         }
       ]
     },
@@ -157,12 +157,12 @@
         {
           "id": "arandu.projectMap",
           "name": "Project Map",
-          "contextualTitle": "Arandu Project Map"
+          "contextualTitle": "Arandu Intelligence Project Map"
         },
         {
           "id": "arandu.development",
           "name": "Development",
-          "contextualTitle": "Arandu Development"
+          "contextualTitle": "Arandu Intelligence Development"
         }
       ]
     },

@@ -55,12 +55,15 @@ func TestTheExtensionStartsTheAranduLanguageClientAndProjectMap(t *testing.T) {
 			} `json:"configuration"`
 			ViewContainers struct {
 				ActivityBar []struct {
-					ID string `json:"id"`
+					ID    string `json:"id"`
+					Title string `json:"title"`
+					Icon  string `json:"icon"`
 				} `json:"activitybar"`
 			} `json:"viewsContainers"`
 			Views map[string][]struct {
-				ID   string `json:"id"`
-				Name string `json:"name"`
+				ID              string `json:"id"`
+				Name            string `json:"name"`
+				ContextualTitle string `json:"contextualTitle"`
 			} `json:"views"`
 			ViewsWelcome []struct {
 				View     string `json:"view"`
@@ -68,7 +71,8 @@ func TestTheExtensionStartsTheAranduLanguageClientAndProjectMap(t *testing.T) {
 				When     string `json:"when"`
 			} `json:"viewsWelcome"`
 			Commands []struct {
-				Command string `json:"command"`
+				Command  string `json:"command"`
+				Category string `json:"category"`
 			} `json:"commands"`
 			Menus map[string][]struct {
 				Command string `json:"command"`
@@ -81,8 +85,8 @@ func TestTheExtensionStartsTheAranduLanguageClientAndProjectMap(t *testing.T) {
 	if got, want := manifest.Publisher+"."+manifest.Name, "arandu-io.arandu"; got != want {
 		t.Fatalf("extension identifier = %q, want %q", got, want)
 	}
-	if manifest.DisplayName != "Arandu" || manifest.Version != "0.1.3" || !manifest.Preview {
-		t.Fatalf("identity = %q %q preview=%t, want Arandu 0.1.3 preview=true", manifest.DisplayName, manifest.Version, manifest.Preview)
+	if manifest.DisplayName != "Arandu Intelligence" || manifest.Version != "0.1.5" || !manifest.Preview {
+		t.Fatalf("identity = %q %q preview=%t, want Arandu Intelligence 0.1.5 preview=true", manifest.DisplayName, manifest.Version, manifest.Preview)
 	}
 	if manifest.Main != "./dist/extension.js" || manifest.Browser != "" {
 		t.Fatalf("extension host = main %q browser %q", manifest.Main, manifest.Browser)
@@ -103,7 +107,7 @@ func TestTheExtensionStartsTheAranduLanguageClientAndProjectMap(t *testing.T) {
 	if manifest.Scripts["typecheck"] != "tsc --noEmit" || manifest.Scripts["bundle"] == "" {
 		t.Fatalf("build scripts = %v", manifest.Scripts)
 	}
-	if !contains(manifest.Files, "dist/extension.js") || !contains(manifest.Files, "images/activity.svg") {
+	if !contains(manifest.Files, "dist/extension.js") || !contains(manifest.Files, "images/aru.svg") || contains(manifest.Files, "images/activity.svg") {
 		t.Fatalf("published files = %v", manifest.Files)
 	}
 	if manifest.Capabilities.Untrusted.Supported != "limited" || manifest.Capabilities.Virtual.Supported {
@@ -112,11 +116,13 @@ func TestTheExtensionStartsTheAranduLanguageClientAndProjectMap(t *testing.T) {
 	if property := manifest.Contributes.Configuration.Properties["arandu.aru.path"]; property.Type != "string" {
 		t.Fatal("arandu.aru.path is not a string workspace configuration")
 	}
-	if len(manifest.Contributes.ViewContainers.ActivityBar) != 1 || manifest.Contributes.ViewContainers.ActivityBar[0].ID != "arandu" {
+	if len(manifest.Contributes.ViewContainers.ActivityBar) != 1 || manifest.Contributes.ViewContainers.ActivityBar[0].ID != "arandu" ||
+		manifest.Contributes.ViewContainers.ActivityBar[0].Title != "Arandu Intelligence" || manifest.Contributes.ViewContainers.ActivityBar[0].Icon != "images/aru.svg" {
 		t.Fatalf("activity bar containers = %#v", manifest.Contributes.ViewContainers.ActivityBar)
 	}
 	views := manifest.Contributes.Views["arandu"]
-	if len(views) != 2 || views[0].ID != "arandu.projectMap" || views[1].ID != "arandu.development" || views[1].Name != "Development" {
+	if len(views) != 2 || views[0].ID != "arandu.projectMap" || views[0].ContextualTitle != "Arandu Intelligence Project Map" ||
+		views[1].ID != "arandu.development" || views[1].Name != "Development" || views[1].ContextualTitle != "Arandu Intelligence Development" {
 		t.Fatalf("Arandu views = %#v", manifest.Contributes.Views["arandu"])
 	}
 	for _, command := range []string{
@@ -132,7 +138,12 @@ func TestTheExtensionStartsTheAranduLanguageClientAndProjectMap(t *testing.T) {
 	} {
 		found := false
 		for _, candidate := range manifest.Contributes.Commands {
-			found = found || candidate.Command == command
+			if candidate.Command == command {
+				found = true
+				if candidate.Category != "Arandu Intelligence" {
+					t.Errorf("command %q category = %q", command, candidate.Category)
+				}
+			}
 		}
 		if !found {
 			t.Errorf("commands do not contain %q", command)
@@ -175,7 +186,7 @@ func TestTheExtensionStartsTheAranduLanguageClientAndProjectMap(t *testing.T) {
 	if _, err := os.Stat(rootPath(t, manifest.Icon)); err != nil {
 		t.Fatalf("first-party icon: %v", err)
 	}
-	activity, err := os.ReadFile(rootPath(t, "images/activity.svg"))
+	activity, err := os.ReadFile(rootPath(t, "images/aru.svg"))
 	if err != nil {
 		t.Fatalf("activity icon: %v", err)
 	}

@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="images/logo.png" alt="Arandu" width="140" height="140">
+  <img src="images/logo.png" alt="Arandu Intelligence" width="140" height="140">
 </p>
 
-<h1 align="center">Arandu for Visual Studio Code</h1>
+<h1 align="center">Arandu Intelligence for Visual Studio Code</h1>
 
-<p align="center">First-party Kyse language intelligence and project navigation for Arandu.</p>
+<p align="center">First-party language intelligence, project navigation, and development tools for Arandu.</p>
 
 <p align="center">
 <a href="https://github.com/arandu-io/vscode-arandu/actions/workflows/ci.yml"><img src="https://github.com/arandu-io/vscode-arandu/actions/workflows/ci.yml/badge.svg" alt="Build Status"></a>
@@ -46,7 +46,7 @@ Doctor findings for the selected project also appear in VS Code Problems, with
 stale findings cleared on every refresh. Doctor runs when the extension starts
 and, with debounce, after relevant files in that project are saved.
 
-The map also refreshes from its toolbar. `Arandu: Start Development Server`,
+The map also refreshes from its toolbar. `Arandu Intelligence: Start Development Server`,
 `Stop`, and `Restart` run `aru dev` in a dedicated terminal only after an
 explicit command; the extension never runs migrations, seeders, or generators.
 
@@ -66,7 +66,7 @@ For the selected project, the adapter resolves `aru` in this order:
 3. `/opt/homebrew/bin/aru` (Apple Silicon Homebrew).
 4. `/usr/local/bin/aru` (Intel Homebrew).
 
-Use `Arandu: Configure Aru Path` when the executable lives elsewhere. The
+Use `Arandu Intelligence: Configure Aru Path` when the executable lives elsewhere. The
 status bar reports language-server startup, readiness, failures, and whether
 the development server is running. Untrusted or virtual workspaces never
 start an Aru process.

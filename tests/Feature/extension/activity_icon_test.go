@@ -22,44 +22,32 @@ type svgPath struct {
 	ClipRule string `xml:"clip-rule,attr"`
 }
 
-func TestTheActivityBarIconUsesEveryCanonicalPath(t *testing.T) {
-	canonical := readSVGIcon(t, "images/favicon.svg")
-	activity := readSVGIcon(t, "images/activity.svg")
-
-	if got, want := len(canonical.Paths), 44; got != want {
-		t.Fatalf("canonical Arandu icon paths = %d, want %d", got, want)
+func TestTheActivityBarUsesTheFourPathAruMark(t *testing.T) {
+	activity := readSVGIcon(t, "images/aru.svg")
+	if got, want := len(activity.Paths), 4; got != want {
+		t.Fatalf("Activity Bar Aru mark paths = %d, want %d", got, want)
 	}
-	if got, want := len(activity.Paths), len(canonical.Paths); got != want {
-		t.Fatalf("Activity Bar icon paths = %d, want all %d canonical paths", got, want)
-	}
-	for index, want := range canonical.Paths {
-		got := activity.Paths[index]
-		got.Fill = ""
-		want.Fill = ""
-		if got != want {
-			t.Fatalf("Activity Bar path %d = %#v, want canonical %#v", index+1, got, want)
+	for index, path := range activity.Paths {
+		if path.Data == "" {
+			t.Fatalf("Activity Bar Aru path %d is empty", index+1)
 		}
 	}
 }
 
 func TestTheActivityBarIconFollowsTheThemeAndFitsTwentyFourPixels(t *testing.T) {
-	canonical := readSVGIcon(t, "images/favicon.svg")
-	activity := readSVGIcon(t, "images/activity.svg")
+	activity := readSVGIcon(t, "images/aru.svg")
 
 	if activity.Width != "24" || activity.Height != "24" {
 		t.Fatalf("Activity Bar icon size = %sx%s, want 24x24", activity.Width, activity.Height)
 	}
-	if got, want := activity.ViewBox, "0 0 631 515"; got != want || got != canonical.ViewBox {
-		t.Fatalf("Activity Bar icon viewBox = %q, want canonical %q", got, want)
-	}
-	if got, want := activity.PreserveAspectRatio, "xMidYMid meet"; got != want {
-		t.Fatalf("Activity Bar icon aspect ratio = %q, want %q", got, want)
+	if got, want := activity.ViewBox, "0 0 292 260"; got != want {
+		t.Fatalf("Activity Bar icon viewBox = %q, want %q", got, want)
 	}
 	if got, want := activity.Fill, "currentColor"; got != want {
 		t.Fatalf("Activity Bar icon fill = %q, want %q", got, want)
 	}
 	for index, path := range activity.Paths {
-		if path.Fill != "" {
+		if path.Fill != "" && path.Fill != "currentColor" {
 			t.Fatalf("Activity Bar path %d overrides the themed fill with %q", index+1, path.Fill)
 		}
 	}
