@@ -77,8 +77,8 @@ jobs:
             tail -n +2 CHANGELOG.md
           } > CHANGELOG.next
           mv CHANGELOG.next CHANGELOG.md
-          git config user.name "HYZIS"
-          git config user.email "admin@hyz.is"
+          git config user.name "Paulo R. Lima"
+          git config user.email "paulorlima@hyz.is"
           git add CHANGELOG.md
           git diff --cached --quiet && exit 0
           git commit -s -m "Write ${TAG} into the changelog"
