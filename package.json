@@ -33,6 +33,7 @@
     "CHANGELOG.md",
     "LICENSE.md",
     "README.md",
+    "THIRD_PARTY.md",
     "dist/extension.js",
     "images/aru.svg",
     "images/icon.png",

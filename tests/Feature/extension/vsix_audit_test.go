@@ -41,6 +41,7 @@ func releaseVSIXFiles() []string {
 		"extension/readme.md",
 		"extension/changelog.md",
 		"extension/LICENSE.md",
+		"extension/THIRD_PARTY.md",
 		"extension/dist/extension.js",
 		"extension/images/aru.svg",
 		"extension/images/icon.png",

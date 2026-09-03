@@ -14,6 +14,7 @@ var releaseFiles = map[string]struct{}{
 	"[Content_Types].xml":                     {},
 	"extension.vsixmanifest":                  {},
 	"extension/LICENSE.md":                    {},
+	"extension/THIRD_PARTY.md":                {},
 	"extension/changelog.md":                  {},
 	"extension/dist/extension.js":             {},
 	"extension/images/aru.svg":                {},
