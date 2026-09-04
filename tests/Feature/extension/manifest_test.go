@@ -4,10 +4,15 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"testing"
 )
+
+// manifestVersion is the version shape the marketplace accepts and the release
+// workflow turns into a tag.
+var manifestVersion = regexp.MustCompile(`^\d+\.\d+\.\d+$`)
 
 func TestTheExtensionStartsTheAranduLanguageClientAndProjectMap(t *testing.T) {
 	var manifest struct {
@@ -81,8 +86,17 @@ func TestTheExtensionStartsTheAranduLanguageClientAndProjectMap(t *testing.T) {
 	if got, want := manifest.Publisher+"."+manifest.Name, "arandu-io.arandu"; got != want {
 		t.Fatalf("extension identifier = %q, want %q", got, want)
 	}
-	if manifest.DisplayName != "Arandu" || manifest.Version != "0.1.3" || !manifest.Preview {
-		t.Fatalf("identity = %q %q preview=%t, want Arandu 0.1.3 preview=true", manifest.DisplayName, manifest.Version, manifest.Preview)
+	if manifest.DisplayName != "Arandu" || !manifest.Preview {
+		t.Fatalf("identity = %q preview=%t, want Arandu preview=true", manifest.DisplayName, manifest.Preview)
+	}
+	// The version is checked for shape, not against a number written here. A
+	// literal has to be edited on every release, and the release that edits the
+	// manifest and forgets this file is the one where a passing suite means
+	// nothing -- which is what happened: the manifest moved on and this
+	// assertion went on asking for the version before it. What the marketplace
+	// and the release tag both require is the shape.
+	if !manifestVersion.MatchString(manifest.Version) {
+		t.Fatalf("version = %q, want three dot-separated numbers", manifest.Version)
 	}
 	if manifest.Main != "./dist/extension.js" || manifest.Browser != "" {
 		t.Fatalf("extension host = main %q browser %q", manifest.Main, manifest.Browser)
