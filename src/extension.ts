@@ -165,10 +165,23 @@ class AranduController implements vscode.Disposable {
       options: { cwd: folder.uri.fsPath, shell: false },
     };
     const clientOptions: LanguageClientOptions = {
+      // Two languages, one server, and the second entry is what carries the
+      // controller half of go-to-definition: a view names a layout and a
+      // component, and Go source names the view. Both are held to the selected
+      // project by a pattern relative to its folder, so a Go file of some other
+      // checkout the person also has open is never sent here.
+      //
+      // Go source already has a language server. This one answers a single
+      // question about it -- which file a view name is -- and the editor merges
+      // the two servers' definitions rather than choosing between them.
       documentSelector: [{
         language: "kyse",
         scheme: "file",
         pattern: { baseUri: folder.uri.toString(), pattern: "**/*.kyse.go" },
+      }, {
+        language: "go",
+        scheme: "file",
+        pattern: { baseUri: folder.uri.toString(), pattern: "**/*.go" },
       }],
       diagnosticCollectionName: "arandu",
       outputChannel: this.output,

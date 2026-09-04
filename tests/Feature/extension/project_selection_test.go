@@ -197,6 +197,57 @@ func TestTheProjectMapUsesTheSelectedRootForEveryEditorCapability(t *testing.T) 
 	}
 }
 
+// TestTheDocumentSelectorReachesViewsAndGoSourceOfTheSelectedProjectOnly fixes
+// which files are sent to the language server.
+//
+// Views alone were not enough: `ctx.View("home", …)` is written in a
+// controller, and a server that never receives the file cannot answer where
+// that view lives. Go source is added for exactly that, and it is added with
+// the same leash the views have -- a pattern relative to the selected
+// project's folder. Without the leash, every Go file of every unrelated
+// checkout the person happens to have open is handed to this project's server.
+func TestTheDocumentSelectorReachesViewsAndGoSourceOfTheSelectedProjectOnly(t *testing.T) {
+	raw, err := os.ReadFile(rootPath(t, "src/extension.ts"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	source := string(raw)
+	start := strings.Index(source, "documentSelector: [")
+	end := strings.Index(source, "diagnosticCollectionName:")
+	if start < 0 || end < 0 || start >= end {
+		t.Fatal("cannot locate the document selector")
+	}
+	selector := source[start:end]
+
+	for _, seam := range []string{
+		`language: "kyse"`,
+		`pattern: { baseUri: folder.uri.toString(), pattern: "**/*.kyse.go" }`,
+		`language: "go"`,
+		`pattern: { baseUri: folder.uri.toString(), pattern: "**/*.go" }`,
+	} {
+		if !strings.Contains(selector, seam) {
+			t.Errorf("document selector is missing %q", seam)
+		}
+	}
+	// Every entry is relative to the selected folder. A bare glob would be a
+	// glob over the whole machine.
+	if strings.Count(selector, "baseUri: folder.uri.toString()") != strings.Count(selector, "pattern: \"**/") {
+		t.Error("a document selector pattern is not anchored to the selected project folder")
+	}
+	if strings.Count(selector, "scheme: \"file\"") != 2 {
+		t.Error("every document selector entry must be limited to local files")
+	}
+
+	// The resolution stays in aru. A provider written here would be a second
+	// answer to the same question, in a language that cannot see the tree the
+	// server already indexes.
+	for _, forbidden := range []string{"registerDefinitionProvider", "DefinitionProvider {", "provideDefinition"} {
+		if strings.Contains(source, forbidden) {
+			t.Errorf("the extension resolves definitions itself with %q; that belongs to aru", forbidden)
+		}
+	}
+}
+
 func TestTheProjectMapSwitchStopsTheOldServerWithoutStartingAnother(t *testing.T) {
 	var contract struct {
 		ProjectSwitchStartsDev *bool `json:"projectSwitchStartsDev"`
