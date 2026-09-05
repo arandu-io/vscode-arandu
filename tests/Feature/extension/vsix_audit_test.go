@@ -44,6 +44,7 @@ func releaseVSIXFiles() []string {
 		"extension/dist/extension.js",
 		"extension/images/activity.svg",
 		"extension/images/icon.png",
+		"extension/images/logo.png",
 		"extension/language-configuration.json",
 		"extension/syntaxes/kyse.tmLanguage.json",
 		"extension/snippets/kyse.json",

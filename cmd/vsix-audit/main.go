@@ -18,6 +18,7 @@ var releaseFiles = map[string]struct{}{
 	"extension/dist/extension.js":             {},
 	"extension/images/activity.svg":           {},
 	"extension/images/icon.png":               {},
+	"extension/images/logo.png":               {},
 	"extension/language-configuration.json":   {},
 	"extension/package.json":                  {},
 	"extension/readme.md":                     {},
