@@ -86,8 +86,8 @@ func TestTheExtensionStartsTheAranduLanguageClientAndProjectMap(t *testing.T) {
 	if got, want := manifest.Publisher+"."+manifest.Name, "arandu-io.arandu"; got != want {
 		t.Fatalf("extension identifier = %q, want %q", got, want)
 	}
-	if manifest.DisplayName != "Arandu" {
-		t.Fatalf("display name = %q, want Arandu", manifest.DisplayName)
+	if manifest.DisplayName != "Arandu Intelligence" {
+		t.Fatalf("display name = %q, want Arandu Intelligence", manifest.DisplayName)
 	}
 	// The preview flag is not checked. It says how a marketplace labels the
 	// entry, which is a decision about the release and not about identity --

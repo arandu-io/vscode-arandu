@@ -1,8 +1,8 @@
 {
   "name": "arandu",
-  "displayName": "Arandu",
-  "description": "Kyse language intelligence and project navigation for Arandu.",
-  "version": "0.1.5",
+  "displayName": "Arandu Intelligence",
+  "description": "Language intelligence, project navigation, and development tools for Arandu.",
+  "version": "0.1.6",
   "publisher": "arandu-io",
   "license": "MIT",
   "icon": "images/icon.png",
@@ -80,7 +80,7 @@
   },
   "contributes": {
     "configuration": {
-      "title": "Arandu",
+      "title": "Arandu Intelligence",
       "properties": {
         "arandu.aru.path": {
           "type": "string",
