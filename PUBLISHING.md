@@ -70,7 +70,24 @@ matching git tag.
 
 ## The other registry
 
-Publishing to Microsoft's marketplace needs an Azure DevOps organisation, a
-verified publisher, and a Personal Access Token scoped to *Marketplace →
-Manage*. It reaches VS Code itself and nothing else; Open VSX reaches everything
-else. Neither covers both.
+Microsoft's marketplace is what VS Code itself reads, and no other editor can.
+Open VSX covers the rest. Neither covers both, so a release goes to each —
+`make publish-all` does the two from one build.
+
+Once, before the first publish there:
+
+1. Create an organisation at <https://dev.azure.com> with the same account.
+2. Under *User settings → Personal Access Tokens*, create a token scoped to
+   **Marketplace → Manage**, with **All accessible organizations** selected.
+   A token scoped to a single organisation is accepted when created and refused
+   when publishing, and the refusal reads as an authentication failure rather
+   than a scope one.
+3. Create the publisher `arandu-io` at
+   <https://marketplace.visualstudio.com/manage>. The name must match the
+   `publisher` field, exactly as on Open VSX.
+
+Every release:
+
+```
+VSCE_PAT=<token> make publish-marketplace
+```

@@ -15,7 +15,7 @@ SECOND := dist/.arandu-second.vsix
 RAW_FIRST := dist/.arandu-first.raw.vsix
 RAW_SECOND := dist/.arandu-second.raw.vsix
 
-.PHONY: audit bundle check format-check json-contracts package publish-check publish-openvsx test typecheck vet
+.PHONY: audit bundle check format-check json-contracts package publish-all publish-check publish-marketplace publish-openvsx test typecheck vet
 
 check: format-check vet test audit typecheck package
 
@@ -82,3 +82,19 @@ publish-openvsx: package
 publish-check: package
 	$(OVSX) get $(PUBLISHER).$(NAME) --metadata 2>&1 | head -20 || true
 	@echo "package ready: $(VSIX)"
+
+# Publish the audited package to Microsoft's marketplace, which is what VS Code
+# itself reads and no other editor can. Open VSX covers the rest; neither
+# registry covers both, so a release goes to each.
+#
+# VSCE_PAT is a Personal Access Token from dev.azure.com, scoped to
+# Marketplace/Manage across all accessible organizations. A token scoped to one
+# organization is accepted at creation and refused at publish, which reads as an
+# authentication failure rather than a scope one.
+publish-marketplace: package
+	@test -n "$(VSCE_PAT)" || { echo "VSCE_PAT is unset: publishing needs a token from dev.azure.com"; exit 1; }
+	$(VSCE) publish --packagePath $(VSIX) --pat $(VSCE_PAT)
+
+# Both registries, in one pass. The package is built once and each registry is
+# handed the same file, so the two cannot drift.
+publish-all: publish-openvsx publish-marketplace
