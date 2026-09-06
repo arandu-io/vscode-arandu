@@ -17,11 +17,23 @@ agreement rather than the token, which is easy to misread as an auth problem.
    This is the step that cannot be skipped and cannot be done from a script.
 3. Create an access token under *Settings → Access Tokens*. Copy it once — the
    page does not show it again.
-4. Claim the namespace, which reserves `arandu-io` so nobody else takes it:
+4. Create the namespace. The name is the `publisher` field of the manifest,
+   exactly — `arandu-io`, not the display name. A namespace name may hold
+   letters, digits, and `_ - + $ ~`.
 
    ```
    npx ovsx create-namespace arandu-io --pat <token>
    ```
+
+5. **Claim ownership of it, which creating it does not give you.** Creating a
+   namespace makes you a *contributor*: you can publish, and every version you
+   publish is shown as **unverified**, with a warning icon on the extension page.
+   Ownership is what turns that into the verified shield, and it is granted
+   publicly — by opening an issue at
+   <https://github.com/EclipseFdn/open-vsx.org>. Granting it in the open is the
+   point: anyone can contest a claim by commenting on the issue.
+
+   Until this is granted, the extension is installable and marked unverified.
 
 ## Every release
 
