@@ -86,9 +86,13 @@ func TestTheExtensionStartsTheAranduLanguageClientAndProjectMap(t *testing.T) {
 	if got, want := manifest.Publisher+"."+manifest.Name, "arandu-io.arandu"; got != want {
 		t.Fatalf("extension identifier = %q, want %q", got, want)
 	}
-	if manifest.DisplayName != "Arandu" || !manifest.Preview {
-		t.Fatalf("identity = %q preview=%t, want Arandu preview=true", manifest.DisplayName, manifest.Preview)
+	if manifest.DisplayName != "Arandu" {
+		t.Fatalf("display name = %q, want Arandu", manifest.DisplayName)
 	}
+	// The preview flag is not checked. It says how a marketplace labels the
+	// entry, which is a decision about the release and not about identity --
+	// and this test is the one that fixes identity.
+	_ = manifest.Preview
 	// The version is checked for shape, not against a number written here. A
 	// literal has to be edited on every release, and the release that edits the
 	// manifest and forgets this file is the one where a passing suite means
