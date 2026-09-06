@@ -7,10 +7,14 @@ import (
 	"io"
 	"os"
 	"sort"
-	"time"
 )
 
-var archiveEpoch = time.Date(1980, time.January, 1, 0, 0, 0, 0, time.UTC)
+// The MS-DOS encoding of 1980-01-01 00:00:00, which is the earliest a zip can
+// express: the date packs year-1980 into 7 bits, month into 4, day into 5.
+const (
+	archiveDOSDate = 1<<5 | 1 // January, day 1, year 1980
+	archiveDOSTime = 0
+)
 
 func main() {
 	if len(os.Args) != 3 {
@@ -66,7 +70,13 @@ func copyFile(destination *zip.Writer, source *zip.File) error {
 	defer reader.Close()
 
 	header := &zip.FileHeader{Name: source.Name, Method: zip.Deflate}
-	header.SetModTime(archiveEpoch)
+	// The timestamp goes in the MS-DOS fields and nowhere else. SetModTime and
+	// Modified both make the writer emit an extended-timestamp extra field, and
+	// Open VSX refuses an archive that carries any extra field at all --
+	// "zip entries with potentially harmful extra fields" -- without saying
+	// which one. These two fields are the 1980 epoch this repack exists to fix.
+	header.ModifiedDate = archiveDOSDate
+	header.ModifiedTime = archiveDOSTime
 	header.SetMode(0o644)
 	writer, err := destination.CreateHeader(header)
 	if err != nil {
