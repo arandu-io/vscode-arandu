@@ -7,11 +7,15 @@ only registry that reaches them.
 
 ## Whose account publishes
 
-The copyright on this extension belongs to HYZIS - SERVICOS DIGITAIS LTDA - EPP,
-so the account that publishes it is the company's — `admin@hyz.is` — and the
-Eclipse Contributor Agreement behind it names the company as the employer, not
-an individual. Commits stay authored by `Paulo R. Lima <paulorlima@hyz.is>`;
-those are separate on purpose.
+Publishing is done from **`paulorlima@hyz.is`**, in every registry. Both
+addresses belong to HYZIS - SERVICOS DIGITAIS LTDA - EPP, which is the company
+that holds the copyright: `paulorlima@` is the named one and publishes,
+`admin@` is the internal one and does not.
+
+So the account that uploads, the identity on the commits, and the entity on the
+licence are all the same company, reached by the same address. That is the point
+of writing it down: an account chosen ad hoc for one release is the one nobody
+can find when the next release needs it.
 
 This matters beyond tidiness: claiming ownership of the namespace is a public
 issue on the registry's repository, and a namespace held by a company while a
