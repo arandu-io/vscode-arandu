@@ -5,6 +5,18 @@ VS Code read: Cursor, Windsurf, Antigravity, VSCodium and Theia. Microsoft's own
 marketplace refuses those editors by its terms of service, so Open VSX is the
 only registry that reaches them.
 
+## Whose account publishes
+
+The copyright on this extension belongs to HYZIS - SERVICOS DIGITAIS LTDA - EPP,
+so the account that publishes it is the company's — `admin@hyz.is` — and the
+Eclipse Contributor Agreement behind it names the company as the employer, not
+an individual. Commits stay authored by `Paulo R. Lima <paulorlima@hyz.is>`;
+those are separate on purpose.
+
+This matters beyond tidiness: claiming ownership of the namespace is a public
+issue on the registry's repository, and a namespace held by a company while a
+personal account publishes into it is the first thing a reader asks about.
+
 ## Once, before the first publish
 
 Open VSX is run by the Eclipse Foundation, and it will not accept an upload
