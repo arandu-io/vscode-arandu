@@ -141,6 +141,18 @@
         "command": "arandu.aru.updateWithHomebrew",
         "title": "Update with Homebrew",
         "category": "Arandu"
+      },
+      {
+        "command": "arandu.native.run",
+        "title": "Run Native Application",
+        "category": "Arandu",
+        "icon": "$(device-desktop)"
+      },
+      {
+        "command": "arandu.native.build",
+        "title": "Build Native Application",
+        "category": "Arandu",
+        "icon": "$(package)"
       }
     ],
     "viewsContainers": {
@@ -214,6 +226,11 @@
           "command": "arandu.dev.restart",
           "when": "view == arandu.projectMap && arandu.project.selected && arandu.dev.running",
           "group": "navigation@5"
+        },
+        {
+          "command": "arandu.native.run",
+          "when": "view == arandu.projectMap && arandu.project.selected && arandu.native.available",
+          "group": "navigation@6"
         }
       ]
     },
