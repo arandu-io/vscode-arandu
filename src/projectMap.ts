@@ -147,6 +147,7 @@ function groupIcon(groupID: string): string {
     views: "browser",
     async: "server-process",
     console: "terminal",
+    "native-screens": "device-desktop",
     "native-capabilities": "verified-filled",
     "community-modules": "extensions",
     diagnostics: "issues",

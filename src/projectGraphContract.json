@@ -27,6 +27,10 @@
       "label": "Console"
     },
     {
+      "id": "native-screens",
+      "label": "Native Screens"
+    },
+    {
       "id": "native-capabilities",
       "label": "Native Capabilities"
     },

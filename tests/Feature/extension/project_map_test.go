@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestTheProjectMapPinsSchemaV1AndTheNineCanonicalGroups(t *testing.T) {
+func TestTheProjectMapPinsSchemaV1AndTheTenCanonicalGroups(t *testing.T) {
 	var contract struct {
 		Request       string `json:"request"`
 		SchemaVersion int    `json:"schemaVersion"`
@@ -28,6 +28,7 @@ func TestTheProjectMapPinsSchemaV1AndTheNineCanonicalGroups(t *testing.T) {
 		{"views", "Views"},
 		{"async", "Async"},
 		{"console", "Console"},
+		{"native-screens", "Native Screens"},
 		{"native-capabilities", "Native Capabilities"},
 		{"community-modules", "Community Modules"},
 		{"diagnostics", "Diagnostics"},

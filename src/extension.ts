@@ -49,6 +49,7 @@ class AranduController implements vscode.Disposable {
   private client: LanguageClient | undefined;
   private refreshTimer: NodeJS.Timeout | undefined;
   private devTerminal: vscode.Terminal | undefined;
+  private nativeTerminal: vscode.Terminal | undefined;
   private restartQueue: Promise<void> = Promise.resolve();
   private stopping = false;
   private failurePromptOpen = false;
@@ -80,10 +81,15 @@ class AranduController implements vscode.Disposable {
       vscode.commands.registerCommand("arandu.dev.start", () => this.startDev()),
       vscode.commands.registerCommand("arandu.dev.stop", () => this.stopDev()),
       vscode.commands.registerCommand("arandu.dev.restart", () => this.restartDev()),
+      vscode.commands.registerCommand("arandu.native.run", () => this.runNative()),
+      vscode.commands.registerCommand("arandu.native.build", () => this.buildNative()),
       vscode.window.onDidCloseTerminal((terminal) => {
         if (terminal === this.devTerminal) {
           this.devTerminal = undefined;
           this.setDevRunning(false);
+        }
+        if (terminal === this.nativeTerminal) {
+          this.nativeTerminal = undefined;
         }
       }),
       vscode.workspace.onDidGrantWorkspaceTrust(() => void this.restart()),
@@ -250,6 +256,7 @@ class AranduController implements vscode.Disposable {
       const graph = parseProjectGraph(response);
       this.provider.setGraph(graph);
       this.publishDoctorDiagnostics(graph);
+      this.setNativeAvailable(graph);
       this.tree.message = undefined;
       this.tree.description = `${graph.nodes.length}`;
       this.output.info(`Project Map refreshed: ${graph.nodes.length} nodes.`);
@@ -448,6 +455,72 @@ class AranduController implements vscode.Disposable {
     }
   }
 
+  // runNative opens the project's native application, and buildNative compiles
+  // it without running.
+  //
+  // Both go through a terminal rather than a task, for the reason the
+  // development server does: the compiler's output is what somebody reads when
+  // it fails, and a task hides it behind a panel nobody has open. A window
+  // opening is the success case and needs no reporting of its own.
+  private async runNative(): Promise<void> {
+    if (this.nativeTerminal !== undefined) {
+      // One window at a time. A second is not a second application, it is the
+      // same one twice -- two icons in the dock, one of them stale.
+      this.nativeTerminal.show(false);
+      return;
+    }
+    await this.startNative("Arandu Native", adapterContract.nativeRunArgs, "device-desktop", (terminal) => {
+      this.nativeTerminal = terminal;
+    });
+  }
+
+  private async buildNative(): Promise<void> {
+    await this.startNative("Arandu Native Build", adapterContract.nativeBuildArgs, "package", () => {});
+  }
+
+  private async startNative(
+    name: string,
+    args: readonly string[],
+    icon: string,
+    keep: (terminal: vscode.Terminal) => void,
+  ): Promise<void> {
+    const project = this.projects.active ?? await this.projects.resolve();
+    this.syncProject(project);
+    if (project === undefined) {
+      await vscode.window.showErrorMessage("Select an Arandu filesystem project before building its native target.");
+      return;
+    }
+    if (!vscode.workspace.isTrusted) {
+      await vscode.window.showErrorMessage("Trust this workspace before building its native target.");
+      return;
+    }
+
+    const folder = project.folder;
+    try {
+      const aru = await resolveAruExecutable(folder);
+      const terminal = vscode.window.createTerminal({
+        name,
+        cwd: folder.uri,
+        shellPath: aru.executable,
+        shellArgs: [...args],
+        iconPath: new vscode.ThemeIcon(icon),
+        isTransient: true,
+      });
+      keep(terminal);
+      this.output.info(`Starting ${aru.executable} ${args.join(" ")} in ${folder.uri.fsPath} by explicit user command.`);
+      terminal.show(false);
+    } catch (error: unknown) {
+      const message = errorMessage(error);
+      this.output.error(`Cannot run ${args.join(" ")}: ${message}`);
+      const action = await vscode.window.showErrorMessage(`${name}: ${message}`, configureAction, showOutputAction);
+      if (action === configureAction) {
+        await this.configureAruPath();
+      } else if (action === showOutputAction) {
+        this.output.show(true);
+      }
+    }
+  }
+
   private stopDev(): void {
     const terminal = this.devTerminal;
     this.devTerminal = undefined;
@@ -471,6 +544,18 @@ class AranduController implements vscode.Disposable {
       this.devStatus.tooltip = "Start aru dev in this trusted workspace.";
       this.devStatus.command = "arandu.dev.start";
     }
+  }
+
+  // setNativeAvailable decides whether this project has a native target to run.
+  //
+  // It reads the map rather than the filesystem, because the map is what the
+  // language server already answered and a second check could disagree with the
+  // tree the person is looking at. A project with no target hides the command
+  // instead of offering one that answers with a refusal.
+  private setNativeAvailable(graph: ReturnType<typeof parseProjectGraph>): void {
+    const screens = graph.groups.find((group) => group.id === "native-screens");
+    const available = (screens?.nodeIds.length ?? 0) > 0;
+    void vscode.commands.executeCommand("setContext", "arandu.native.available", available);
   }
 
   private publishDoctorDiagnostics(graph: ReturnType<typeof parseProjectGraph>): void {
