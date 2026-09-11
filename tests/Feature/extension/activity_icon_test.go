@@ -3,6 +3,9 @@ package extension_test
 import (
 	"encoding/xml"
 	"os"
+	"regexp"
+	"slices"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -130,4 +133,131 @@ func readSVGIcon(t *testing.T, name string) svgIcon {
 		t.Fatalf("decode %s: %v", name, err)
 	}
 	return icon
+}
+
+// TestTheActivityBarIconFillsTheStripItIsDrawnIn is the check the other two
+// leave out.
+//
+// A 24-pixel icon whose viewBox carries a wide empty border renders a small
+// drawing in a large square, beside neighbours that fill theirs. Nothing about
+// it is broken -- the size is right, the colour is right, the paths are there
+// -- and it reads as an icon somebody forgot to finish. This measures what the
+// drawing actually occupies, which is the thing an eye notices.
+func TestTheActivityBarIconFillsTheStripItIsDrawnIn(t *testing.T) {
+	activity := readSVGIcon(t, "images/activity.svg")
+
+	x, y, side := viewBoxOf(t, activity.ViewBox)
+	left, top, right, bottom := drawingBounds(t, activity.Paths)
+
+	width, height := right-left, bottom-top
+	longest := width
+	if height > longest {
+		longest = height
+	}
+
+	// Nine tenths, and the tenth that is left is the air an icon needs so its
+	// strokes do not touch the neighbouring ones.
+	if filled := longest / side; filled < 0.85 {
+		t.Errorf("the drawing fills %.0f%% of its box; it renders small beside icons that fill theirs", filled*100)
+	}
+
+	// And centred: a drawing that fills the box and sits against one edge is
+	// the same failure seen from the side.
+	for _, axis := range []struct {
+		name             string
+		start, extent, v float64
+	}{
+		{"horizontally", left, width, x},
+		{"vertically", top, height, y},
+	} {
+		before := axis.start - axis.v
+		after := (axis.v + side) - (axis.start + axis.extent)
+		if difference := before - after; difference > side*0.05 || difference < -side*0.05 {
+			t.Errorf("the drawing is not centred %s: %.1f before it, %.1f after", axis.name, before, after)
+		}
+	}
+}
+
+// viewBoxOf reads the origin and the side of a square viewBox.
+func viewBoxOf(t *testing.T, viewBox string) (x, y, side float64) {
+	t.Helper()
+
+	parts := strings.Fields(viewBox)
+	if len(parts) != 4 {
+		t.Fatalf("viewBox %q is not four numbers", viewBox)
+	}
+	values := make([]float64, 4)
+	for index, part := range parts {
+		value, err := strconv.ParseFloat(part, 64)
+		if err != nil {
+			t.Fatalf("viewBox %q: %v", viewBox, err)
+		}
+		values[index] = value
+	}
+	if values[2] != values[3] {
+		t.Errorf("viewBox is %gx%g; a strip icon is drawn in a square", values[2], values[3])
+	}
+	return values[0], values[1], values[2]
+}
+
+// drawingBounds answers the box the paths actually cover.
+//
+// It reads the coordinates out of the path data rather than rendering, which
+// is enough for what this asks: every command in these files is absolute, and
+// a control point outside the drawn curve only makes the box larger, never
+// smaller. An over-estimate here can only let a too-small drawing pass, and
+// the drawing this guards is not near the line.
+func drawingBounds(t *testing.T, paths []svgPath) (left, top, right, bottom float64) {
+	t.Helper()
+
+	coordinates := regexp.MustCompile(`([MmLlHhVvCcSsQqTtAaZz])|(-?\d*\.?\d+)`)
+
+	var xs, ys []float64
+	for _, path := range paths {
+		var command string
+		var numbers []float64
+
+		flush := func() {
+			switch command {
+			case "M", "L", "T", "C", "S", "Q":
+				for index, value := range numbers {
+					if index%2 == 0 {
+						xs = append(xs, value)
+					} else {
+						ys = append(ys, value)
+					}
+				}
+			case "H":
+				xs = append(xs, numbers...)
+			case "V":
+				ys = append(ys, numbers...)
+			}
+			numbers = nil
+		}
+
+		for _, match := range coordinates.FindAllStringSubmatch(path.Data, -1) {
+			if letter := match[1]; letter != "" {
+				flush()
+				command = strings.ToUpper(letter)
+				if letter != command {
+					// Relative commands would need the running position, and
+					// none of these files uses one. Ignoring the run rather
+					// than guessing at it keeps a wrong number out of the box.
+					command = ""
+				}
+				continue
+			}
+			value, err := strconv.ParseFloat(match[2], 64)
+			if err != nil {
+				t.Fatalf("path coordinate %q: %v", match[2], err)
+			}
+			numbers = append(numbers, value)
+		}
+		flush()
+	}
+
+	if len(xs) == 0 || len(ys) == 0 {
+		t.Fatal("the icon's paths carry no coordinates")
+	}
+	return slices.Min(xs), slices.Min(ys), slices.Max(xs), slices.Max(ys)
 }
