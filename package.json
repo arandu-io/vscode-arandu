@@ -153,6 +153,12 @@
         "title": "Build Native Application",
         "category": "Arandu",
         "icon": "$(package)"
+      },
+      {
+        "command": "arandu.native.dev",
+        "title": "Watch Native Application",
+        "category": "Arandu",
+        "icon": "$(debug-restart)"
       }
     ],
     "viewsContainers": {

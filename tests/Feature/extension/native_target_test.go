@@ -31,7 +31,7 @@ func TestTheNativeCommandsAreDeclaredAndImplemented(t *testing.T) {
 
 	source := readFile(t, "src/extension.ts")
 
-	for _, command := range []string{"arandu.native.run", "arandu.native.build"} {
+	for _, command := range []string{"arandu.native.run", "arandu.native.build", "arandu.native.dev"} {
 		title, ok := declared[command]
 		if !ok {
 			t.Errorf("%s is not declared in the manifest, so nothing can reach it", command)
@@ -55,6 +55,7 @@ func TestTheNativeCommandsAreDeclaredAndImplemented(t *testing.T) {
 func TestTheNativeCommandsRunTheCommandsTheyName(t *testing.T) {
 	var contract struct {
 		NativeRunArgs      []string `json:"nativeRunArgs"`
+		NativeDevArgs      []string `json:"nativeDevArgs"`
 		NativeBuildArgs    []string `json:"nativeBuildArgs"`
 		NativeTargetMarker string   `json:"nativeTargetMarker"`
 	}
@@ -62,6 +63,7 @@ func TestTheNativeCommandsRunTheCommandsTheyName(t *testing.T) {
 
 	for name, args := range map[string][]string{
 		"native:run":   contract.NativeRunArgs,
+		"native:dev":   contract.NativeDevArgs,
 		"native:build": contract.NativeBuildArgs,
 	} {
 		if len(args) != 1 || args[0] != name {
@@ -158,4 +160,42 @@ func readFile(t *testing.T, path string) string {
 		t.Fatalf("%s could not be read: %v", path, err)
 	}
 	return string(body)
+}
+
+// TestOnlyOneNativeWindowIsOpenedAtATime keeps running and watching from
+// producing two.
+//
+// They are the same application: one opens a window, the other opens a window
+// and replaces it on every change. Two at once is not two applications, it is
+// two builds racing to overwrite the same binary, with one of the windows
+// drawing from whichever lost.
+func TestOnlyOneNativeWindowIsOpenedAtATime(t *testing.T) {
+	source := readFile(t, "src/extension.ts")
+
+	for _, opener := range []string{"runNative", "watchNative"} {
+		body := functionBody(t, source, opener)
+		if !strings.Contains(body, "this.nativeTerminal !== undefined") {
+			t.Errorf("%s does not check for a window that is already open", opener)
+		}
+		if !strings.Contains(body, "this.nativeTerminal = terminal") {
+			t.Errorf("%s does not record the window it opened, so the next call opens a second", opener)
+		}
+	}
+}
+
+// functionBody answers the text of one method, from its name to the line that
+// closes it at the same indentation.
+func functionBody(t *testing.T, source, name string) string {
+	t.Helper()
+
+	start := strings.Index(source, "private async "+name+"(")
+	if start < 0 {
+		t.Fatalf("%s is not defined", name)
+	}
+	rest := source[start:]
+	end := strings.Index(rest, "\n  }")
+	if end < 0 {
+		t.Fatalf("%s is never closed", name)
+	}
+	return rest[:end]
 }

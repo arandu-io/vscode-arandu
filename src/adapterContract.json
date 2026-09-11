@@ -25,6 +25,9 @@
   "nativeRunArgs": [
     "native:run"
   ],
+  "nativeDevArgs": [
+    "native:dev"
+  ],
   "nativeBuildArgs": [
     "native:build"
   ],
