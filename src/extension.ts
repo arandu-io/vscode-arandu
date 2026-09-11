@@ -83,6 +83,7 @@ class AranduController implements vscode.Disposable {
       vscode.commands.registerCommand("arandu.dev.restart", () => this.restartDev()),
       vscode.commands.registerCommand("arandu.native.run", () => this.runNative()),
       vscode.commands.registerCommand("arandu.native.build", () => this.buildNative()),
+      vscode.commands.registerCommand("arandu.native.dev", () => this.watchNative()),
       vscode.window.onDidCloseTerminal((terminal) => {
         if (terminal === this.devTerminal) {
           this.devTerminal = undefined;
@@ -470,6 +471,21 @@ class AranduController implements vscode.Disposable {
       return;
     }
     await this.startNative("Arandu Native", adapterContract.nativeRunArgs, "device-desktop", (terminal) => {
+      this.nativeTerminal = terminal;
+    });
+  }
+
+  // watchNative rebuilds the application and reopens its window on every
+  // change to a screen.
+  //
+  // It keeps the same one-window rule running does: a second loop is not a
+  // second application, it is two builds racing to replace the same binary.
+  private async watchNative(): Promise<void> {
+    if (this.nativeTerminal !== undefined) {
+      this.nativeTerminal.show(false);
+      return;
+    }
+    await this.startNative("Arandu Native", adapterContract.nativeDevArgs, "device-desktop", (terminal) => {
       this.nativeTerminal = terminal;
     });
   }
