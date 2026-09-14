@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="images/logo.png" alt="Arandu" width="140" height="140">
+  <img src="images/logo.svg" alt="Arandu" width="180">
 </p>
 
 <h1 align="center">Arandu for Visual Studio Code</h1>

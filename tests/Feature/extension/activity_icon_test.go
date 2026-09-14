@@ -155,9 +155,9 @@ func TestTheActivityBarIconFillsTheStripItIsDrawnIn(t *testing.T) {
 		longest = height
 	}
 
-	// Nine tenths, and the tenth that is left is the air an icon needs so its
-	// strokes do not touch the neighbouring ones.
-	if filled := longest / side; filled < 0.85 {
+	// The longest axis must fill at least 95% of the strip. The remaining air
+	// keeps the glyph from touching neighbouring Activity Bar icons.
+	if filled := longest / side; filled < 0.95 {
 		t.Errorf("the drawing fills %.0f%% of its box; it renders small beside icons that fill theirs", filled*100)
 	}
 
