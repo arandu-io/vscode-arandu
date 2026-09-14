@@ -1,5 +1,9 @@
 # Release Notes
 
+## [v0.1.7](https://github.com/arandu-io/vscode-arandu/compare/v0.1.6...v0.1.7) - 2026-09-14
+
+**Full Changelog**: https://github.com/arandu-io/vscode-arandu/compare/v0.1.6...v0.1.7
+
 ## [v0.1.6](https://github.com/arandu-io/vscode-arandu/compare/v0.1.5...v0.1.6) - 2026-09-06
 
 **Full Changelog**: https://github.com/arandu-io/vscode-arandu/compare/v0.1.5...v0.1.6
