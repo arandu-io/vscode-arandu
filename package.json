@@ -2,7 +2,7 @@
   "name": "arandu",
   "displayName": "Arandu Intelligence",
   "description": "Language intelligence, project navigation, and development tools for Arandu.",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "publisher": "arandu-io",
   "license": "MIT",
   "icon": "images/icon.png",
