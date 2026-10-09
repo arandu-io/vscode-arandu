@@ -25,26 +25,40 @@ The release process attaches a reproducible `arandu-*.vsix` to every
 it and install it from VS Code with **Extensions: Install from VSIX**, or run:
 
 ```bash
-code --install-extension arandu-0.1.0.vsix
+code --install-extension arandu-<version>.vsix
 ```
 
 ## Preview
 
 The extension owns `.kyse.go` files and supplies Kyse syntax highlighting,
 comment and indentation rules, and snippets for complete views, layouts,
-control flow, composition, CSRF, and both interpolation forms. Its language
-client connects to `aru lsp` for completion and diagnostics.
+control flow, composition, component attributes, CSRF, and both interpolation
+forms. Highlighting continues inside an HTML opening tag: a directive on its
+own line between attributes, such as `@if(...)` or `@attributes(...)`, and a
+`{{ }}` or `{!! !!}` inside an attribute value are colored as Kyse rather than
+as HTML. Its language client connects to `aru lsp` for completion,
+diagnostics, and go-to-definition from a view to the layouts and components it
+names and from Go source to the views it names.
 
 The Arandu activity container has two native views. Project Map starts with the
 active-project selector, then shows application features, HTTP, database,
-views, async, console, native capabilities, community modules, and diagnostics;
-located items open at their source line. Development exposes visible actions to
-select the project, start, stop, or restart `aru dev`, run Doctor immediately,
-and configure the Aru executable.
+views, async, console, native screens, native capabilities, community modules,
+and diagnostics; located items open at their source line. Development exposes
+visible actions to select the project, start, stop, or restart `aru dev`, run
+Doctor immediately, and configure the Aru executable.
+
+When the project has a native target, the Project Map toolbar also offers
+`Arandu: Run Native Application`, and the command palette adds
+`Arandu: Build Native Application` and `Arandu: Watch Native Application`. Each
+runs the matching `aru native:*` command in a terminal, and Run and Watch keep a
+single native window open.
 
 Doctor findings for the selected project also appear in VS Code Problems, with
 stale findings cleared on every refresh. Doctor runs when the extension starts
-and, with debounce, after relevant files in that project are saved.
+and, with debounce, after a change to any Go file in that project or to another
+file Doctor reads, such as `arandu.toml`, `go.mod`, or `.env.example`. Changes
+under `vendor`, `node_modules`, `testdata`, `bin`, `.git`, and the views `aru`
+writes to `storage/framework/views` do not trigger it.
 
 The map also refreshes from its toolbar. `Arandu: Start Development Server`,
 `Stop`, and `Restart` run `aru dev` in a dedicated terminal only after an
