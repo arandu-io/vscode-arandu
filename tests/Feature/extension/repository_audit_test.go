@@ -65,3 +65,31 @@ func writeAuditFile(t *testing.T, root, name, contents string) {
 		t.Fatal(err)
 	}
 }
+
+// TestTheRepositoryIgnoresTheBinaryOfEveryCommand keeps a stray `go build` at
+// the root out of a commit: it names the binary after the command directory,
+// and two of them were once committed that way.
+func TestTheRepositoryIgnoresTheBinaryOfEveryCommand(t *testing.T) {
+	raw, err := os.ReadFile(rootPath(t, ".gitignore"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	ignored := make(map[string]bool)
+	for _, line := range strings.Split(string(raw), "\n") {
+		ignored[strings.TrimSpace(line)] = true
+	}
+	commands, err := os.ReadDir(rootPath(t, "cmd"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, command := range commands {
+		if !command.IsDir() {
+			continue
+		}
+		// Anchored to the root: an unanchored name would also ignore the
+		// command's own source directory under cmd/.
+		if !ignored["/"+command.Name()] {
+			t.Errorf(".gitignore does not ignore /%s, the binary go build writes for cmd/%s", command.Name(), command.Name())
+		}
+	}
+}

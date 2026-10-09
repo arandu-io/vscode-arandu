@@ -8,3 +8,10 @@ node_modules/
 
 # Harness configuration lives at the workspace root, never in a repository.
 .claude/
+
+# `go build ./cmd/<name>` run at the root leaves the binary here. The Makefile
+# and the tests run every command with `go run`, so none is ever committed.
+/manifest-version
+/repository-audit
+/vsix-audit
+/vsix-repack
