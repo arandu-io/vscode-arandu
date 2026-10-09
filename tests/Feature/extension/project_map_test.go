@@ -75,7 +75,9 @@ func TestTheEditorAdapterHasAReadOnlyTrustedWorkspaceContract(t *testing.T) {
 	if !reflect.DeepEqual(contract.DevArgs, []string{"dev"}) || !contract.ManualDevOnly {
 		t.Fatalf("dev contract = args:%v manual:%t", contract.DevArgs, contract.ManualDevOnly)
 	}
-	for _, path := range []string{"arandu.toml", "go.mod", "main.go", "app/", "database/", "resources/views/", "routes/", "cmd/", "modules/", "framework/modules/"} {
+	// Doctor reads tests/ for the test layout rules and .env.example for the
+	// engines a project names, so a save in either has to refresh it too.
+	for _, path := range []string{"arandu.toml", "go.mod", "main.go", ".env.example", "app/", "database/", "resources/views/", "routes/", "tests/", "cmd/", "modules/", "framework/modules/"} {
 		if !contains(contract.RelevantPaths, path) {
 			t.Errorf("relevant project paths do not contain %q", path)
 		}
