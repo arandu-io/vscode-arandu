@@ -1,0 +1,744 @@
+{
+ "directives": [
+  {
+   "name": "attributes",
+   "kind": "inline"
+  },
+  {
+   "name": "break",
+   "kind": "inline"
+  },
+  {
+   "name": "continue",
+   "kind": "inline"
+  },
+  {
+   "name": "csrf",
+   "kind": "inline"
+  },
+  {
+   "name": "else",
+   "kind": "inline"
+  },
+  {
+   "name": "elseif",
+   "kind": "inline"
+  },
+  {
+   "name": "empty",
+   "kind": "inline"
+  },
+  {
+   "name": "endfor",
+   "kind": "end",
+   "closes": "for"
+  },
+  {
+   "name": "endforeach",
+   "kind": "end",
+   "closes": "foreach"
+  },
+  {
+   "name": "endforelse",
+   "kind": "end",
+   "closes": "forelse"
+  },
+  {
+   "name": "endgo",
+   "kind": "end",
+   "closes": "go"
+  },
+  {
+   "name": "endif",
+   "kind": "end",
+   "closes": "if"
+  },
+  {
+   "name": "endsection",
+   "kind": "end",
+   "closes": "section"
+  },
+  {
+   "name": "endwhile",
+   "kind": "end",
+   "closes": "while"
+  },
+  {
+   "name": "extends",
+   "kind": "inline"
+  },
+  {
+   "name": "for",
+   "kind": "block",
+   "closedBy": "endfor"
+  },
+  {
+   "name": "foreach",
+   "kind": "block",
+   "closedBy": "endforeach"
+  },
+  {
+   "name": "forelse",
+   "kind": "block",
+   "closedBy": "endforelse"
+  },
+  {
+   "name": "go",
+   "kind": "block",
+   "closedBy": "endgo"
+  },
+  {
+   "name": "if",
+   "kind": "block",
+   "closedBy": "endif"
+  },
+  {
+   "name": "include",
+   "kind": "inline"
+  },
+  {
+   "name": "section",
+   "kind": "block",
+   "closedBy": "endsection"
+  },
+  {
+   "name": "while",
+   "kind": "block",
+   "closedBy": "endwhile"
+  },
+  {
+   "name": "yield",
+   "kind": "inline"
+  }
+ ],
+ "commands": [
+  {
+   "name": "key:generate",
+   "usage": "aru key:generate",
+   "description": "generate the 32-byte APP_KEY",
+   "flags": []
+  },
+  {
+   "name": "serve",
+   "usage": "aru serve [-- flags for the application]",
+   "description": "build the views and run the application, once, without watching",
+   "flags": []
+  },
+  {
+   "name": "migrate",
+   "usage": "aru migrate",
+   "description": "apply the migrations collected from the registered modules",
+   "flags": []
+  },
+  {
+   "name": "migrate:rollback",
+   "usage": "aru migrate:rollback",
+   "description": "undo the last batch of migrations",
+   "flags": []
+  },
+  {
+   "name": "migrate:status",
+   "usage": "aru migrate:status",
+   "description": "show which migrations ran, and in which batch",
+   "flags": []
+  },
+  {
+   "name": "migrate:fresh",
+   "usage": "aru migrate:fresh",
+   "description": "roll everything back and migrate again (development only)",
+   "flags": []
+  },
+  {
+   "name": "schedule:list",
+   "usage": "aru schedule:list",
+   "description": "list the scheduled tasks, with the next run of each",
+   "flags": []
+  },
+  {
+   "name": "schedule:run",
+   "usage": "aru schedule:run <id> [--tenant=<id>]",
+   "description": "run one scheduled task now, on the same path the scheduler uses",
+   "flags": [
+    "--tenant"
+   ]
+  },
+  {
+   "name": "queue:work",
+   "usage": "aru queue:work [--queue=default] [--workers=4]",
+   "description": "drain a job queue; the same image with another argument",
+   "flags": [
+    "--queue",
+    "--workers"
+   ]
+  },
+  {
+   "name": "queue:listen",
+   "usage": "aru queue:listen [<connection>] [--queue=default]",
+   "description": "drain a queue in a child process, restarted after each job",
+   "flags": [
+    "--queue"
+   ]
+  },
+  {
+   "name": "queue:restart",
+   "usage": "aru queue:restart",
+   "description": "ask every running worker to stop after its current job",
+   "flags": []
+  },
+  {
+   "name": "queue:pause",
+   "usage": "aru queue:pause <connection:queue> [--for=30m]",
+   "description": "stop workers taking jobs off a queue, without stopping them",
+   "flags": [
+    "--for"
+   ]
+  },
+  {
+   "name": "queue:resume",
+   "usage": "aru queue:resume <connection:queue>",
+   "description": "let workers take jobs off a paused queue again",
+   "flags": []
+  },
+  {
+   "name": "queue:clear",
+   "usage": "aru queue:clear [<connection>] [--queue=default] [--force]",
+   "description": "delete every job waiting on a queue, after confirming",
+   "flags": [
+    "--queue",
+    "--force"
+   ]
+  },
+  {
+   "name": "queue:monitor",
+   "usage": "aru queue:monitor <connection:queue>... [--max=1000]",
+   "description": "report how many jobs are waiting on each queue named",
+   "flags": [
+    "--max"
+   ]
+  },
+  {
+   "name": "queue:failed",
+   "usage": "aru queue:failed --tenant=<id>",
+   "description": "list the jobs that gave up, with why each one did",
+   "flags": [
+    "--tenant"
+   ]
+  },
+  {
+   "name": "queue:retry",
+   "usage": "aru queue:retry --tenant=<id> [<id>...] [--queue=default]",
+   "description": "put failed jobs back in line, by id or by queue",
+   "flags": [
+    "--tenant",
+    "--queue"
+   ]
+  },
+  {
+   "name": "queue:forget",
+   "usage": "aru queue:forget --tenant=<id> <id>",
+   "description": "delete one failed job",
+   "flags": [
+    "--tenant"
+   ]
+  },
+  {
+   "name": "queue:flush",
+   "usage": "aru queue:flush --tenant=<id> [--hours=24]",
+   "description": "delete the failed jobs, keeping the recent ones",
+   "flags": [
+    "--tenant",
+    "--hours"
+   ]
+  },
+  {
+   "name": "queue:prune-failed",
+   "usage": "aru queue:prune-failed --tenant=<id> [--hours=24]",
+   "description": "delete the failed jobs past the retention, on a schedule",
+   "flags": [
+    "--tenant",
+    "--hours"
+   ]
+  },
+  {
+   "name": "queue:retry-batch",
+   "usage": "aru queue:retry-batch --tenant=<id> <batch>",
+   "description": "put the failed jobs of one batch back in line",
+   "flags": [
+    "--tenant"
+   ]
+  },
+  {
+   "name": "queue:prune-batches",
+   "usage": "aru queue:prune-batches --tenant=<id> [--hours=24] [--unfinished=0] [--cancelled=0]",
+   "description": "delete the stale rows from the batch list",
+   "flags": [
+    "--tenant",
+    "--hours",
+    "--unfinished",
+    "--cancelled"
+   ]
+  },
+  {
+   "name": "build",
+   "usage": "aru build [--docker] [--tag=<name:version>] [--version=v1.2.3] [--output=bin/app] [--skip-views]",
+   "description": "compile one static binary, with its checksum, or a container image",
+   "flags": [
+    "--docker",
+    "--tag",
+    "--version",
+    "--output",
+    "--skip-views"
+   ]
+  },
+  {
+   "name": "native:run",
+   "usage": "aru native:run [-server addr] [-dark]",
+   "description": "build the native application and open its window",
+   "flags": [
+    "-server",
+    "-dark"
+   ]
+  },
+  {
+   "name": "native:dev",
+   "usage": "aru native:dev [-server addr] [-dark]",
+   "description": "rebuild the native application and reopen it on every change",
+   "flags": [
+    "-server",
+    "-dark"
+   ]
+  },
+  {
+   "name": "native:build",
+   "usage": "aru native:build [-target os/arch] [-output path] [-name text] [-appid id] [-version 1.0.0.1] [-icon icon.png] [-package] [-signkey path] [-signpass secret] [-x] | -list",
+   "description": "compile the native application for one platform",
+   "flags": [
+    "-target",
+    "-output",
+    "-name",
+    "-appid",
+    "-version",
+    "-icon",
+    "-package",
+    "-signkey",
+    "-signpass",
+    "-x",
+    "-list"
+   ]
+  },
+  {
+   "name": "route:list",
+   "usage": "aru route:list",
+   "description": "list the registered routes, by module",
+   "flags": []
+  },
+  {
+   "name": "db:seed",
+   "usage": "aru db:seed [<Name>] [flags for the seeder]",
+   "description": "run the seeders in database/seeders (DatabaseSeeder by default)",
+   "flags": []
+  },
+  {
+   "name": "vendor:publish",
+   "usage": "aru vendor:publish [--tag=<tag>] [--apply] [--force]",
+   "description": "show what the registered modules would publish into the project, and write it",
+   "flags": [
+    "--tag",
+    "--apply",
+    "--force"
+   ]
+  },
+  {
+   "name": "skills:sync",
+   "usage": "aru skills:sync [--apply] [--force]",
+   "description": "show how the project's skills differ from the skeleton's and its modules', and bring them in step",
+   "flags": [
+    "--apply",
+    "--force"
+   ]
+  },
+  {
+   "name": "dev",
+   "usage": "aru dev [-- flags for the application]",
+   "description": "build the views, run the application, and restart it on every change",
+   "flags": []
+  },
+  {
+   "name": "lsp",
+   "usage": "aru lsp",
+   "description": "serve Kyse diagnostics and completion, the project map and its navigation to an editor",
+   "flags": []
+  },
+  {
+   "name": "model:build",
+   "usage": "aru model:build [--check]",
+   "description": "write the query beside every entity, and refresh the factories it keeps",
+   "flags": [
+    "--check"
+   ]
+  },
+  {
+   "name": "view:build",
+   "usage": "aru view:build",
+   "description": "compile templates, CSS and JavaScript bundles without Node or npm",
+   "flags": []
+  },
+  {
+   "name": "font:add",
+   "usage": "aru font:add \"Young Serif\" --as display [--weight 400..700] [--subset latin,latin-ext]\n       aru font:add --file ./Arandu.woff2 --family \"Arandu\" --as display [--metrics-from ./Arandu.ttf]",
+   "description": "vendor a font into the project, from the catalogue or from a file of your own",
+   "flags": [
+    "--as",
+    "--weight",
+    "--subset",
+    "--file",
+    "--family",
+    "--metrics-from"
+   ]
+  },
+  {
+   "name": "font:search",
+   "usage": "aru font:search [query] [--category serif] [--variable] [--limit 25|--all]",
+   "description": "browse the catalogue: what exists, its weights and its licence",
+   "flags": [
+    "--category",
+    "--variable",
+    "--limit",
+    "--all"
+   ]
+  },
+  {
+   "name": "font:info",
+   "usage": "aru font:info \"Young Serif\"",
+   "description": "one family in full: weights, axes, scripts, who drew it",
+   "flags": []
+  },
+  {
+   "name": "font:list",
+   "usage": "aru font:list",
+   "description": "show the vendored faces, their licences and what they weigh",
+   "flags": []
+  },
+  {
+   "name": "font:remove",
+   "usage": "aru font:remove <display|body>",
+   "description": "drop a vendored face and fall back to the system stack",
+   "flags": []
+  },
+  {
+   "name": "new",
+   "usage": "aru new <name> [--module github.com/you/name]",
+   "description": "create a new project from the skeleton",
+   "flags": [
+    "--module"
+   ]
+  },
+  {
+   "name": "make:module",
+   "usage": "aru make:module <name> --fields \"title:string!,amount:money\" [--tenant] [--parent=<resource>] [--force] [--dry-run]",
+   "description": "generate a full module: Model-backed entity, policy, service, request, controller, migration, screens, tests",
+   "flags": [
+    "--fields",
+    "--tenant",
+    "--parent",
+    "--force",
+    "--dry-run"
+   ]
+  },
+  {
+   "name": "generate",
+   "usage": "aru generate <spec.yaml> [--check] [--dry-run] [--force]",
+   "description": "generate a module from a specification; the model writes the spec, never the Go",
+   "flags": [
+    "--check",
+    "--dry-run",
+    "--force"
+   ]
+  },
+  {
+   "name": "schema",
+   "usage": "aru schema [--output module.schema.json]",
+   "description": "print the JSON Schema a specification is written against",
+   "flags": [
+    "--output"
+   ]
+  },
+  {
+   "name": "make:model",
+   "usage": "aru make:model <Name> --fields \"reference:string!u,total:money\" [--tenant] [-m|--migration] [-f|--factory] [-s|--seed] [--policy] [--requests] [-c|--controller] [-a|--all] [--force] [--dry-run]",
+   "description": "generate the entity, and the migration, factory, seeder, policy and request the flags ask for",
+   "flags": [
+    "--fields",
+    "--tenant",
+    "-m",
+    "--migration",
+    "-f",
+    "--factory",
+    "-s",
+    "--seed",
+    "--policy",
+    "--requests",
+    "-c",
+    "--controller",
+    "-a",
+    "--all",
+    "--force",
+    "--dry-run"
+   ]
+  },
+  {
+   "name": "make:service",
+   "usage": "aru make:service <Name> [--force] [--dry-run]",
+   "description": "generate the service of an existing entity, with one use case that validates, authorizes and persists",
+   "flags": [
+    "--force",
+    "--dry-run"
+   ]
+  },
+  {
+   "name": "make:resource",
+   "usage": "aru make:resource <Name> [--force] [--dry-run]",
+   "description": "generate the JSON Resource of an existing entity: the fields it answers with, and its collection",
+   "flags": [
+    "--force",
+    "--dry-run"
+   ]
+  },
+  {
+   "name": "make:notification",
+   "usage": "aru make:notification <Name> [--channels=mail,database] [--force] [--dry-run]",
+   "description": "generate a notification: the channels it travels by and the message each one sends",
+   "flags": [
+    "--channels",
+    "--force",
+    "--dry-run"
+   ]
+  },
+  {
+   "name": "make:client",
+   "usage": "aru make:client <Vendor> [--force] [--dry-run]",
+   "description": "generate the client of an external system: config, interface, the client, a fake and the test",
+   "flags": [
+    "--force",
+    "--dry-run"
+   ]
+  },
+  {
+   "name": "make:mcp-tool",
+   "usage": "aru make:mcp-tool <Name> --service=<Entity> [--force] [--dry-run]",
+   "description": "generate a tool of the application's MCP server, calling a service as who is asking",
+   "flags": [
+    "--service",
+    "--force",
+    "--dry-run"
+   ]
+  },
+  {
+   "name": "make:mcp-resource",
+   "usage": "aru make:mcp-resource <Name> --service=<Entity> [--force] [--dry-run]",
+   "description": "generate a resource of the application's MCP server, read through a service",
+   "flags": [
+    "--service",
+    "--force",
+    "--dry-run"
+   ]
+  },
+  {
+   "name": "make:mcp-prompt",
+   "usage": "aru make:mcp-prompt <Name> [--force] [--dry-run]",
+   "description": "generate a prompt of the application's MCP server",
+   "flags": [
+    "--force",
+    "--dry-run"
+   ]
+  },
+  {
+   "name": "make:migration",
+   "usage": "aru make:migration <name> [--create=<table> | --table=<table>] --fields \"status:string,paid_at:timestamp\" [--tenant] [--force] [--dry-run]",
+   "description": "generate one migration: a table, or columns added to one",
+   "flags": [
+    "--create",
+    "--table",
+    "--fields",
+    "--tenant",
+    "--force",
+    "--dry-run"
+   ]
+  },
+  {
+   "name": "make:controller",
+   "usage": "aru make:controller <Name> [--resource | --singleton | --invokable] [--parent=<resource>] [--action=<name>] [--force]",
+   "description": "generate one controller, in the flat app/Http/Controllers package",
+   "flags": [
+    "--resource",
+    "--singleton",
+    "--invokable",
+    "--parent",
+    "--action",
+    "--force"
+   ]
+  },
+  {
+   "name": "make:middleware",
+   "usage": "aru make:middleware <Name> [--force]",
+   "description": "generate one middleware, as the net/http signature every Go server takes",
+   "flags": [
+    "--force"
+   ]
+  },
+  {
+   "name": "make:request",
+   "usage": "aru make:request <Name> [--fields \"reference:string!,total:money!\"] [--force]",
+   "description": "generate one input contract; authorization stays in the Policy",
+   "flags": [
+    "--fields",
+    "--force"
+   ]
+  },
+  {
+   "name": "make:factory",
+   "usage": "aru make:factory <Name> [--force] [--dry-run]",
+   "description": "generate the factory of an entity, with the fields read off its model",
+   "flags": [
+    "--force",
+    "--dry-run"
+   ]
+  },
+  {
+   "name": "make:seeder",
+   "usage": "aru make:seeder <Name> [--force] [--dry-run]",
+   "description": "generate one seeder, for the registry in database/seeders",
+   "flags": [
+    "--force",
+    "--dry-run"
+   ]
+  },
+  {
+   "name": "make:job",
+   "usage": "aru make:job <Name> [--event-name=invoice.send] [--fields \"invoice_id:uuid\"] [--force] [--dry-run]",
+   "description": "generate a background job: the payload it carries and the handler that runs it",
+   "flags": [
+    "--event-name",
+    "--fields",
+    "--force",
+    "--dry-run"
+   ]
+  },
+  {
+   "name": "make:mail",
+   "usage": "aru make:mail <Name> [--subject \"Welcome\"] [--fields \"name:string,link:string\"] [--force] [--dry-run]",
+   "description": "generate a mailable and the two views it renders, HTML and plain text",
+   "flags": [
+    "--subject",
+    "--fields",
+    "--force",
+    "--dry-run"
+   ]
+  },
+  {
+   "name": "make:command",
+   "usage": "aru make:command <Name> [--signature=invoice:close] [--description=\"...\"] [--force] [--dry-run]",
+   "description": "generate a console command, in app/Console/Commands",
+   "flags": [
+    "--signature",
+    "--description",
+    "--force",
+    "--dry-run"
+   ]
+  },
+  {
+   "name": "make:listener",
+   "usage": "aru make:listener <Name> [--event=invoice.paid] [--force] [--dry-run]",
+   "description": "generate an event listener, in app/Listeners",
+   "flags": [
+    "--event",
+    "--force",
+    "--dry-run"
+   ]
+  },
+  {
+   "name": "make:event",
+   "usage": "aru make:event <Name> --aggregate=invoice [--event-name=invoice.paid] [--fields \"...\"] [--force] [--dry-run]",
+   "description": "generate a domain event, stored in the outbox by the write that caused it",
+   "flags": [
+    "--aggregate",
+    "--event-name",
+    "--fields",
+    "--force",
+    "--dry-run"
+   ]
+  },
+  {
+   "name": "make:enum",
+   "usage": "aru make:enum <Name> --values draft,sent,paid,void [--int] [--force] [--dry-run]",
+   "description": "generate a closed set of values, with the Scan/Value pair the column needs",
+   "flags": [
+    "--values",
+    "--int",
+    "--force",
+    "--dry-run"
+   ]
+  },
+  {
+   "name": "make:policy",
+   "usage": "aru make:policy <module> [--force]",
+   "description": "generate a policy for an existing entity",
+   "flags": [
+    "--force"
+   ]
+  },
+  {
+   "name": "make:test",
+   "usage": "aru make:test <Name> [--force] [--dry-run]",
+   "description": "generate the unit test of an existing entity, in tests/Unit",
+   "flags": [
+    "--force",
+    "--dry-run"
+   ]
+  },
+  {
+   "name": "trace",
+   "usage": "aru trace [<request_id>] [--host http://127.0.0.1:8080] [--secret=<secret>] [--json]",
+   "description": "reconstruct a request in the terminal, from the running application",
+   "flags": [
+    "--host",
+    "--secret",
+    "--json"
+   ]
+  },
+  {
+   "name": "action:list",
+   "usage": "aru action:list [--module=<name>]",
+   "description": "list the actions the source declares, with the constant and the line of each",
+   "flags": [
+    "--module"
+   ]
+  },
+  {
+   "name": "imports:catalog",
+   "usage": "aru imports:catalog [--json]",
+   "description": "print the import path each exported framework symbol should be named by",
+   "flags": [
+    "--json"
+   ]
+  },
+  {
+   "name": "about",
+   "usage": "aru about [--only=<section>]",
+   "description": "report what the project is configured and wired with: versions, drivers, modules",
+   "flags": [
+    "--only"
+   ]
+  },
+  {
+   "name": "doctor",
+   "usage": "aru doctor [--strict] [--profile=performance] | --list",
+   "description": "check that the project honors the framework contracts",
+   "flags": [
+    "--strict",
+    "--profile",
+    "--list"
+   ]
+  }
+ ]
+}

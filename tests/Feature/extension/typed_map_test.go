@@ -4,6 +4,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
+	"sort"
 	"strings"
 	"testing"
 )
@@ -29,6 +31,7 @@ func runExtensionModules(t *testing.T, script string) {
 		`export * from "./src/projectGraphSchema";`,
 		`export * from "./src/projectGraphProtocol";`,
 		`export * from "./src/projectMapModel";`,
+		`export * from "./src/catalog";`,
 	}, "\n"))
 	if output, err := build.CombinedOutput(); err != nil {
 		t.Fatalf("bundle extension modules: %v\n%s", err, output)
@@ -129,11 +132,11 @@ func TestTheProjectMapFallsBackToSchemaOneForAnOlderAru(t *testing.T) {
 	runExtensionModules(t, `
 for (const capabilities of [undefined, null, {}, { experimental: {} }, { experimental: { aranduProjectGraphSchemas: [1] } }]) {
   const features = m.readServerFeatures(capabilities);
-  same(features, { projectGraphSchema: 1, doctorDiagnostics: false }, "features of " + JSON.stringify(capabilities));
+  same(features, { projectGraphSchema: 1, catalog: false, doctorDiagnostics: false }, "features of " + JSON.stringify(capabilities));
   same(m.projectGraphParams(features), undefined, "an older aru is asked with no parameters");
 }
 const typed = m.readServerFeatures({ experimental: { aranduProjectGraphSchemas: [1, 2], aranduCatalog: true, aranduDoctorDiagnostics: true } });
-same(typed, { projectGraphSchema: 2, doctorDiagnostics: true }, "features aru v0.65.0 reports");
+same(typed, { projectGraphSchema: 2, catalog: true, doctorDiagnostics: true }, "features aru v0.65.0 reports");
 same(m.projectGraphParams(typed), { schemaVersion: 2 }, "the typed schema is asked for by number");
 
 const raw = fixture("projectGraph.v1.aru-0.64.json");
@@ -211,4 +214,97 @@ same(m.doctorFindings(first, m.readServerFeatures(undefined)).map((finding) => [
 	if count := strings.Count(source, "this.doctorDiagnostics.set("); count != 1 {
 		t.Errorf("Doctor diagnostics are set in %d places, want only the one fed by doctorFindings", count)
 	}
+}
+
+// TestTheEditorReadsDirectivesFromTheCatalogue holds the directive vocabulary
+// to the running aru's catalogue, with the extension's own list read in one
+// place and only for an aru that does not answer one.
+func TestTheEditorReadsDirectivesFromTheCatalogue(t *testing.T) {
+	var grammar struct {
+		Repository map[string]struct {
+			Patterns []struct {
+				Match string `json:"match"`
+			} `json:"patterns"`
+		} `json:"repository"`
+	}
+	readJSON(t, "syntaxes/kyse.tmLanguage.json", &grammar)
+	var grammarDirectives []string
+	for _, pattern := range grammar.Repository["known-directives"].Patterns {
+		grammarDirectives = append(grammarDirectives, strings.TrimSuffix(strings.TrimPrefix(pattern.Match, "@"), `\b`))
+	}
+	sort.Strings(grammarDirectives)
+
+	runExtensionModules(t, `
+const served = m.parseCatalog(fixture("catalog.json"));
+same(served.source, "aru", "source");
+same(served.directives.length, 24, "the directives aru v0.65.0 lists");
+const fallback = m.fallbackCatalog();
+same(fallback.source, "fallback", "fallback source");
+same(fallback.commands, [], "no command list is kept by hand");
+same(fallback.directives.map((directive) => directive.name).sort(), `+jsonArray(grammarDirectives)+`, "the fallback list matches the grammar");
+
+// A directive only the server knows is found in what the server served, and
+// not in the fallback: the served list is the one read.
+const extended = m.parseCatalog({ directives: [...fixture("catalog.json").directives, { name: "fragment", kind: "block", closedBy: "endfragment" }], commands: [] });
+const found = m.directiveAt(extended, "  @fragment('x')", 5);
+same([found.directive.name, found.start, found.end], ["fragment", 2, 11], "the served directive is found");
+same(m.directiveAt(fallback, "  @fragment('x')", 5), undefined, "the fallback does not know it");
+same(m.describeDirective(found.directive), "`+"`@fragment`"+` opens a Kyse block that `+"`@endfragment`"+` closes.", "block hover");
+same(m.describeDirective(served.directives.find((d) => d.name === "endif")), "`+"`@endif`"+` closes the Kyse block `+"`@if`"+` opened.", "end hover");
+same(m.directiveAt(served, "mail me at someone@if.example", 21), undefined, "an address is not a directive");
+throws(() => m.parseCatalog({ directives: "if", commands: [] }), /catalog directives must be an array/, "a malformed catalogue");
+`)
+
+	sources, err := filepath.Glob(rootPath(t, "src", "*.ts"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	handList := regexp.MustCompile(`["'](endforeach|endforelse|endsection)["']`)
+	for _, file := range sources {
+		raw, err := os.ReadFile(file)
+		if err != nil {
+			t.Fatal(err)
+		}
+		source := string(raw)
+		name := filepath.Base(file)
+		if strings.Contains(source, "catalogFallback.json") && name != "catalog.ts" {
+			t.Errorf("%s reads the fallback list; only catalog.ts may", name)
+		}
+		if handList.MatchString(source) {
+			t.Errorf("%s spells a directive list of its own", name)
+		}
+	}
+	raw, err := os.ReadFile(rootPath(t, "src", "catalog.ts"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	catalog := string(raw)
+	body := regexp.MustCompile(`(?s)export function fallbackCatalog\(\): AruCatalog \{.*?\n\}`).FindString(catalog)
+	if body == "" {
+		t.Fatal("catalog.ts has no fallbackCatalog")
+	}
+	if strings.Count(catalog, "fallback.") != strings.Count(body, "fallback.") {
+		t.Error("catalog.ts reads the fallback list outside fallbackCatalog")
+	}
+	extension, err := os.ReadFile(rootPath(t, "src", "extension.ts"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, seam := range []string{
+		"if (!this.serverFeatures.catalog) {\n      this.catalog = fallbackCatalog();",
+		"this.catalog = parseCatalog(response);",
+		"directiveAt(this.catalog, document.lineAt(position.line).text, position.character)",
+	} {
+		if !strings.Contains(string(extension), seam) {
+			t.Errorf("catalogue use does not contain %q", seam)
+		}
+	}
+}
+
+func jsonArray(values []string) string {
+	quoted := make([]string, len(values))
+	for i, value := range values {
+		quoted[i] = `"` + value + `"`
+	}
+	return "[" + strings.Join(quoted, ",") + "]"
 }

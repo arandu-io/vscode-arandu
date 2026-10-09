@@ -38,7 +38,9 @@ own line between attributes, such as `@if(...)` or `@attributes(...)`, and a
 `{{ }}` or `{!! !!}` inside an attribute value are colored as Kyse rather than
 as HTML. Its language client connects to `aru lsp` for completion,
 diagnostics, and go-to-definition from a view to the layouts and components it
-names and from Go source to the views it names.
+names and from Go source to the views it names. Hovering a directive says
+whether it opens a block, closes one, or stands alone, from the directive
+catalogue the running Aru reports.
 
 The Arandu activity container has two native views. Project Map starts with the
 active-project selector, then shows the groups the language server reports, in

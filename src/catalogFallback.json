@@ -1,0 +1,115 @@
+{
+  "directives": [
+    {
+      "name": "attributes",
+      "kind": "inline"
+    },
+    {
+      "name": "break",
+      "kind": "inline"
+    },
+    {
+      "name": "continue",
+      "kind": "inline"
+    },
+    {
+      "name": "csrf",
+      "kind": "inline"
+    },
+    {
+      "name": "else",
+      "kind": "inline"
+    },
+    {
+      "name": "elseif",
+      "kind": "inline"
+    },
+    {
+      "name": "empty",
+      "kind": "inline"
+    },
+    {
+      "name": "endfor",
+      "kind": "end",
+      "closes": "for"
+    },
+    {
+      "name": "endforeach",
+      "kind": "end",
+      "closes": "foreach"
+    },
+    {
+      "name": "endforelse",
+      "kind": "end",
+      "closes": "forelse"
+    },
+    {
+      "name": "endgo",
+      "kind": "end",
+      "closes": "go"
+    },
+    {
+      "name": "endif",
+      "kind": "end",
+      "closes": "if"
+    },
+    {
+      "name": "endsection",
+      "kind": "end",
+      "closes": "section"
+    },
+    {
+      "name": "endwhile",
+      "kind": "end",
+      "closes": "while"
+    },
+    {
+      "name": "extends",
+      "kind": "inline"
+    },
+    {
+      "name": "for",
+      "kind": "block",
+      "closedBy": "endfor"
+    },
+    {
+      "name": "foreach",
+      "kind": "block",
+      "closedBy": "endforeach"
+    },
+    {
+      "name": "forelse",
+      "kind": "block",
+      "closedBy": "endforelse"
+    },
+    {
+      "name": "go",
+      "kind": "block",
+      "closedBy": "endgo"
+    },
+    {
+      "name": "if",
+      "kind": "block",
+      "closedBy": "endif"
+    },
+    {
+      "name": "include",
+      "kind": "inline"
+    },
+    {
+      "name": "section",
+      "kind": "block",
+      "closedBy": "endsection"
+    },
+    {
+      "name": "while",
+      "kind": "block",
+      "closedBy": "endwhile"
+    },
+    {
+      "name": "yield",
+      "kind": "inline"
+    }
+  ],
+  "commands": []
+}

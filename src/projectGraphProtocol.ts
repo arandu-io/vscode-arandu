@@ -1,3 +1,4 @@
+import catalogContract from "./catalogContract.json";
 import contract from "./projectGraphContract.json";
 import type { DiagnosticLevel, ProjectGraph, ProjectGraphSchemaVersion } from "./projectGraphSchema";
 
@@ -7,11 +8,13 @@ import type { DiagnosticLevel, ProjectGraph, ProjectGraphSchemaVersion } from ".
 // the extension has always sent.
 export interface ServerFeatures {
   readonly projectGraphSchema: ProjectGraphSchemaVersion;
+  readonly catalog: boolean;
   readonly doctorDiagnostics: boolean;
 }
 
 export const firstSchemaServer: ServerFeatures = {
   projectGraphSchema: 1,
+  catalog: false,
   doctorDiagnostics: false,
 };
 
@@ -32,6 +35,7 @@ export function readServerFeatures(capabilities: unknown): ServerFeatures {
   const typed = Array.isArray(schemas) && schemas.includes(contract.typedSchemaVersion);
   return {
     projectGraphSchema: typed ? 2 : 1,
+    catalog: experimental[catalogContract.capability] === true,
     doctorDiagnostics: experimental[contract.doctorDiagnosticsCapability] === true,
   };
 }

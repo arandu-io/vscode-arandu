@@ -4,6 +4,14 @@ import { LanguageClient, State, type LanguageClientOptions, type ServerOptions }
 import adapterContract from "./adapterContract.json";
 import { resolveAruExecutable } from "./aru";
 import { AruUpdateManager } from "./aruUpdate";
+import {
+  describeDirective,
+  directiveAt,
+  fallbackCatalog,
+  parseCatalog,
+  type AruCatalog,
+} from "./catalog";
+import catalogContract from "./catalogContract.json";
 import { ProjectMapProvider } from "./projectMap";
 import { isRelevantProjectPath } from "./projectPaths";
 import { AranduProjects } from "./projects";
@@ -57,6 +65,7 @@ class AranduController implements vscode.Disposable {
   private runtimeDisposables: vscode.Disposable[] = [];
   private client: LanguageClient | undefined;
   private serverFeatures: ServerFeatures = firstSchemaServer;
+  private catalog: AruCatalog = fallbackCatalog();
   private refreshTimer: NodeJS.Timeout | undefined;
   private devTerminal: vscode.Terminal | undefined;
   private nativeTerminal: vscode.Terminal | undefined;
@@ -94,6 +103,20 @@ class AranduController implements vscode.Disposable {
       vscode.commands.registerCommand("arandu.native.run", () => this.runNative()),
       vscode.commands.registerCommand("arandu.native.build", () => this.buildNative()),
       vscode.commands.registerCommand("arandu.native.dev", () => this.watchNative()),
+      // The directives a hover describes are the running aru's catalogue, and
+      // the extension's own list only while no aru that answers one is running.
+      vscode.languages.registerHoverProvider({ language: "kyse" }, {
+        provideHover: (document, position) => {
+          const found = directiveAt(this.catalog, document.lineAt(position.line).text, position.character);
+          if (found === undefined) {
+            return undefined;
+          }
+          return new vscode.Hover(
+            new vscode.MarkdownString(describeDirective(found.directive)),
+            new vscode.Range(position.line, found.start, position.line, found.end),
+          );
+        },
+      }),
       vscode.window.onDidCloseTerminal((terminal) => {
         if (terminal === this.devTerminal) {
           this.devTerminal = undefined;
@@ -224,11 +247,13 @@ class AranduController implements vscode.Disposable {
     this.serverFeatures = readServerFeatures(client.initializeResult?.capabilities);
     this.output.info(
       `aru lsp answers project graph schema ${this.serverFeatures.projectGraphSchema}`
+        + `${this.serverFeatures.catalog ? ", the catalogue" : ""}`
         + `${this.serverFeatures.doctorDiagnostics ? " and the doctor's diagnostics" : ""}.`,
     );
     if (this.serverFeatures.doctorDiagnostics) {
       this.doctorDiagnostics.clear();
     }
+    await this.loadCatalog(client);
     this.setReady(aru.executable);
     await this.refreshGraph();
   }
@@ -244,6 +269,7 @@ class AranduController implements vscode.Disposable {
     const client = this.client;
     this.client = undefined;
     this.serverFeatures = firstSchemaServer;
+    this.catalog = fallbackCatalog();
     if (client !== undefined) {
       this.stopping = true;
       try {
@@ -637,6 +663,27 @@ class AranduController implements vscode.Disposable {
     const [file, fragment] = href.split("#", 2);
     return vscode.Uri.joinPath(root, file ?? "").with({ fragment: fragment ?? "" });
   }
+
+  private async loadCatalog(client: LanguageClient): Promise<void> {
+    if (!this.serverFeatures.catalog) {
+      this.catalog = fallbackCatalog();
+      return;
+    }
+    try {
+      const response = await client.sendRequest<unknown>(catalogContract.request);
+      if (this.client !== client) {
+        return;
+      }
+      this.catalog = parseCatalog(response);
+      this.output.info(
+        `Catalogue from aru: ${this.catalog.directives.length} directives and ${this.catalog.commands.length} commands.`,
+      );
+    } catch (error: unknown) {
+      this.catalog = fallbackCatalog();
+      this.output.warn(`aru did not answer its catalogue; using the extension's own directive list: ${errorMessage(error)}`);
+    }
+  }
+
 }
 
 function isRelevantProjectURI(folder: vscode.WorkspaceFolder, uri: vscode.Uri): boolean {
