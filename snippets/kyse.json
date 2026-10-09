@@ -130,6 +130,11 @@
     "body": "@csrf",
     "description": "Render the CSRF form field"
   },
+  "Component attributes": {
+    "prefix": "attributes",
+    "body": "@attributes(${1:.Attrs})",
+    "description": "Write the attributes a caller handed a component inside its opening tag"
+  },
   "Escaped interpolation": {
     "prefix": "echo",
     "body": "{{ ${1:.Value} }}",
