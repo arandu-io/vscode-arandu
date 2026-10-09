@@ -187,6 +187,10 @@
     "known-directives": {
       "patterns": [
         {
+          "match": "@attributes\\b",
+          "name": "keyword.control.kyse"
+        },
+        {
           "match": "@break\\b",
           "name": "keyword.control.kyse"
         },

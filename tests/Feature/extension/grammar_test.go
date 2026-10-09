@@ -19,8 +19,9 @@ func TestTheGrammarRecognizesExactlyTheKyseLanguage(t *testing.T) {
 		Name  string `json:"name"`
 	}
 	var grammar struct {
-		Name       string `json:"name"`
-		ScopeName  string `json:"scopeName"`
+		Name       string           `json:"name"`
+		ScopeName  string           `json:"scopeName"`
+		Patterns   []grammarInclude `json:"patterns"`
 		Repository map[string]struct {
 			Patterns []pattern `json:"patterns"`
 		} `json:"repository"`
@@ -30,11 +31,14 @@ func TestTheGrammarRecognizesExactlyTheKyseLanguage(t *testing.T) {
 	if grammar.Name != "Kyse" || grammar.ScopeName != "source.kyse" {
 		t.Fatalf("grammar identity = %q %q", grammar.Name, grammar.ScopeName)
 	}
+	// The whole closed set the Kyse compiler accepts: every block opener, its
+	// end, and every inline directive. One missing here is painted as an
+	// illegal directive in a view that compiles.
 	want := []string{
-		"break", "continue", "csrf", "else", "elseif", "empty", "endfor",
-		"endforeach", "endforelse", "endgo", "endif", "endsection", "endwhile",
-		"extends", "for", "foreach", "forelse", "go", "if", "include",
-		"section", "while", "yield",
+		"attributes", "break", "continue", "csrf", "else", "elseif", "empty",
+		"endfor", "endforeach", "endforelse", "endgo", "endif", "endsection",
+		"endwhile", "extends", "for", "foreach", "forelse", "go", "if",
+		"include", "section", "while", "yield",
 	}
 	literal := regexp.MustCompile(`^@([a-z]+)\\b$`)
 	var got []string
@@ -51,6 +55,22 @@ func TestTheGrammarRecognizesExactlyTheKyseLanguage(t *testing.T) {
 	sort.Strings(got)
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("grammar directives = %v, want %v", got, want)
+	}
+
+	// The unknown-directive rule matches every known directive too, and at the
+	// same position the earlier rule wins, so the order is what keeps a known
+	// directive from being painted as illegal.
+	knownPosition, unknownPosition := -1, -1
+	for position, candidate := range grammar.Patterns {
+		switch candidate.Include {
+		case "#known-directives":
+			knownPosition = position
+		case "#unknown-directive":
+			unknownPosition = position
+		}
+	}
+	if knownPosition < 0 || unknownPosition < 0 || knownPosition > unknownPosition {
+		t.Fatalf("known directives at %d must be recognized before unknown ones at %d", knownPosition, unknownPosition)
 	}
 
 	raw, err := os.ReadFile(rootPath(t, "syntaxes/kyse.tmLanguage.json"))
