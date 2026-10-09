@@ -301,6 +301,74 @@ throws(() => m.parseCatalog({ directives: "if", commands: [] }), /catalog direct
 	}
 }
 
+// TestTheEditorRunsGeneratorsOnlyFromTheCatalogue holds the generator command
+// to the make: commands of the catalogue, asked for and shown before they run.
+func TestTheEditorRunsGeneratorsOnlyFromTheCatalogue(t *testing.T) {
+	runExtensionModules(t, `
+const raw = fixture("catalog.json");
+const catalog = m.parseCatalog(raw);
+const generators = m.generatorCommands(catalog);
+assert(generators.length > 0 && generators.every((command) => command.name.startsWith("make:")), "only make: commands");
+same(generators.length, raw.commands.filter((command) => command.name.startsWith("make:")).length, "every make: command is offered");
+const planted = m.parseCatalog({ directives: [], commands: [
+  { name: "migrate", usage: "aru migrate", description: "", flags: [] },
+  { name: "db:seed", usage: "aru db:seed", description: "", flags: [] },
+  { name: "vendor:publish", usage: "aru vendor:publish [--apply]", description: "", flags: ["--apply"] },
+  { name: "make:../escape", usage: "aru make:../escape", description: "", flags: [] },
+] });
+same(m.generatorCommands(planted), [], "migrations, seeders, wiring and odd names are never generators");
+throws(() => m.generatorArguments(planted.commands[0], undefined, [], false), /migrate is not a generator/, "a non-generator cannot be run");
+
+const model = generators.find((command) => command.name === "make:model");
+same(m.generatorName(model), "Name", "the positional argument");
+const flags = m.generatorFlags(model);
+const fields = flags.find((flag) => flag.flag === "--fields");
+same([fields.takesValue, fields.required, fields.example], [true, true, "reference:string!u,total:money"], "--fields from the usage line");
+same(flags.find((flag) => flag.flag === "--tenant"), { flag: "--tenant", takesValue: false, required: false }, "--tenant is a switch");
+assert(!flags.some((flag) => flag.flag === "-m"), "a short alias of a long flag is not offered twice");
+assert(!flags.some((flag) => flag.flag === "--dry-run"), "the preview is its own step");
+assert(m.supportsPreview(model), "make:model previews");
+same(m.generatorArguments(model, "Invoice", [{ flag: "--fields", value: "total:money" }, { flag: "--tenant" }], true), ["make:model", "Invoice", "--fields=total:money", "--tenant", "--dry-run"], "the argument vector");
+throws(() => m.generatorArguments(model, "Invoice", [{ flag: "--apply" }], false), /make:model has no flag --apply/, "a flag the generator lacks");
+const controller = generators.find((command) => command.name === "make:controller");
+assert(!m.supportsPreview(controller), "make:controller has no preview");
+same(m.generatorFlags(controller).find((flag) => flag.flag === "--resource").takesValue, false, "--resource is a switch");
+`)
+
+	raw, err := os.ReadFile(rootPath(t, "src", "extension.ts"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	source := string(raw)
+	for _, seam := range []string{
+		`registerCommand("arandu.make.run", () => this.runGenerator())`,
+		"const generators = generatorCommands(this.catalog);",
+		"if (this.catalog.source !== \"aru\" || generators.length === 0) {",
+		"modal: true,",
+		"const args = generatorArguments(command, request.name, request.flags, action === previewAction);",
+		"shellArgs: args,",
+	} {
+		if !strings.Contains(source, seam) {
+			t.Errorf("generator command does not contain %q", seam)
+		}
+	}
+	var manifest struct {
+		Contributes struct {
+			Commands []struct {
+				Command string `json:"command"`
+			} `json:"commands"`
+		} `json:"contributes"`
+	}
+	readJSON(t, "package.json", &manifest)
+	found := false
+	for _, command := range manifest.Contributes.Commands {
+		found = found || command.Command == "arandu.make.run"
+	}
+	if !found {
+		t.Error("the manifest does not contribute arandu.make.run")
+	}
+}
+
 func jsonArray(values []string) string {
 	quoted := make([]string, len(values))
 	for i, value := range values {

@@ -160,6 +160,12 @@
         "title": "Watch Native Application",
         "category": "Arandu",
         "icon": "$(debug-restart)"
+      },
+      {
+        "command": "arandu.make.run",
+        "title": "Run Generator",
+        "category": "Arandu",
+        "icon": "$(wand)"
       }
     ],
     "viewsContainers": {
@@ -238,6 +244,11 @@
           "command": "arandu.native.run",
           "when": "view == arandu.projectMap && arandu.project.selected && arandu.native.available",
           "group": "navigation@6"
+        },
+        {
+          "command": "arandu.make.run",
+          "when": "view == arandu.projectMap && arandu.project.selected && arandu.generators.available",
+          "group": "navigation@7"
         }
       ]
     },

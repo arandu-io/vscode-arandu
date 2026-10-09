@@ -102,9 +102,12 @@ func TestTheEditorAdapterHasAReadOnlyTrustedWorkspaceContract(t *testing.T) {
 			t.Errorf("relevant project paths do not contain %q", path)
 		}
 	}
+	// The server arguments are what starts with the workspace, so nothing that
+	// changes the project belongs in them. A generator is allowed, but only on
+	// an explicit request: TestTheEditorRunsGeneratorsOnlyFromTheCatalogue.
 	for _, argument := range contract.ServerArgs {
 		lower := strings.ToLower(argument)
-		for _, forbidden := range []string{"migrate", "seed", "generate"} {
+		for _, forbidden := range []string{"migrate", "seed", "generate", "make:"} {
 			if strings.Contains(lower, forbidden) {
 				t.Errorf("editor adapter may not run %q automatically", argument)
 			}
@@ -149,7 +152,9 @@ func TestTheDevelopmentViewUsesTheSameDoctorRefreshWithoutStartingProcesses(t *t
 			t.Errorf("Development view adapter does not contain %q", seam)
 		}
 	}
-	for _, forbidden := range []string{"sendText(", `shellArgs: ["migrate"`, `shellArgs: ["seed"`, `shellArgs: ["generate"`} {
+	// Generators are not in this list: the typed project map made them an
+	// explicit editor action, held to the catalogue's make: commands.
+	for _, forbidden := range []string{"sendText(", `shellArgs: ["migrate"`, `shellArgs: ["seed"`, `shellArgs: ["db:seed"`} {
 		if strings.Contains(source, forbidden) {
 			t.Errorf("Development view introduced forbidden process execution %q", forbidden)
 		}

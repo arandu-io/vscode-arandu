@@ -1,4 +1,6 @@
 {
   "request": "arandu/catalog",
-  "capability": "aranduCatalog"
+  "capability": "aranduCatalog",
+  "generatorPrefix": "make:",
+  "previewFlag": "--dry-run"
 }

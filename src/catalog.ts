@@ -1,3 +1,4 @@
+import catalogContract from "./catalogContract.json";
 import fallback from "./catalogFallback.json";
 
 // KyseDirective is one directive the view compiler knows. Kind is block for
@@ -37,8 +38,9 @@ export class CatalogContractError extends Error {
 
 // fallbackCatalog is the list kept in this repository, for an aru that does
 // not answer arandu/catalog. It is the only place that list is read. It
-// carries no commands, because a list of them kept here would describe some
-// other release of aru than the one installed.
+// carries no commands: the generators are offered from the catalogue alone,
+// because a list of their flags kept here would describe some other release
+// of aru than the one installed.
 export function fallbackCatalog(): AruCatalog {
   return {
     source: "fallback",
@@ -94,6 +96,118 @@ export function describeDirective(directive: KyseDirective): string {
     return `${name} is an inline Kyse directive.`;
   }
   return `${name} is a Kyse directive (${directive.kind}).`;
+}
+
+// generatorCommands are the commands of the catalogue the extension may run
+// for someone who asks: the generators, and nothing else. A migration, a
+// seeder and anything that edits the wiring are never among them, because
+// none of them is a make: command.
+export function generatorCommands(catalog: AruCatalog): AruCommand[] {
+  return catalog.commands.filter((command) => isGeneratorCommand(command.name));
+}
+
+export function isGeneratorCommand(name: string): boolean {
+  return name.startsWith(catalogContract.generatorPrefix) && /^[a-z]+:[a-z][a-z0-9-]*$/.test(name);
+}
+
+// GeneratorFlag is one flag of a generator as its usage line writes it.
+export interface GeneratorFlag {
+  readonly flag: string;
+  readonly takesValue: boolean;
+  readonly required: boolean;
+  readonly example?: string;
+}
+
+// generatorFlags reads, from the usage line, how each flag of a generator is
+// written: whether a value follows it, whether it sits outside the brackets
+// that mark an optional part, and the example value the usage gives. The
+// short spelling of a flag that also has a long one is left out, and so is
+// the preview flag, which the extension offers as its own step.
+export function generatorFlags(command: AruCommand): GeneratorFlag[] {
+  const flags: GeneratorFlag[] = [];
+  for (const flag of command.flags) {
+    if (flag === catalogContract.previewFlag) {
+      continue;
+    }
+    const at = flagPosition(command.usage, flag);
+    if (at < 0) {
+      flags.push({ flag, takesValue: false, required: false });
+      continue;
+    }
+    const after = command.usage.slice(at + flag.length);
+    if (/^\|--?[A-Za-z]/.test(after)) {
+      continue;
+    }
+    const value = /^(?:=|\s+)("[^"]*"|<[^>]*>|[A-Za-z0-9][^\s\]|]*)/.exec(after);
+    const entry: { flag: string; takesValue: boolean; required: boolean; example?: string } = {
+      flag,
+      takesValue: value !== null,
+      required: bracketDepth(command.usage, at) === 0,
+    };
+    if (value?.[1] !== undefined) {
+      entry.example = value[1].replace(/^"(.*)"$/, "$1");
+    }
+    flags.push(entry);
+  }
+  return flags;
+}
+
+// generatorName is the positional argument a generator's usage line asks
+// for first, such as <Name> or <module>, or undefined when it asks for none.
+export function generatorName(command: AruCommand): string | undefined {
+  const rest = command.usage.split(/\s+/).slice(2).join(" ");
+  const name = /^<([^>]+)>/.exec(rest);
+  return name?.[1];
+}
+
+export function supportsPreview(command: AruCommand): boolean {
+  return command.flags.includes(catalogContract.previewFlag);
+}
+
+// generatorArguments is the argument vector of one generator run. A value
+// is attached to its flag with "=", which every aru flag reads, so nothing
+// here depends on a shell splitting words.
+export function generatorArguments(
+  command: AruCommand,
+  name: string | undefined,
+  chosen: ReadonlyArray<{ readonly flag: string; readonly value?: string }>,
+  preview: boolean,
+): string[] {
+  if (!isGeneratorCommand(command.name)) {
+    throw new CatalogContractError(`${command.name} is not a generator.`);
+  }
+  const args = [command.name];
+  if (name !== undefined) {
+    args.push(name);
+  }
+  for (const entry of chosen) {
+    if (!command.flags.includes(entry.flag)) {
+      throw new CatalogContractError(`${command.name} has no flag ${entry.flag}.`);
+    }
+    args.push(entry.value === undefined ? entry.flag : `${entry.flag}=${entry.value}`);
+  }
+  if (preview) {
+    args.push(catalogContract.previewFlag);
+  }
+  return args;
+}
+
+function flagPosition(usage: string, flag: string): number {
+  const escaped = flag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = new RegExp(`(^|[\\s\\[|])${escaped}(?![A-Za-z0-9-])`).exec(usage);
+  return match === null ? -1 : match.index + match[1].length;
+}
+
+function bracketDepth(usage: string, at: number): number {
+  let depth = 0;
+  for (const character of usage.slice(0, at)) {
+    if (character === "[") {
+      depth += 1;
+    } else if (character === "]") {
+      depth = Math.max(0, depth - 1);
+    }
+  }
+  return depth;
 }
 
 function parseDirective(raw: unknown, index: number): KyseDirective {

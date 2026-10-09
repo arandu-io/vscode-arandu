@@ -72,7 +72,14 @@ writes to `storage/framework/views` do not trigger it.
 
 The map also refreshes from its toolbar. `Arandu: Start Development Server`,
 `Stop`, and `Restart` run `aru dev` in a dedicated terminal only after an
-explicit command; the extension never runs migrations, seeders, or generators.
+explicit command.
+
+`Arandu: Run Generator`, in the command palette and the Project Map toolbar,
+offers the `make:*` generators the running Aru lists. It asks for the name and
+the flags, shows the command line, and runs it in a terminal you see; when
+the generator has `--dry-run`, you can preview it first without writing
+anything. Nothing runs a generator on open or save, and the extension never
+runs migrations or seeders or edits the wiring.
 
 ## Aru discovery
 

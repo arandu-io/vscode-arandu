@@ -8,8 +8,14 @@ import {
   describeDirective,
   directiveAt,
   fallbackCatalog,
+  generatorArguments,
+  generatorCommands,
+  generatorFlags,
+  generatorName,
   parseCatalog,
+  supportsPreview,
   type AruCatalog,
+  type AruCommand,
 } from "./catalog";
 import catalogContract from "./catalogContract.json";
 import { ProjectMapProvider } from "./projectMap";
@@ -30,6 +36,8 @@ import { parseProjectGraph } from "./projectGraphSchema";
 const configureAction = "Configure Aru Path";
 const retryAction = "Retry";
 const showOutputAction = "Show Output";
+const previewAction = "Preview";
+const generateAction = "Generate";
 
 let activeController: AranduController | undefined;
 
@@ -103,6 +111,7 @@ class AranduController implements vscode.Disposable {
       vscode.commands.registerCommand("arandu.native.run", () => this.runNative()),
       vscode.commands.registerCommand("arandu.native.build", () => this.buildNative()),
       vscode.commands.registerCommand("arandu.native.dev", () => this.watchNative()),
+      vscode.commands.registerCommand("arandu.make.run", () => this.runGenerator()),
       // The directives a hover describes are the running aru's catalogue, and
       // the extension's own list only while no aru that answers one is running.
       vscode.languages.registerHoverProvider({ language: "kyse" }, {
@@ -270,6 +279,7 @@ class AranduController implements vscode.Disposable {
     this.client = undefined;
     this.serverFeatures = firstSchemaServer;
     this.catalog = fallbackCatalog();
+    this.setGeneratorsAvailable();
     if (client !== undefined) {
       this.stopping = true;
       try {
@@ -667,6 +677,7 @@ class AranduController implements vscode.Disposable {
   private async loadCatalog(client: LanguageClient): Promise<void> {
     if (!this.serverFeatures.catalog) {
       this.catalog = fallbackCatalog();
+      this.setGeneratorsAvailable();
       return;
     }
     try {
@@ -682,8 +693,150 @@ class AranduController implements vscode.Disposable {
       this.catalog = fallbackCatalog();
       this.output.warn(`aru did not answer its catalogue; using the extension's own directive list: ${errorMessage(error)}`);
     }
+    this.setGeneratorsAvailable();
   }
 
+  private setGeneratorsAvailable(): void {
+    const available = this.catalog.source === "aru" && generatorCommands(this.catalog).length > 0;
+    void vscode.commands.executeCommand("setContext", "arandu.generators.available", available);
+  }
+
+  // runGenerator runs one aru generator for someone who asked for it: the
+  // generator is chosen from the running aru's catalogue, the name and flags
+  // are asked, the command line is shown before anything runs, and it runs in
+  // a terminal the person sees. Only make: commands are offered, so a
+  // migration, a seeder or the wiring is never run from here.
+  private async runGenerator(): Promise<void> {
+    const project = this.projects.active ?? await this.projects.resolve();
+    this.syncProject(project);
+    if (project === undefined) {
+      await vscode.window.showErrorMessage("Select an Arandu filesystem project before running a generator.");
+      return;
+    }
+    if (!vscode.workspace.isTrusted) {
+      await vscode.window.showErrorMessage("Trust this workspace before running a generator.");
+      return;
+    }
+    const generators = generatorCommands(this.catalog);
+    if (this.catalog.source !== "aru" || generators.length === 0) {
+      await vscode.window.showWarningMessage(
+        `Generators are offered from the catalogue of aru ${graphContract.typedMapAru} or later. Update aru and restart the language server.`,
+      );
+      return;
+    }
+    const picked = await vscode.window.showQuickPick(
+      generators.map((command) => ({ label: command.name, description: command.description, detail: command.usage, command })),
+      { title: "Arandu: Run Generator", placeHolder: "Choose what aru generates", matchOnDescription: true },
+    );
+    if (picked === undefined) {
+      return;
+    }
+    const command = picked.command;
+    const request = await askGeneratorArguments(command);
+    if (request === undefined) {
+      return;
+    }
+    const preview = supportsPreview(command);
+    const commandLine = displayCommandLine(generatorArguments(command, request.name, request.flags, false));
+    const action = await vscode.window.showInformationMessage(
+      `Run ${commandLine}?`,
+      {
+        modal: true,
+        detail: preview
+          ? "Preview runs it with --dry-run and writes nothing. Generate writes the files."
+          : "This generator has no preview: it writes the files.",
+      },
+      ...(preview ? [previewAction, generateAction] : [generateAction]),
+    );
+    if (action === undefined) {
+      return;
+    }
+    const args = generatorArguments(command, request.name, request.flags, action === previewAction);
+    try {
+      const aru = await resolveAruExecutable(project.folder);
+      const terminal = vscode.window.createTerminal({
+        name: `Arandu ${command.name}`,
+        cwd: project.folder.uri,
+        shellPath: aru.executable,
+        shellArgs: args,
+        iconPath: new vscode.ThemeIcon("wand"),
+        isTransient: true,
+      });
+      this.output.info(`Running ${aru.executable} ${args.join(" ")} in ${project.folder.uri.fsPath} by explicit user command.`);
+      terminal.show(false);
+    } catch (error: unknown) {
+      const message = errorMessage(error);
+      this.output.error(`Cannot run ${command.name}: ${message}`);
+      const choice = await vscode.window.showErrorMessage(`Arandu: ${message}`, configureAction, showOutputAction);
+      if (choice === configureAction) {
+        await this.configureAruPath();
+      } else if (choice === showOutputAction) {
+        this.output.show(true);
+      }
+    }
+  }
+}
+
+// askGeneratorArguments asks for the name a generator's usage line wants
+// first and for the flags it takes, with a value for each flag that has one.
+// The flags written outside the usage's brackets start selected.
+async function askGeneratorArguments(
+  command: AruCommand,
+): Promise<{ name: string | undefined; flags: Array<{ flag: string; value?: string }> } | undefined> {
+  const positional = generatorName(command);
+  let name: string | undefined;
+  if (positional !== undefined) {
+    const answer = await vscode.window.showInputBox({
+      title: command.usage,
+      prompt: `${positional} for ${command.name}`,
+      placeHolder: positional,
+      validateInput: (value) => /^[A-Za-z][A-Za-z0-9_.-]*$/.test(value.trim())
+        ? undefined
+        : `${positional} is one word of letters, digits, underscores, dots or dashes.`,
+    });
+    if (answer === undefined) {
+      return undefined;
+    }
+    name = answer.trim();
+  }
+  const flags: Array<{ flag: string; value?: string }> = [];
+  const available = generatorFlags(command);
+  if (available.length === 0) {
+    return { name, flags };
+  }
+  const picked = await vscode.window.showQuickPick(
+    available.map((flag) => ({
+      label: flag.flag,
+      description: flag.takesValue ? flag.example ?? "value" : undefined,
+      picked: flag.required,
+      flag,
+    })),
+    { title: command.usage, placeHolder: "Choose the flags; the ones the usage requires are selected", canPickMany: true },
+  );
+  if (picked === undefined) {
+    return undefined;
+  }
+  for (const item of picked) {
+    if (!item.flag.takesValue) {
+      flags.push({ flag: item.flag.flag });
+      continue;
+    }
+    const value = await vscode.window.showInputBox({
+      title: command.usage,
+      prompt: `Value for ${item.flag.flag}`,
+      placeHolder: item.flag.example,
+      validateInput: (text) => text.trim() === "" ? `${item.flag.flag} needs a value.` : undefined,
+    });
+    if (value === undefined) {
+      return undefined;
+    }
+    flags.push({ flag: item.flag.flag, value: value.trim() });
+  }
+  return { name, flags };
+}
+
+function displayCommandLine(args: readonly string[]): string {
+  return ["aru", ...args].map((arg) => (/[\s"']/.test(arg) ? JSON.stringify(arg) : arg)).join(" ");
 }
 
 function isRelevantProjectURI(folder: vscode.WorkspaceFolder, uri: vscode.Uri): boolean {
