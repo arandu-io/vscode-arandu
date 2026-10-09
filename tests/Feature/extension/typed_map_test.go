@@ -76,11 +76,12 @@ same(graph.profile, "conventional", "profile");
 same(graph.groups.map((group) => group.id), raw.groups.map((group) => group.id), "groups are the response's, in its order");
 same(graph.groups.length, 12, "the samples carry twelve groups");
 
-// The number of groups is the server's: one fewer and one unheard of still parse.
+// The number of groups is the server's: two fewer and one unheard of still parse,
+// and are read as they came.
 const reshaped = JSON.parse(JSON.stringify(raw));
-reshaped.groups = reshaped.groups.filter((group) => group.id !== "console");
+reshaped.groups = reshaped.groups.filter((group) => group.id !== "console" && group.id !== "community-modules");
 reshaped.groups.push({ id: "schedules", label: "Schedules", nodeIds: [] });
-same(m.parseProjectGraph(reshaped, 2).groups.map((group) => group.id).slice(-2), ["diagnostics", "schedules"], "reshaped groups");
+same(m.parseProjectGraph(reshaped, 2).groups.map((group) => group.id), reshaped.groups.map((group) => group.id), "eleven reshaped groups");
 
 const byLabel = new Map(graph.nodes.map((node) => [node.label, node]));
 const route = byLabel.get("GET /tasks/{task}");
@@ -247,6 +248,7 @@ same(fallback.directives.map((directive) => directive.name).sort(), `+jsonArray(
 // not in the fallback: the served list is the one read.
 const extended = m.parseCatalog({ directives: [...fixture("catalog.json").directives, { name: "fragment", kind: "block", closedBy: "endfragment" }], commands: [] });
 const found = m.directiveAt(extended, "  @fragment('x')", 5);
+assert(found !== undefined, "the served directive fragment is not found: the served list was not read");
 same([found.directive.name, found.start, found.end], ["fragment", 2, 11], "the served directive is found");
 same(m.directiveAt(fallback, "  @fragment('x')", 5), undefined, "the fallback does not know it");
 same(m.describeDirective(found.directive), "`+"`@fragment`"+` opens a Kyse block that `+"`@endfragment`"+` closes.", "block hover");
