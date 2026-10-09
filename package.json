@@ -38,6 +38,7 @@
     "images/logo.png",
     "language-configuration.json",
     "snippets/kyse.json",
+    "syntaxes/kyse.tag.injection.tmLanguage.json",
     "syntaxes/kyse.tmLanguage.json"
   ],
   "engines": {
@@ -264,6 +265,13 @@
           "meta.embedded.expression.go": "go",
           "meta.embedded.html.kyse": "html"
         }
+      },
+      {
+        "scopeName": "kyse.tag.injection",
+        "path": "syntaxes/kyse.tag.injection.tmLanguage.json",
+        "injectTo": [
+          "source.kyse"
+        ]
       }
     ],
     "snippets": [

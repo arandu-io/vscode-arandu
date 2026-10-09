@@ -176,8 +176,10 @@ func TestTheExtensionStartsTheAranduLanguageClientAndProjectMap(t *testing.T) {
 	if language.ID != "kyse" || !contains(language.Extensions, ".kyse.go") || language.Configuration != "language-configuration.json" {
 		t.Fatalf("Kyse language declaration = %#v", language)
 	}
-	if len(manifest.Contributes.Grammars) != 1 {
-		t.Fatalf("grammars = %d, want exactly one", len(manifest.Contributes.Grammars))
+	// Two grammars: the Kyse language, and the injection that carries Kyse into
+	// an HTML tag, which TestTheGrammarInjectsKyseIntoEveryHTMLTag pins.
+	if len(manifest.Contributes.Grammars) != 2 || manifest.Contributes.Grammars[1].ScopeName != tagInjectionScope {
+		t.Fatalf("grammars = %#v, want the Kyse language and its tag injection", manifest.Contributes.Grammars)
 	}
 	grammar := manifest.Contributes.Grammars[0]
 	if grammar.Language != "kyse" || grammar.ScopeName != "source.kyse" || grammar.Path != "syntaxes/kyse.tmLanguage.json" {

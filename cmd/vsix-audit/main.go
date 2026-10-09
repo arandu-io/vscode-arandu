@@ -11,19 +11,20 @@ import (
 )
 
 var releaseFiles = map[string]struct{}{
-	"[Content_Types].xml":                     {},
-	"extension.vsixmanifest":                  {},
-	"extension/LICENSE.md":                    {},
-	"extension/changelog.md":                  {},
-	"extension/dist/extension.js":             {},
-	"extension/images/activity.svg":           {},
-	"extension/images/icon.png":               {},
-	"extension/images/logo.png":               {},
-	"extension/language-configuration.json":   {},
-	"extension/package.json":                  {},
-	"extension/readme.md":                     {},
-	"extension/snippets/kyse.json":            {},
-	"extension/syntaxes/kyse.tmLanguage.json": {},
+	"[Content_Types].xml":                                   {},
+	"extension.vsixmanifest":                                {},
+	"extension/LICENSE.md":                                  {},
+	"extension/changelog.md":                                {},
+	"extension/dist/extension.js":                           {},
+	"extension/images/activity.svg":                         {},
+	"extension/images/icon.png":                             {},
+	"extension/images/logo.png":                             {},
+	"extension/language-configuration.json":                 {},
+	"extension/package.json":                                {},
+	"extension/readme.md":                                   {},
+	"extension/snippets/kyse.json":                          {},
+	"extension/syntaxes/kyse.tag.injection.tmLanguage.json": {},
+	"extension/syntaxes/kyse.tmLanguage.json":               {},
 }
 
 func main() {

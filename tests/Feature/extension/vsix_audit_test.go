@@ -47,6 +47,7 @@ func releaseVSIXFiles() []string {
 		"extension/images/logo.png",
 		"extension/language-configuration.json",
 		"extension/syntaxes/kyse.tmLanguage.json",
+		"extension/syntaxes/kyse.tag.injection.tmLanguage.json",
 		"extension/snippets/kyse.json",
 	}
 }

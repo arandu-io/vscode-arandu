@@ -1,0 +1,67 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Kyse inside an HTML tag",
+  "scopeName": "kyse.tag.injection",
+  "injectionSelector": "L:meta.tag - (comment, meta.interpolation)",
+  "patterns": [
+    {
+      "include": "source.kyse#comments"
+    },
+    {
+      "include": "source.kyse#interpolation"
+    },
+    {
+      "include": "#directive-line"
+    },
+    {
+      "include": "#directive-name"
+    }
+  ],
+  "repository": {
+    "directive-line": {
+      "match": "^\\s*(@[A-Za-z]+)\\s*(?:(\\()(.*)(\\)))?\\s*$",
+      "name": "meta.directive.kyse",
+      "captures": {
+        "1": {
+          "patterns": [
+            {
+              "include": "source.kyse#known-directives"
+            },
+            {
+              "include": "source.kyse#unknown-directive"
+            }
+          ]
+        },
+        "2": {
+          "name": "punctuation.section.arguments.begin.kyse"
+        },
+        "3": {
+          "name": "meta.embedded.expression.go",
+          "patterns": [
+            {
+              "include": "source.kyse#expression"
+            }
+          ]
+        },
+        "4": {
+          "name": "punctuation.section.arguments.end.kyse"
+        }
+      }
+    },
+    "directive-name": {
+      "match": "^\\s*(@[A-Za-z]+)\\b",
+      "captures": {
+        "1": {
+          "patterns": [
+            {
+              "include": "source.kyse#known-directives"
+            },
+            {
+              "include": "source.kyse#unknown-directive"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
