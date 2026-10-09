@@ -1,7 +1,10 @@
 package extension_test
 
 import (
+	"encoding/json"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -133,5 +136,106 @@ func TestTheDevelopmentViewUsesTheSameDoctorRefreshWithoutStartingProcesses(t *t
 		if strings.Contains(source, forbidden) {
 			t.Errorf("Development view introduced forbidden process execution %q", forbidden)
 		}
+	}
+}
+
+// TestDoctorRefreshesForEveryGoFileDoctorReads runs the editor's own path
+// matcher. Doctor parses every Go file in the project and skips the same five
+// directories at any depth, so a save anywhere else in Go source can change a
+// finding; the views aru writes under storage are its output, not its input.
+func TestDoctorRefreshesForEveryGoFileDoctorReads(t *testing.T) {
+	var contract struct {
+		RelevantSuffix     string   `json:"relevantSuffix"`
+		SkippedDirectories []string `json:"skippedDirectories"`
+		SkippedPaths       []string `json:"skippedPaths"`
+	}
+	readJSON(t, "src/adapterContract.json", &contract)
+	if contract.RelevantSuffix != ".go" {
+		t.Fatalf("relevant suffix = %q, want .go", contract.RelevantSuffix)
+	}
+	if want := []string{".git", "bin", "node_modules", "testdata", "vendor"}; !reflect.DeepEqual(contract.SkippedDirectories, want) {
+		t.Fatalf("skipped directories = %v, want the ones Doctor's walk skips: %v", contract.SkippedDirectories, want)
+	}
+	if want := []string{"storage/framework/views/"}; !reflect.DeepEqual(contract.SkippedPaths, want) {
+		t.Fatalf("skipped paths = %v, want %v", contract.SkippedPaths, want)
+	}
+
+	raw, err := os.ReadFile(rootPath(t, "src/extension.ts"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	source := string(raw)
+	for _, seam := range []string{
+		`import { isRelevantProjectPath } from "./projectPaths";`,
+		"if (!isRelevantProjectURI(folder, uri)) {",
+		`return isRelevantProjectPath(relative.split(path.sep).join("/"));`,
+	} {
+		if !strings.Contains(source, seam) {
+			t.Errorf("watcher does not contain %q", seam)
+		}
+	}
+	if strings.Contains(source, "adapterContract.relevantPaths") {
+		t.Error("extension.ts matches project paths itself instead of calling projectPaths")
+	}
+
+	cases := map[string]bool{
+		"main.go":                                 true,
+		"internal/billing/charge.go":              true,
+		"pkg/money/money_test.go":                 true,
+		"app/Http/Controllers/home_controller.go": true,
+		"resources/views/home.kyse.go":            true,
+		"tests/Feature/home_test.go":              true,
+		"arandu.toml":                             true,
+		"go.mod":                                  true,
+		".env.example":                            true,
+		"config/app.toml":                         true,
+		"modules/blog/arandu.mod.toml":            true,
+		"storage/framework/views/home.go":         false,
+		"storage/framework/views/layouts/app.go":  false,
+		"vendor/github.com/acme/lib/lib.go":       false,
+		"node_modules/acme/main.go":               false,
+		"app/testdata/fixture.go":                 false,
+		"tests/testdata/golden.json":              false,
+		"tools/bin/generate.go":                   false,
+		".git/hooks/pre-commit.go":                false,
+		"README.md":                               false,
+		"public/app.css":                          false,
+		"../other/main.go":                        false,
+		"":                                        false,
+	}
+	table, err := json.Marshal(cases)
+	if err != nil {
+		t.Fatal(err)
+	}
+	bundle := filepath.Join(t.TempDir(), "project-paths.cjs")
+	build := exec.Command(
+		filepath.Join(rootPath(t), "node_modules", ".bin", "esbuild"),
+		"src/projectPaths.ts",
+		"--bundle",
+		"--platform=node",
+		"--format=cjs",
+		"--outfile="+bundle,
+	)
+	build.Dir = rootPath(t)
+	if output, err := build.CombinedOutput(); err != nil {
+		t.Fatalf("bundle project path seam: %v\n%s", err, output)
+	}
+	check := exec.Command("node", "-e", `
+const paths = require(process.env.ARANDU_PROJECT_PATHS_MODULE);
+const cases = JSON.parse(process.env.ARANDU_PROJECT_PATHS_CASES);
+const wrong = [];
+for (const [relative, want] of Object.entries(cases)) {
+  const got = paths.isRelevantProjectPath(relative);
+  if (got !== want) {
+    wrong.push(JSON.stringify(relative) + " relevant = " + got + ", want " + want);
+  }
+}
+if (wrong.length > 0) {
+  throw new Error(wrong.join("\n"));
+}
+`)
+	check.Env = append(os.Environ(), "ARANDU_PROJECT_PATHS_MODULE="+bundle, "ARANDU_PROJECT_PATHS_CASES="+string(table))
+	if output, err := check.CombinedOutput(); err != nil {
+		t.Fatalf("project path contract: %v\n%s", err, output)
 	}
 }

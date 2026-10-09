@@ -49,5 +49,16 @@
     "cmd/",
     "modules/",
     "framework/modules/"
+  ],
+  "relevantSuffix": ".go",
+  "skippedDirectories": [
+    ".git",
+    "bin",
+    "node_modules",
+    "testdata",
+    "vendor"
+  ],
+  "skippedPaths": [
+    "storage/framework/views/"
   ]
 }

@@ -5,6 +5,7 @@ import adapterContract from "./adapterContract.json";
 import { resolveAruExecutable } from "./aru";
 import { AruUpdateManager } from "./aruUpdate";
 import { ProjectMapProvider } from "./projectMap";
+import { isRelevantProjectPath } from "./projectPaths";
 import { AranduProjects } from "./projects";
 import type { AranduProject } from "./projects";
 import graphContract from "./projectGraphContract.json";
@@ -274,7 +275,7 @@ class AranduController implements vscode.Disposable {
   private createProjectWatcher(folder: vscode.WorkspaceFolder): vscode.FileSystemWatcher {
     const watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(folder, "**/*"));
     const schedule = (uri: vscode.Uri): void => {
-      if (!isRelevantProjectPath(folder, uri)) {
+      if (!isRelevantProjectURI(folder, uri)) {
         return;
       }
       if (this.refreshTimer !== undefined) {
@@ -608,20 +609,15 @@ class AranduController implements vscode.Disposable {
   }
 }
 
-function isRelevantProjectPath(folder: vscode.WorkspaceFolder, uri: vscode.Uri): boolean {
+function isRelevantProjectURI(folder: vscode.WorkspaceFolder, uri: vscode.Uri): boolean {
   if (uri.scheme !== "file") {
     return false;
   }
-  const relative = path.relative(folder.uri.fsPath, uri.fsPath).split(path.sep).join("/");
-  if (relative === "" || relative.startsWith("../")) {
+  const relative = path.relative(folder.uri.fsPath, uri.fsPath);
+  if (path.isAbsolute(relative)) {
     return false;
   }
-  return adapterContract.relevantPaths.some((candidate) => {
-    if (candidate.endsWith("/")) {
-      return relative.startsWith(candidate);
-    }
-    return relative === candidate || (candidate === "arandu.mod.toml" && relative.endsWith(`/${candidate}`));
-  });
+  return isRelevantProjectPath(relative.split(path.sep).join("/"));
 }
 
 function errorMessage(error: unknown): string {
