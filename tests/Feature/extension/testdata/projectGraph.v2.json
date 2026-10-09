@@ -1,0 +1,645 @@
+{
+  "schemaVersion": 2,
+  "profile": "conventional",
+  "groups": [
+    {
+      "id": "application-features",
+      "label": "Application Features",
+      "nodeIds": [
+        "feature:RXhwb3J0",
+        "feature:SW52b2ljZQ",
+        "feature:VGFzaw",
+        "policy:YXBwL1BvbGljaWVzL0ludm9pY2VQb2xpY3kuZ28"
+      ]
+    },
+    {
+      "id": "http",
+      "label": "HTTP",
+      "nodeIds": [
+        "route-file:cm91dGVzL3dlYi5nbw",
+        "route:R0VUIC90YXNrcy97dGFza30",
+        "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvRXhwb3J0Q29udHJvbGxlci5nbw",
+        "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvVGFza0NvbnRyb2xsZXIuZ28",
+        "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvSW52b2ljZUNvbnRyb2xsZXIuZ28",
+        "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvSW52b2ljZUFQSUNvbnRyb2xsZXIuZ28",
+        "webhook:YXBwL0h0dHAvQ29udHJvbGxlcnMvU3RyaXBlV2ViaG9va0NvbnRyb2xsZXIuZ28",
+        "action:YXBwL0h0dHAvQ29udHJvbGxlcnMvRXhwb3J0Q29udHJvbGxlci5nbyNFeHBvcnRDb250cm9sbGVyLkludm9rZQ",
+        "action:YXBwL0h0dHAvQ29udHJvbGxlcnMvVGFza0NvbnRyb2xsZXIuZ28jVGFza0NvbnRyb2xsZXIuU2hvdw",
+        "action:YXBwL0h0dHAvQ29udHJvbGxlcnMvSW52b2ljZUNvbnRyb2xsZXIuZ28jSW52b2ljZUNvbnRyb2xsZXIuU3RvcmU",
+        "action:YXBwL0h0dHAvQ29udHJvbGxlcnMvSW52b2ljZUFQSUNvbnRyb2xsZXIuZ28jSW52b2ljZUFQSUNvbnRyb2xsZXIuSW5kZXg",
+        "action:YXBwL0h0dHAvQ29udHJvbGxlcnMvU3RyaXBlV2ViaG9va0NvbnRyb2xsZXIuZ28jU3RyaXBlV2ViaG9va0NvbnRyb2xsZXIuU3RvcmU",
+        "request:YXBwL0h0dHAvUmVxdWVzdHMvU3RvcmVJbnZvaWNlUmVxdWVzdC5nbw",
+        "resource:YXBwL0h0dHAvUmVzb3VyY2VzL0ludm9pY2VSZXNvdXJjZS5nbw"
+      ]
+    },
+    {
+      "id": "database",
+      "label": "Database",
+      "nodeIds": [
+        "factory:ZGF0YWJhc2UvZmFjdG9yaWVzL0ludm9pY2VGYWN0b3J5Lmdv",
+        "model:YXBwL01vZGVscy9JbnZvaWNlLmdv",
+        "model:YXBwL01vZGVscy9JbnZvaWNlUXVlcnkuZ28",
+        "seeder:ZGF0YWJhc2Uvc2VlZGVycy9JbnZvaWNlU2VlZGVyLmdv"
+      ]
+    },
+    {
+      "id": "views",
+      "label": "Views",
+      "nodeIds": [
+        "view:cmVzb3VyY2VzL3ZpZXdzL21haWwvd2VsY29tZS1lbWFpbC5reXNlLmdv"
+      ]
+    },
+    {
+      "id": "async",
+      "label": "Async",
+      "nodeIds": [
+        "event:YXBwL0V2ZW50cy9JbnZvaWNlUGFpZC5nbw",
+        "listener:YXBwL0xpc3RlbmVycy9Ob3RpZnlBY2NvdW50aW5nLmdv"
+      ]
+    },
+    {
+      "id": "integrations",
+      "label": "Integrations",
+      "nodeIds": [
+        "client:YXBwL0NsaWVudHMvU3RyaXBlQ2xpZW50Lmdv"
+      ]
+    },
+    {
+      "id": "console",
+      "label": "Console",
+      "nodeIds": []
+    },
+    {
+      "id": "tests",
+      "label": "Tests",
+      "nodeIds": [
+        "test:dGVzdHMvVW5pdC9TdHJpcGVDbGllbnRfdGVzdC5nbw"
+      ]
+    },
+    {
+      "id": "native-screens",
+      "label": "Native Screens",
+      "nodeIds": []
+    },
+    {
+      "id": "native-capabilities",
+      "label": "Native Capabilities",
+      "nodeIds": [
+        "native-capability:YXV0aA"
+      ]
+    },
+    {
+      "id": "community-modules",
+      "label": "Community Modules",
+      "nodeIds": []
+    },
+    {
+      "id": "diagnostics",
+      "label": "Diagnostics",
+      "nodeIds": [
+        "diagnostic:Z2VuZXJhdGVkLW5vdC13aXJlZA:YXBwL0h0dHAvQ29udHJvbGxlcnMvRXhwb3J0Q29udHJvbGxlci5nbw:41"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvRXhwb3J0Q29udHJvbGxlci5nbw",
+      "kind": "controller",
+      "label": "ExportController",
+      "variant": "invokable",
+      "file": "file:///ROOT/app/Http/Controllers/ExportController.go",
+      "line": 28,
+      "column": 0,
+      "endLine": 55,
+      "endColumn": 1,
+      "feature": "feature:RXhwb3J0"
+    },
+    {
+      "id": "action:YXBwL0h0dHAvQ29udHJvbGxlcnMvRXhwb3J0Q29udHJvbGxlci5nbyNFeHBvcnRDb250cm9sbGVyLkludm9rZQ",
+      "kind": "action",
+      "label": "ExportController.Invoke",
+      "detail": "app/Http/Controllers/ExportController.go",
+      "file": "file:///ROOT/app/Http/Controllers/ExportController.go",
+      "line": 53,
+      "column": 27,
+      "endLine": 55,
+      "endColumn": 1,
+      "feature": "feature:RXhwb3J0",
+      "parent": "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvRXhwb3J0Q29udHJvbGxlci5nbw"
+    },
+    {
+      "id": "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvVGFza0NvbnRyb2xsZXIuZ28",
+      "kind": "controller",
+      "label": "TaskController",
+      "variant": "resource",
+      "nestedUnder": "projects",
+      "file": "file:///ROOT/app/Http/Controllers/TaskController.go",
+      "line": 12,
+      "column": 0,
+      "endLine": 80,
+      "endColumn": 1,
+      "feature": "feature:VGFzaw"
+    },
+    {
+      "id": "action:YXBwL0h0dHAvQ29udHJvbGxlcnMvVGFza0NvbnRyb2xsZXIuZ28jVGFza0NvbnRyb2xsZXIuU2hvdw",
+      "kind": "action",
+      "label": "TaskController.Show",
+      "detail": "app/Http/Controllers/TaskController.go",
+      "file": "file:///ROOT/app/Http/Controllers/TaskController.go",
+      "line": 40,
+      "column": 26,
+      "endLine": 48,
+      "endColumn": 1,
+      "feature": "feature:VGFzaw",
+      "parent": "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvVGFza0NvbnRyb2xsZXIuZ28"
+    },
+    {
+      "id": "route:R0VUIC90YXNrcy97dGFza30",
+      "kind": "route",
+      "label": "GET /tasks/{task}",
+      "detail": "projects.tasks.show",
+      "file": "file:///ROOT/routes/web.go",
+      "line": 24,
+      "column": 1,
+      "endLine": 24,
+      "endColumn": 37,
+      "feature": "feature:VGFzaw",
+      "method": "GET",
+      "pattern": "/tasks/{task}",
+      "name": "projects.tasks.show",
+      "nestedUnder": "projects"
+    },
+    {
+      "id": "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvSW52b2ljZUNvbnRyb2xsZXIuZ28",
+      "kind": "controller",
+      "label": "InvoiceController",
+      "variant": "resource",
+      "file": "file:///ROOT/app/Http/Controllers/InvoiceController.go",
+      "line": 20,
+      "column": 0,
+      "endLine": 140,
+      "endColumn": 1,
+      "feature": "feature:SW52b2ljZQ"
+    },
+    {
+      "id": "action:YXBwL0h0dHAvQ29udHJvbGxlcnMvSW52b2ljZUNvbnRyb2xsZXIuZ28jSW52b2ljZUNvbnRyb2xsZXIuU3RvcmU",
+      "kind": "action",
+      "label": "InvoiceController.Store",
+      "detail": "app/Http/Controllers/InvoiceController.go",
+      "file": "file:///ROOT/app/Http/Controllers/InvoiceController.go",
+      "line": 100,
+      "column": 27,
+      "endLine": 120,
+      "endColumn": 1,
+      "feature": "feature:SW52b2ljZQ",
+      "parent": "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvSW52b2ljZUNvbnRyb2xsZXIuZ28"
+    },
+    {
+      "id": "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvSW52b2ljZUFQSUNvbnRyb2xsZXIuZ28",
+      "kind": "controller",
+      "label": "InvoiceAPIController",
+      "variant": "plain",
+      "file": "file:///ROOT/app/Http/Controllers/InvoiceAPIController.go",
+      "line": 8,
+      "column": 0,
+      "endLine": 30,
+      "endColumn": 1,
+      "feature": "feature:SW52b2ljZQ"
+    },
+    {
+      "id": "action:YXBwL0h0dHAvQ29udHJvbGxlcnMvSW52b2ljZUFQSUNvbnRyb2xsZXIuZ28jSW52b2ljZUFQSUNvbnRyb2xsZXIuSW5kZXg",
+      "kind": "action",
+      "label": "InvoiceAPIController.Index",
+      "detail": "app/Http/Controllers/InvoiceAPIController.go",
+      "file": "file:///ROOT/app/Http/Controllers/InvoiceAPIController.go",
+      "line": 10,
+      "column": 30,
+      "endLine": 13,
+      "endColumn": 1,
+      "feature": "feature:SW52b2ljZQ",
+      "parent": "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvSW52b2ljZUFQSUNvbnRyb2xsZXIuZ28"
+    },
+    {
+      "id": "webhook:YXBwL0h0dHAvQ29udHJvbGxlcnMvU3RyaXBlV2ViaG9va0NvbnRyb2xsZXIuZ28",
+      "kind": "webhook",
+      "label": "StripeWebhookController",
+      "file": "file:///ROOT/app/Http/Controllers/StripeWebhookController.go",
+      "line": 9,
+      "column": 0,
+      "endLine": 25,
+      "endColumn": 1
+    },
+    {
+      "id": "action:YXBwL0h0dHAvQ29udHJvbGxlcnMvU3RyaXBlV2ViaG9va0NvbnRyb2xsZXIuZ28jU3RyaXBlV2ViaG9va0NvbnRyb2xsZXIuU3RvcmU",
+      "kind": "action",
+      "label": "StripeWebhookController.Store",
+      "detail": "app/Http/Controllers/StripeWebhookController.go",
+      "file": "file:///ROOT/app/Http/Controllers/StripeWebhookController.go",
+      "line": 14,
+      "column": 34,
+      "endLine": 25,
+      "endColumn": 1,
+      "parent": "webhook:YXBwL0h0dHAvQ29udHJvbGxlcnMvU3RyaXBlV2ViaG9va0NvbnRyb2xsZXIuZ28"
+    },
+    {
+      "id": "request:YXBwL0h0dHAvUmVxdWVzdHMvU3RvcmVJbnZvaWNlUmVxdWVzdC5nbw",
+      "kind": "request",
+      "label": "StoreInvoiceRequest",
+      "file": "file:///ROOT/app/Http/Requests/StoreInvoiceRequest.go",
+      "line": 10,
+      "column": 0,
+      "endLine": 30,
+      "endColumn": 1,
+      "feature": "feature:SW52b2ljZQ"
+    },
+    {
+      "id": "resource:YXBwL0h0dHAvUmVzb3VyY2VzL0ludm9pY2VSZXNvdXJjZS5nbw",
+      "kind": "resource",
+      "label": "InvoiceResource",
+      "file": "file:///ROOT/app/Http/Resources/InvoiceResource.go",
+      "line": 9,
+      "column": 0,
+      "endLine": 24,
+      "endColumn": 1,
+      "feature": "feature:SW52b2ljZQ"
+    },
+    {
+      "id": "policy:YXBwL1BvbGljaWVzL0ludm9pY2VQb2xpY3kuZ28",
+      "kind": "policy",
+      "label": "InvoicePolicy",
+      "file": "file:///ROOT/app/Policies/InvoicePolicy.go",
+      "line": 11,
+      "column": 0,
+      "endLine": 60,
+      "endColumn": 1,
+      "feature": "feature:SW52b2ljZQ"
+    },
+    {
+      "id": "model:YXBwL01vZGVscy9JbnZvaWNlLmdv",
+      "kind": "model",
+      "label": "Invoice",
+      "file": "file:///ROOT/app/Models/Invoice.go",
+      "line": 12,
+      "column": 0,
+      "endLine": 30,
+      "endColumn": 1,
+      "feature": "feature:SW52b2ljZQ"
+    },
+    {
+      "id": "model:YXBwL01vZGVscy9JbnZvaWNlUXVlcnkuZ28",
+      "kind": "model",
+      "label": "InvoiceQuery",
+      "generated": true,
+      "feature": "feature:SW52b2ljZQ",
+      "file": "file:///ROOT/app/Models/InvoiceQuery.go",
+      "line": 0,
+      "column": 0,
+      "endLine": 210,
+      "endColumn": 0
+    },
+    {
+      "id": "factory:ZGF0YWJhc2UvZmFjdG9yaWVzL0ludm9pY2VGYWN0b3J5Lmdv",
+      "kind": "factory",
+      "label": "InvoiceFactory",
+      "file": "file:///ROOT/database/factories/InvoiceFactory.go",
+      "line": 14,
+      "column": 0,
+      "endLine": 40,
+      "endColumn": 1,
+      "feature": "feature:SW52b2ljZQ"
+    },
+    {
+      "id": "seeder:ZGF0YWJhc2Uvc2VlZGVycy9JbnZvaWNlU2VlZGVyLmdv",
+      "kind": "seeder",
+      "label": "InvoiceSeeder",
+      "file": "file:///ROOT/database/seeders/InvoiceSeeder.go",
+      "line": 12,
+      "column": 0,
+      "endLine": 40,
+      "endColumn": 1,
+      "feature": "feature:SW52b2ljZQ"
+    },
+    {
+      "id": "client:YXBwL0NsaWVudHMvU3RyaXBlQ2xpZW50Lmdv",
+      "kind": "client",
+      "label": "StripeClient",
+      "file": "file:///ROOT/app/Clients/StripeClient.go",
+      "line": 15,
+      "column": 0,
+      "endLine": 104,
+      "endColumn": 1
+    },
+    {
+      "id": "test:dGVzdHMvVW5pdC9TdHJpcGVDbGllbnRfdGVzdC5nbw",
+      "kind": "test",
+      "label": "StripeClient_test",
+      "file": "file:///ROOT/tests/Unit/StripeClient_test.go",
+      "line": 10,
+      "column": 0,
+      "endLine": 40,
+      "endColumn": 1
+    },
+    {
+      "id": "event:YXBwL0V2ZW50cy9JbnZvaWNlUGFpZC5nbw",
+      "kind": "event",
+      "label": "InvoicePaid",
+      "file": "file:///ROOT/app/Events/InvoicePaid.go",
+      "line": 8,
+      "column": 0,
+      "endLine": 20,
+      "endColumn": 1
+    },
+    {
+      "id": "listener:YXBwL0xpc3RlbmVycy9Ob3RpZnlBY2NvdW50aW5nLmdv",
+      "kind": "listener",
+      "label": "NotifyAccounting",
+      "file": "file:///ROOT/app/Listeners/NotifyAccounting.go",
+      "line": 20,
+      "column": 0,
+      "endLine": 60,
+      "endColumn": 1
+    },
+    {
+      "id": "diagnostic:Z2VuZXJhdGVkLW5vdC13aXJlZA:YXBwL0h0dHAvQ29udHJvbGxlcnMvRXhwb3J0Q29udHJvbGxlci5nbw:41",
+      "kind": "diagnostic",
+      "label": "NewExportController is never called: the controller is not wired",
+      "detail": "code nothing constructs is code nothing runs",
+      "file": "file:///ROOT/app/Http/Controllers/ExportController.go",
+      "line": 40,
+      "column": 0,
+      "endLine": 40,
+      "endColumn": 46,
+      "rule": "generated-not-wired",
+      "severity": "warning",
+      "ruleDoc": "https://github.com/arandu-io/arandu/blob/main/.agents/skills/arandu-doctor/SKILL.md"
+    },
+    {
+      "id": "feature:RXhwb3J0",
+      "kind": "feature",
+      "label": "Export",
+      "detail": "Application feature",
+      "file": "file:///ROOT/app/Http/Controllers/ExportController.go",
+      "line": 28,
+      "column": 0,
+      "endLine": 28,
+      "endColumn": 0
+    },
+    {
+      "id": "feature:VGFzaw",
+      "kind": "feature",
+      "label": "Task",
+      "detail": "Application feature",
+      "file": "file:///ROOT/app/Http/Controllers/TaskController.go",
+      "line": 12,
+      "column": 0,
+      "endLine": 12,
+      "endColumn": 0
+    },
+    {
+      "id": "feature:SW52b2ljZQ",
+      "kind": "feature",
+      "label": "Invoice",
+      "detail": "Application feature",
+      "file": "file:///ROOT/app/Models/Invoice.go",
+      "line": 12,
+      "column": 0,
+      "endLine": 12,
+      "endColumn": 0
+    },
+    {
+      "id": "route-file:cm91dGVzL3dlYi5nbw",
+      "kind": "route-file",
+      "label": "web",
+      "file": "file:///ROOT/routes/web.go",
+      "line": 10,
+      "column": 0,
+      "endLine": 28,
+      "endColumn": 1
+    },
+    {
+      "id": "view:cmVzb3VyY2VzL3ZpZXdzL21haWwvd2VsY29tZS1lbWFpbC5reXNlLmdv",
+      "kind": "view",
+      "label": "mail.welcome-email",
+      "file": "file:///ROOT/resources/views/mail/welcome-email.kyse.go",
+      "line": 0,
+      "column": 0,
+      "endLine": 44,
+      "endColumn": 0
+    },
+    {
+      "id": "native-capability:YXV0aA",
+      "kind": "native-capability",
+      "label": "auth",
+      "detail": "github.com/arandu-io/hesape/auth",
+      "file": "file:///ROOT/app/Jobs/SendInvoice.go",
+      "line": 5,
+      "column": 1,
+      "endLine": 5,
+      "endColumn": 1
+    }
+  ],
+  "edges": [
+    {
+      "from": "route:R0VUIC90YXNrcy97dGFza30",
+      "kind": "routes-to",
+      "to": "action:YXBwL0h0dHAvQ29udHJvbGxlcnMvVGFza0NvbnRyb2xsZXIuZ28jVGFza0NvbnRyb2xsZXIuU2hvdw",
+      "at": {
+        "file": "file:///ROOT/routes/web.go",
+        "line": 24,
+        "column": 1,
+        "endLine": 24,
+        "endColumn": 37
+      }
+    },
+    {
+      "from": "action:YXBwL0h0dHAvQ29udHJvbGxlcnMvSW52b2ljZUNvbnRyb2xsZXIuZ28jSW52b2ljZUNvbnRyb2xsZXIuU3RvcmU",
+      "kind": "validates-with",
+      "to": "request:YXBwL0h0dHAvUmVxdWVzdHMvU3RvcmVJbnZvaWNlUmVxdWVzdC5nbw",
+      "at": {
+        "file": "file:///ROOT/app/Http/Controllers/InvoiceController.go",
+        "line": 105,
+        "column": 8,
+        "endLine": 105,
+        "endColumn": 31
+      }
+    },
+    {
+      "from": "seeder:ZGF0YWJhc2Uvc2VlZGVycy9JbnZvaWNlU2VlZGVyLmdv",
+      "kind": "authorizes",
+      "to": "policy:YXBwL1BvbGljaWVzL0ludm9pY2VQb2xpY3kuZ28",
+      "at": {
+        "file": "file:///ROOT/database/seeders/InvoiceSeeder.go",
+        "line": 33,
+        "column": 67,
+        "endLine": 33,
+        "endColumn": 87
+      }
+    },
+    {
+      "from": "factory:ZGF0YWJhc2UvZmFjdG9yaWVzL0ludm9pY2VGYWN0b3J5Lmdv",
+      "kind": "persists",
+      "to": "model:YXBwL01vZGVscy9JbnZvaWNlLmdv",
+      "at": {
+        "file": "file:///ROOT/database/factories/InvoiceFactory.go",
+        "line": 36,
+        "column": 39,
+        "endLine": 36,
+        "endColumn": 54
+      }
+    },
+    {
+      "from": "action:YXBwL0h0dHAvQ29udHJvbGxlcnMvSW52b2ljZUFQSUNvbnRyb2xsZXIuZ28jSW52b2ljZUFQSUNvbnRyb2xsZXIuSW5kZXg",
+      "kind": "renders",
+      "to": "resource:YXBwL0h0dHAvUmVzb3VyY2VzL0ludm9pY2VSZXNvdXJjZS5nbw",
+      "at": {
+        "file": "file:///ROOT/app/Http/Controllers/InvoiceAPIController.go",
+        "line": 11,
+        "column": 22,
+        "endLine": 11,
+        "endColumn": 52
+      }
+    },
+    {
+      "from": "client:YXBwL0NsaWVudHMvU3RyaXBlQ2xpZW50Lmdv",
+      "kind": "tested-by",
+      "to": "test:dGVzdHMvVW5pdC9TdHJpcGVDbGllbnRfdGVzdC5nbw",
+      "at": {
+        "file": "file:///ROOT/tests/Unit/StripeClient_test.go",
+        "line": 16,
+        "column": 43,
+        "endLine": 16,
+        "endColumn": 63
+      }
+    },
+    {
+      "from": "action:YXBwL0h0dHAvQ29udHJvbGxlcnMvU3RyaXBlV2ViaG9va0NvbnRyb2xsZXIuZ28jU3RyaXBlV2ViaG9va0NvbnRyb2xsZXIuU3RvcmU",
+      "kind": "dispatches",
+      "to": "event:YXBwL0V2ZW50cy9JbnZvaWNlUGFpZC5nbw",
+      "at": {
+        "file": "file:///ROOT/app/Http/Controllers/StripeWebhookController.go",
+        "line": 16,
+        "column": 5,
+        "endLine": 16,
+        "endColumn": 23
+      }
+    },
+    {
+      "from": "listener:YXBwL0xpc3RlbmVycy9Ob3RpZnlBY2NvdW50aW5nLmdv",
+      "kind": "listens-to",
+      "to": "event:YXBwL0V2ZW50cy9JbnZvaWNlUGFpZC5nbw",
+      "at": {
+        "file": "file:///ROOT/app/Listeners/NotifyAccounting.go",
+        "line": 53,
+        "column": 14,
+        "endLine": 53,
+        "endColumn": 28
+      }
+    },
+    {
+      "from": "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvRXhwb3J0Q29udHJvbGxlci5nbw",
+      "kind": "contains",
+      "to": "action:YXBwL0h0dHAvQ29udHJvbGxlcnMvRXhwb3J0Q29udHJvbGxlci5nbyNFeHBvcnRDb250cm9sbGVyLkludm9rZQ"
+    },
+    {
+      "from": "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvVGFza0NvbnRyb2xsZXIuZ28",
+      "kind": "contains",
+      "to": "action:YXBwL0h0dHAvQ29udHJvbGxlcnMvVGFza0NvbnRyb2xsZXIuZ28jVGFza0NvbnRyb2xsZXIuU2hvdw"
+    },
+    {
+      "from": "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvSW52b2ljZUNvbnRyb2xsZXIuZ28",
+      "kind": "contains",
+      "to": "action:YXBwL0h0dHAvQ29udHJvbGxlcnMvSW52b2ljZUNvbnRyb2xsZXIuZ28jSW52b2ljZUNvbnRyb2xsZXIuU3RvcmU"
+    },
+    {
+      "from": "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvSW52b2ljZUFQSUNvbnRyb2xsZXIuZ28",
+      "kind": "contains",
+      "to": "action:YXBwL0h0dHAvQ29udHJvbGxlcnMvSW52b2ljZUFQSUNvbnRyb2xsZXIuZ28jSW52b2ljZUFQSUNvbnRyb2xsZXIuSW5kZXg"
+    },
+    {
+      "from": "webhook:YXBwL0h0dHAvQ29udHJvbGxlcnMvU3RyaXBlV2ViaG9va0NvbnRyb2xsZXIuZ28",
+      "kind": "contains",
+      "to": "action:YXBwL0h0dHAvQ29udHJvbGxlcnMvU3RyaXBlV2ViaG9va0NvbnRyb2xsZXIuZ28jU3RyaXBlV2ViaG9va0NvbnRyb2xsZXIuU3RvcmU"
+    },
+    {
+      "from": "feature:RXhwb3J0",
+      "kind": "contains",
+      "to": "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvRXhwb3J0Q29udHJvbGxlci5nbw"
+    },
+    {
+      "from": "feature:VGFzaw",
+      "kind": "contains",
+      "to": "route:R0VUIC90YXNrcy97dGFza30"
+    },
+    {
+      "from": "feature:SW52b2ljZQ",
+      "kind": "contains",
+      "to": "model:YXBwL01vZGVscy9JbnZvaWNlLmdv"
+    },
+    {
+      "from": "feature:SW52b2ljZQ",
+      "kind": "contains",
+      "to": "model:YXBwL01vZGVscy9JbnZvaWNlUXVlcnkuZ28"
+    },
+    {
+      "from": "route-file:cm91dGVzL3dlYi5nbw",
+      "kind": "contains",
+      "to": "route:R0VUIC90YXNrcy97dGFza30"
+    }
+  ],
+  "edgeKinds": [
+    {
+      "kind": "contains",
+      "meaning": "a feature holds an artifact, and a controller holds its actions",
+      "follows": "the entity a file is named for, the file a generated file was generated from, and the methods a controller type declares with the action signature",
+      "doesNotFollow": "an artifact named for no entity, which belongs to no feature"
+    },
+    {
+      "kind": "routes-to",
+      "meaning": "a route reaches a controller action",
+      "follows": "Resource, Singleton, ResourceAction, Invokable, Action and the verb methods in routes/, Group prefixes held in variables of the same function, and a controller resolved through a parameter, a struct field of the routes package, a composite literal or a New constructor",
+      "doesNotFollow": "a router passed between functions with a prefix already applied, a controller built in another package and handed over as an interface, a handler that is a function literal, and routes a module registers on its own"
+    },
+    {
+      "kind": "validates-with",
+      "meaning": "an action or a service takes a request",
+      "follows": "any reference to a type of a request file: the variable an action binds into and the parameter a service validates",
+      "doesNotFollow": "a request reached through a value of another type"
+    },
+    {
+      "kind": "authorizes",
+      "meaning": "an artifact asks a policy",
+      "follows": "any reference from outside the policies to a declaration of a policy file: the field holding the policy and the action constants handed to Authorize",
+      "doesNotFollow": "a policy reached through an interface value built elsewhere, and route guards"
+    },
+    {
+      "kind": "persists",
+      "meaning": "an artifact reads or writes rows through a model or a repository, and a model is stored in the table a migration declares",
+      "follows": "a call of a function of a model file (the query constructor model:build writes), any reference from a repository to a model, any reference to a repository, and a table named in a model's TableSpec and in a migration's Schema().Create or Table call or CREATE TABLE and ALTER TABLE statement",
+      "doesNotFollow": "a model used only as a value, SQL assembled at run time, and a table name held in a variable"
+    },
+    {
+      "kind": "renders",
+      "meaning": "an action, a mail or a view renders a view, and an action answers with a JSON resource",
+      "follows": "the literal name passed to ctx.View, ctx.Fragment or ctx.Partial, a View or TextView field set to a literal, @extends and @include, and any reference from a controller to a resource file",
+      "doesNotFollow": "a view name assembled at run time"
+    },
+    {
+      "kind": "tested-by",
+      "meaning": "a test uses an artifact",
+      "follows": "any reference from a _test.go file to a declaration of the project's packages, and bare identifiers of a test in the package it tests",
+      "doesNotFollow": "an artifact a test reaches only through HTTP requests or another artifact"
+    },
+    {
+      "kind": "dispatches",
+      "meaning": "an artifact sends a job, an event, a notification or a mail",
+      "follows": "a call of a Dispatch function, a composite literal of the declared type and a reference to its Name constant, from outside bootstrap and outside the declaring package",
+      "doesNotFollow": "a value of the type built elsewhere and handed over, and a job named by a string literal"
+    },
+    {
+      "kind": "listens-to",
+      "meaning": "a listener reacts to an event",
+      "follows": "a string literal in the listener equal to the value of an event's Name constant, and any reference from a listener to an event file",
+      "doesNotFollow": "an event name assembled at run time and the outbox wiring in bootstrap"
+    }
+  ]
+}

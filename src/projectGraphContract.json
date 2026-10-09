@@ -1,6 +1,11 @@
 {
   "request": "arandu/projectGraph",
   "schemaVersion": 1,
+  "typedSchemaVersion": 2,
+  "schemasCapability": "aranduProjectGraphSchemas",
+  "doctorDiagnosticsCapability": "aranduDoctorDiagnostics",
+  "doctorDiagnosticsOption": "doctorDiagnostics",
+  "typedMapAru": "v0.65.0",
   "groups": [
     {
       "id": "application-features",

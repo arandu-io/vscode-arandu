@@ -41,11 +41,17 @@ diagnostics, and go-to-definition from a view to the layouts and components it
 names and from Go source to the views it names.
 
 The Arandu activity container has two native views. Project Map starts with the
-active-project selector, then shows application features, HTTP, database,
-views, async, console, native screens, native capabilities, community modules,
-and diagnostics; located items open at their source line. Development exposes
-visible actions to select the project, start, stop, or restart `aru dev`, run
-Doctor immediately, and configure the Aru executable.
+active-project selector, then shows the groups the language server reports, in
+its order: application features, HTTP, database, views, async, integrations,
+console, tests, native screens, native capabilities, community modules, and
+diagnostics. Located items open with their whole declaration selected. Routes
+show their method, pattern, and name; controllers their shape; generated files
+are marked. Under each item, its relationships are grouped by kind (routes-to,
+validates-with, authorizes, persists, renders, tested-by, dispatches,
+listens-to), with the kind's meaning as tooltip, and each one opens where it is
+written in the code. Development exposes visible actions to select the project,
+start, stop, or restart `aru dev`, run Doctor immediately, and configure the
+Aru executable.
 
 When the project has a native target, the Project Map toolbar also offers
 `Arandu: Run Native Application`, and the command palette adds
@@ -54,9 +60,11 @@ runs the matching `aru native:*` command in a terminal, and Run and Watch keep a
 single native window open.
 
 Doctor findings for the selected project also appear in VS Code Problems, with
-stale findings cleared on every refresh. Doctor runs when the extension starts
-and, with debounce, after a change to any Go file in that project or to another
-file Doctor reads, such as `arandu.toml`, `go.mod`, or `.env.example`. Changes
+stale findings cleared on every refresh. The language server publishes them,
+each with its rule and a link to the rule's documentation; with an Aru older
+than v0.65.0 the extension draws them from the map instead, never both.
+Doctor runs when the extension starts and, with debounce, after a change to any
+Go file in that project or to another file Doctor reads, such as `arandu.toml`, `go.mod`, or `.env.example`. Changes
 under `vendor`, `node_modules`, `testdata`, `bin`, `.git`, and the views `aru`
 writes to `storage/framework/views` do not trigger it.
 

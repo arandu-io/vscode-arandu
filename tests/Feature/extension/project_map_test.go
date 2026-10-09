@@ -10,11 +10,19 @@ import (
 	"testing"
 )
 
+// TestTheProjectMapPinsSchemaV1AndTheTenCanonicalGroups pins the fallback: an
+// aru older than the typed map answers schema 1, whose ten groups are fixed.
+// The typed schema's groups are the server's and are not counted here.
 func TestTheProjectMapPinsSchemaV1AndTheTenCanonicalGroups(t *testing.T) {
 	var contract struct {
-		Request       string `json:"request"`
-		SchemaVersion int    `json:"schemaVersion"`
-		Groups        []struct {
+		Request                     string `json:"request"`
+		SchemaVersion               int    `json:"schemaVersion"`
+		TypedSchemaVersion          int    `json:"typedSchemaVersion"`
+		SchemasCapability           string `json:"schemasCapability"`
+		DoctorDiagnosticsCapability string `json:"doctorDiagnosticsCapability"`
+		DoctorDiagnosticsOption     string `json:"doctorDiagnosticsOption"`
+		TypedMapAru                 string `json:"typedMapAru"`
+		Groups                      []struct {
 			ID    string `json:"id"`
 			Label string `json:"label"`
 		} `json:"groups"`
@@ -23,6 +31,15 @@ func TestTheProjectMapPinsSchemaV1AndTheTenCanonicalGroups(t *testing.T) {
 
 	if contract.Request != "arandu/projectGraph" || contract.SchemaVersion != 1 {
 		t.Fatalf("project graph seam = %q schema %d", contract.Request, contract.SchemaVersion)
+	}
+	if contract.TypedSchemaVersion != 2 || contract.SchemasCapability != "aranduProjectGraphSchemas" {
+		t.Fatalf("typed schema = %d advertised by %q", contract.TypedSchemaVersion, contract.SchemasCapability)
+	}
+	if contract.DoctorDiagnosticsCapability != "aranduDoctorDiagnostics" || contract.DoctorDiagnosticsOption != "doctorDiagnostics" {
+		t.Fatalf("doctor diagnostics seam = capability %q option %q", contract.DoctorDiagnosticsCapability, contract.DoctorDiagnosticsOption)
+	}
+	if contract.TypedMapAru != "v0.65.0" {
+		t.Fatalf("typed map needs aru %q, want v0.65.0", contract.TypedMapAru)
 	}
 	want := [][2]string{
 		{"application-features", "Application Features"},

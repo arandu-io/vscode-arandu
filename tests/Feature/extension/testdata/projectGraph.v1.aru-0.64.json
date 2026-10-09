@@ -1,0 +1,1114 @@
+{
+ "schemaVersion": 1,
+ "groups": [
+  {
+   "id": "application-features",
+   "label": "Application Features",
+   "nodeIds": [
+    "bootstrap:Ym9vdHN0cmFwL21pZ3JhdGUuZ28",
+    "bootstrap:Ym9vdHN0cmFwL2FwcC5nbw",
+    "bootstrap:Ym9vdHN0cmFwL2JhY2tncm91bmQuZ28",
+    "bootstrap:Ym9vdHN0cmFwL2NvbnNvbGUuZ28",
+    "bootstrap:Ym9vdHN0cmFwL3B1Ymxpc2guZ28",
+    "bootstrap:Ym9vdHN0cmFwL3F1ZXVlLmdv",
+    "feature:QXBwU2VydmljZQ",
+    "feature:QXV0aA",
+    "feature:RXZlbnRMb2c",
+    "feature:SG9tZQ",
+    "feature:Tm90ZQ",
+    "feature:VHdvRmFjdG9y",
+    "feature:VXNlcg",
+    "feature:ZG9j",
+    "policy:YXBwL1BvbGljaWVzL05vdGVQb2xpY3kuZ28",
+    "policy:YXBwL1BvbGljaWVzL1R3b0ZhY3RvclBvbGljeS5nbw",
+    "policy:YXBwL1BvbGljaWVzL1VzZXJQb2xpY3kuZ28",
+    "provider:YXBwL1Byb3ZpZGVycy9BcHBTZXJ2aWNlUHJvdmlkZXIuZ28",
+    "service:YXBwL1NlcnZpY2VzL05vdGVTZXJ2aWNlLmdv",
+    "service:YXBwL1NlcnZpY2VzL1R3b0ZhY3RvclNlcnZpY2UuZ28",
+    "service:YXBwL1NlcnZpY2VzL1VzZXJTZXJ2aWNlLmdv"
+   ]
+  },
+  {
+   "id": "http",
+   "label": "HTTP",
+   "nodeIds": [
+    "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvQ29udHJvbGxlci5nbw",
+    "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvQXV0aC9kb2MuZ28",
+    "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvSG9tZUNvbnRyb2xsZXIuZ28",
+    "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvTm90ZUNvbnRyb2xsZXIuZ28",
+    "request:YXBwL0h0dHAvUmVxdWVzdHMvQXV0aC5nbw",
+    "request:YXBwL0h0dHAvUmVxdWVzdHMvTm90ZVJlcXVlc3QuZ28",
+    "route:cm91dGVzL3dlYi5nbw"
+   ]
+  },
+  {
+   "id": "database",
+   "label": "Database",
+   "nodeIds": [
+    "migration:ZGF0YWJhc2UvbWlncmF0aW9ucy8yMDI2MDcyOV8wMDAxX2NyZWF0ZV91c2Vycy5nbw",
+    "migration:ZGF0YWJhc2UvbWlncmF0aW9ucy8yMDI2MDgwOV8wMDAyX2FkZF9uYW1lX2FuZF92ZXJpZmljYXRpb25fdG9fdXNlcnMuZ28",
+    "migration:ZGF0YWJhc2UvbWlncmF0aW9ucy8yMDI2MDgyOF8wMDAzX2NyZWF0ZV90d29fZmFjdG9yLmdv",
+    "migration:ZGF0YWJhc2UvbWlncmF0aW9ucy8yMDI2XzEwXzAxXzAwMDAwMV9jcmVhdGVfbm90ZXNfdGFibGUuZ28",
+    "migration:ZGF0YWJhc2UvbWlncmF0aW9ucy9taWdyYXRpb25zLmdv",
+    "model:YXBwL01vZGVscy9Ob3RlLmdv",
+    "model:YXBwL01vZGVscy9Ob3RlUXVlcnkuZ28",
+    "model:YXBwL01vZGVscy9SZWNvdmVyeUNvZGVRdWVyeS5nbw",
+    "model:YXBwL01vZGVscy9Ud29GYWN0b3IuZ28",
+    "model:YXBwL01vZGVscy9Ud29GYWN0b3JRdWVyeS5nbw",
+    "model:YXBwL01vZGVscy9Vc2VyLmdv",
+    "model:YXBwL01vZGVscy9Vc2VyUXVlcnkuZ28",
+    "repository:YXBwL1JlcG9zaXRvcmllcy9Ud29GYWN0b3JSZXBvc2l0b3J5Lmdv",
+    "seeder:ZGF0YWJhc2Uvc2VlZGVycy9EYXRhYmFzZVNlZWRlci5nbw",
+    "seeder:ZGF0YWJhc2Uvc2VlZGVycy9Ob3RlU2VlZGVyLmdv",
+    "seeder:ZGF0YWJhc2Uvc2VlZGVycy9Vc2VyU2VlZGVyLmdv",
+    "seeder:ZGF0YWJhc2Uvc2VlZGVycy9zZWVkZXJzLmdv"
+   ]
+  },
+  {
+   "id": "views",
+   "label": "Views",
+   "nodeIds": [
+    "view:cmVzb3VyY2VzL3ZpZXdzL25vdGVzL2NyZWF0ZS5reXNlLmdv",
+    "view:cmVzb3VyY2VzL3ZpZXdzL25vdGVzL2VkaXQua3lzZS5nbw",
+    "view:cmVzb3VyY2VzL3ZpZXdzL25vdGVzL2luZGV4Lmt5c2UuZ28",
+    "view:cmVzb3VyY2VzL3ZpZXdzL25vdGVzL3Nob3cua3lzZS5nbw",
+    "view:cmVzb3VyY2VzL3ZpZXdzL2hvbWUua3lzZS5nbw",
+    "view:cmVzb3VyY2VzL3ZpZXdzL2xheW91dHMvYXBwLmt5c2UuZ28",
+    "view:cmVzb3VyY2VzL3ZpZXdzL3BhcnRpYWxzL25vdGVzX3RhYmxlLmt5c2UuZ28"
+   ]
+  },
+  {
+   "id": "async",
+   "label": "Async",
+   "nodeIds": [
+    "event:YXBwL0V2ZW50cy9Vc2VyLmdv",
+    "listener:YXBwL0xpc3RlbmVycy9FdmVudExvZy5nbw"
+   ]
+  },
+  {
+   "id": "console",
+   "label": "Console",
+   "nodeIds": [
+    "console-route:cm91dGVzL2NvbnNvbGUuZ28",
+    "entrypoint:bWFpbi5nbw"
+   ]
+  },
+  {
+   "id": "native-screens",
+   "label": "Native Screens",
+   "nodeIds": []
+  },
+  {
+   "id": "native-capabilities",
+   "label": "Native Capabilities",
+   "nodeIds": [
+    "native-capability:MmZh",
+    "native-capability:Y29uZmln",
+    "native-capability:Y29uc29sZQ",
+    "native-capability:Y2FjaGU",
+    "native-capability:YXJhbmR1dGVzdA",
+    "native-capability:YXV0aA",
+    "native-capability:YnVz",
+    "native-capability:Z2Vv",
+    "native-capability:ZGF0YWJhc2U",
+    "native-capability:ZW5jcnlwdGlvbg",
+    "native-capability:ZXZlbnRz",
+    "native-capability:ZXhjZXB0aW9u",
+    "native-capability:Zm91bmRhdGlvbg",
+    "native-capability:ZmFrZXI",
+    "native-capability:aGFzaGluZw",
+    "native-capability:aHR0cA",
+    "native-capability:b25ldGltZQ",
+    "native-capability:b3Rw",
+    "native-capability:bG9n",
+    "native-capability:bWFpbA",
+    "native-capability:c2Vzc2lvbg",
+    "native-capability:cGFnaW5hdGlvbg",
+    "native-capability:cHVibGlzaA",
+    "native-capability:cXVldWU",
+    "native-capability:cm91dGluZw",
+    "native-capability:dmFsaWRhdGlvbg",
+    "native-capability:dmlldw"
+   ]
+  },
+  {
+   "id": "community-modules",
+   "label": "Community Modules",
+   "nodeIds": []
+  },
+  {
+   "id": "diagnostics",
+   "label": "Diagnostics",
+   "nodeIds": []
+  }
+ ],
+ "nodes": [
+  {
+   "id": "bootstrap:Ym9vdHN0cmFwL21pZ3JhdGUuZ28",
+   "kind": "bootstrap",
+   "label": "migrate",
+   "detail": "bootstrap/migrate.go",
+   "file": "file:///ROOT/bootstrap/migrate.go",
+   "line": 41,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "bootstrap:Ym9vdHN0cmFwL2FwcC5nbw",
+   "kind": "bootstrap",
+   "label": "app",
+   "detail": "bootstrap/app.go",
+   "file": "file:///ROOT/bootstrap/app.go",
+   "line": 126,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "bootstrap:Ym9vdHN0cmFwL2JhY2tncm91bmQuZ28",
+   "kind": "bootstrap",
+   "label": "background",
+   "detail": "bootstrap/background.go",
+   "file": "file:///ROOT/bootstrap/background.go",
+   "line": 28,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "bootstrap:Ym9vdHN0cmFwL2NvbnNvbGUuZ28",
+   "kind": "bootstrap",
+   "label": "console",
+   "detail": "bootstrap/console.go",
+   "file": "file:///ROOT/bootstrap/console.go",
+   "line": 26,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "bootstrap:Ym9vdHN0cmFwL3B1Ymxpc2guZ28",
+   "kind": "bootstrap",
+   "label": "publish",
+   "detail": "bootstrap/publish.go",
+   "file": "file:///ROOT/bootstrap/publish.go",
+   "line": 30,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "bootstrap:Ym9vdHN0cmFwL3F1ZXVlLmdv",
+   "kind": "bootstrap",
+   "label": "queue",
+   "detail": "bootstrap/queue.go",
+   "file": "file:///ROOT/bootstrap/queue.go",
+   "line": 33,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "console-route:cm91dGVzL2NvbnNvbGUuZ28",
+   "kind": "console-route",
+   "label": "console",
+   "detail": "routes/console.go",
+   "file": "file:///ROOT/routes/console.go",
+   "line": 15,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvQ29udHJvbGxlci5nbw",
+   "kind": "controller",
+   "label": "Controller",
+   "detail": "app/Http/Controllers/Controller.go",
+   "file": "file:///ROOT/app/Http/Controllers/Controller.go",
+   "line": 22,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvQXV0aC9kb2MuZ28",
+   "kind": "controller",
+   "label": "doc",
+   "detail": "app/Http/Controllers/Auth/doc.go",
+   "file": "file:///ROOT/app/Http/Controllers/Auth/doc.go",
+   "line": 1,
+   "column": 8,
+   "level": ""
+  },
+  {
+   "id": "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvSG9tZUNvbnRyb2xsZXIuZ28",
+   "kind": "controller",
+   "label": "HomeController",
+   "detail": "app/Http/Controllers/HomeController.go",
+   "file": "file:///ROOT/app/Http/Controllers/HomeController.go",
+   "line": 16,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvTm90ZUNvbnRyb2xsZXIuZ28",
+   "kind": "controller",
+   "label": "NoteController",
+   "detail": "app/Http/Controllers/NoteController.go",
+   "file": "file:///ROOT/app/Http/Controllers/NoteController.go",
+   "line": 34,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "entrypoint:bWFpbi5nbw",
+   "kind": "entrypoint",
+   "label": "main",
+   "detail": "main.go",
+   "file": "file:///ROOT/main.go",
+   "line": 23,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "event:YXBwL0V2ZW50cy9Vc2VyLmdv",
+   "kind": "event",
+   "label": "User",
+   "detail": "app/Events/User.go",
+   "file": "file:///ROOT/app/Events/User.go",
+   "line": 4,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "feature:QXBwU2VydmljZQ",
+   "kind": "feature",
+   "label": "AppService",
+   "detail": "Application feature",
+   "file": "file:///ROOT/app/Providers/AppServiceProvider.go",
+   "line": 31,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "feature:QXV0aA",
+   "kind": "feature",
+   "label": "Auth",
+   "detail": "Application feature",
+   "file": "file:///ROOT/app/Http/Requests/Auth.go",
+   "line": 14,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "feature:RXZlbnRMb2c",
+   "kind": "feature",
+   "label": "EventLog",
+   "detail": "Application feature",
+   "file": "file:///ROOT/app/Listeners/EventLog.go",
+   "line": 38,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "feature:SG9tZQ",
+   "kind": "feature",
+   "label": "Home",
+   "detail": "Application feature",
+   "file": "file:///ROOT/app/Http/Controllers/HomeController.go",
+   "line": 16,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "feature:Tm90ZQ",
+   "kind": "feature",
+   "label": "Note",
+   "detail": "Application feature",
+   "file": "file:///ROOT/app/Models/Note.go",
+   "line": 19,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "feature:VHdvRmFjdG9y",
+   "kind": "feature",
+   "label": "TwoFactor",
+   "detail": "Application feature",
+   "file": "file:///ROOT/app/Models/TwoFactor.go",
+   "line": 10,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "feature:VXNlcg",
+   "kind": "feature",
+   "label": "User",
+   "detail": "Application feature",
+   "file": "file:///ROOT/app/Models/User.go",
+   "line": 25,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "feature:ZG9j",
+   "kind": "feature",
+   "label": "doc",
+   "detail": "Application feature",
+   "file": "file:///ROOT/app/Http/Controllers/Auth/doc.go",
+   "line": 1,
+   "column": 8,
+   "level": ""
+  },
+  {
+   "id": "listener:YXBwL0xpc3RlbmVycy9FdmVudExvZy5nbw",
+   "kind": "listener",
+   "label": "EventLog",
+   "detail": "app/Listeners/EventLog.go",
+   "file": "file:///ROOT/app/Listeners/EventLog.go",
+   "line": 38,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "migration:ZGF0YWJhc2UvbWlncmF0aW9ucy8yMDI2MDcyOV8wMDAxX2NyZWF0ZV91c2Vycy5nbw",
+   "kind": "migration",
+   "label": "20260729_0001_create_users",
+   "detail": "database/migrations/20260729_0001_create_users.go",
+   "file": "file:///ROOT/database/migrations/20260729_0001_create_users.go",
+   "line": 10,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "migration:ZGF0YWJhc2UvbWlncmF0aW9ucy8yMDI2MDgwOV8wMDAyX2FkZF9uYW1lX2FuZF92ZXJpZmljYXRpb25fdG9fdXNlcnMuZ28",
+   "kind": "migration",
+   "label": "20260809_0002_add_name_and_verification_to_users",
+   "detail": "database/migrations/20260809_0002_add_name_and_verification_to_users.go",
+   "file": "file:///ROOT/database/migrations/20260809_0002_add_name_and_verification_to_users.go",
+   "line": 10,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "migration:ZGF0YWJhc2UvbWlncmF0aW9ucy8yMDI2MDgyOF8wMDAzX2NyZWF0ZV90d29fZmFjdG9yLmdv",
+   "kind": "migration",
+   "label": "20260828_0003_create_two_factor",
+   "detail": "database/migrations/20260828_0003_create_two_factor.go",
+   "file": "file:///ROOT/database/migrations/20260828_0003_create_two_factor.go",
+   "line": 9,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "migration:ZGF0YWJhc2UvbWlncmF0aW9ucy8yMDI2XzEwXzAxXzAwMDAwMV9jcmVhdGVfbm90ZXNfdGFibGUuZ28",
+   "kind": "migration",
+   "label": "2026_10_01_000001_create_notes_table",
+   "detail": "database/migrations/2026_10_01_000001_create_notes_table.go",
+   "file": "file:///ROOT/database/migrations/2026_10_01_000001_create_notes_table.go",
+   "line": 30,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "migration:ZGF0YWJhc2UvbWlncmF0aW9ucy9taWdyYXRpb25zLmdv",
+   "kind": "migration",
+   "label": "migrations",
+   "detail": "database/migrations/migrations.go",
+   "file": "file:///ROOT/database/migrations/migrations.go",
+   "line": 5,
+   "column": 8,
+   "level": ""
+  },
+  {
+   "id": "model:YXBwL01vZGVscy9Ob3RlLmdv",
+   "kind": "model",
+   "label": "Note",
+   "detail": "app/Models/Note.go",
+   "file": "file:///ROOT/app/Models/Note.go",
+   "line": 19,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "model:YXBwL01vZGVscy9Ob3RlUXVlcnkuZ28",
+   "kind": "model",
+   "label": "NoteQuery",
+   "detail": "app/Models/NoteQuery.go",
+   "file": "file:///ROOT/app/Models/NoteQuery.go",
+   "line": 18,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "model:YXBwL01vZGVscy9SZWNvdmVyeUNvZGVRdWVyeS5nbw",
+   "kind": "model",
+   "label": "RecoveryCodeQuery",
+   "detail": "app/Models/RecoveryCodeQuery.go",
+   "file": "file:///ROOT/app/Models/RecoveryCodeQuery.go",
+   "line": 18,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "model:YXBwL01vZGVscy9Ud29GYWN0b3IuZ28",
+   "kind": "model",
+   "label": "TwoFactor",
+   "detail": "app/Models/TwoFactor.go",
+   "file": "file:///ROOT/app/Models/TwoFactor.go",
+   "line": 10,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "model:YXBwL01vZGVscy9Ud29GYWN0b3JRdWVyeS5nbw",
+   "kind": "model",
+   "label": "TwoFactorQuery",
+   "detail": "app/Models/TwoFactorQuery.go",
+   "file": "file:///ROOT/app/Models/TwoFactorQuery.go",
+   "line": 18,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "model:YXBwL01vZGVscy9Vc2VyLmdv",
+   "kind": "model",
+   "label": "User",
+   "detail": "app/Models/User.go",
+   "file": "file:///ROOT/app/Models/User.go",
+   "line": 25,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "model:YXBwL01vZGVscy9Vc2VyUXVlcnkuZ28",
+   "kind": "model",
+   "label": "UserQuery",
+   "detail": "app/Models/UserQuery.go",
+   "file": "file:///ROOT/app/Models/UserQuery.go",
+   "line": 18,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "native-capability:MmZh",
+   "kind": "native-capability",
+   "label": "2fa",
+   "detail": "github.com/arandu-io/hesape/2fa",
+   "file": "file:///ROOT/app/Repositories/TwoFactorRepository.go",
+   "line": 10,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:Y29uZmln",
+   "kind": "native-capability",
+   "label": "config",
+   "detail": "github.com/arandu-io/hesape/config",
+   "file": "file:///ROOT/config/app.go",
+   "line": 21,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:Y29uc29sZQ",
+   "kind": "native-capability",
+   "label": "console",
+   "detail": "github.com/arandu-io/hesape/console",
+   "file": "file:///ROOT/bootstrap/app.go",
+   "line": 30,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:Y2FjaGU",
+   "kind": "native-capability",
+   "label": "cache",
+   "detail": "github.com/arandu-io/hesape/cache",
+   "file": "file:///ROOT/app/Services/TwoFactorService.go",
+   "line": 13,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:YXJhbmR1dGVzdA",
+   "kind": "native-capability",
+   "label": "arandutest",
+   "detail": "github.com/arandu-io/hesape/arandutest",
+   "file": "file:///ROOT/tests/TestCase.go",
+   "line": 24,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:YXV0aA",
+   "kind": "native-capability",
+   "label": "auth",
+   "detail": "github.com/arandu-io/hesape/auth",
+   "file": "file:///ROOT/app/Http/Controllers/HomeController.go",
+   "line": 6,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:YnVz",
+   "kind": "native-capability",
+   "label": "bus",
+   "detail": "github.com/arandu-io/hesape/bus",
+   "file": "file:///ROOT/bootstrap/queue.go",
+   "line": 5,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:Z2Vv",
+   "kind": "native-capability",
+   "label": "geo",
+   "detail": "github.com/arandu-io/hesape/geo",
+   "file": "file:///ROOT/bootstrap/app.go",
+   "line": 37,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:ZGF0YWJhc2U",
+   "kind": "native-capability",
+   "label": "database",
+   "detail": "github.com/arandu-io/hesape/database",
+   "file": "file:///ROOT/app/Models/Note.go",
+   "line": 8,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:ZW5jcnlwdGlvbg",
+   "kind": "native-capability",
+   "label": "encryption",
+   "detail": "github.com/arandu-io/hesape/encryption",
+   "file": "file:///ROOT/app/Services/TwoFactorService.go",
+   "line": 15,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:ZXZlbnRz",
+   "kind": "native-capability",
+   "label": "events",
+   "detail": "github.com/arandu-io/hesape/events",
+   "file": "file:///ROOT/app/Listeners/EventLog.go",
+   "line": 11,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:ZXhjZXB0aW9u",
+   "kind": "native-capability",
+   "label": "exception",
+   "detail": "github.com/arandu-io/hesape/exception",
+   "file": "file:///ROOT/bootstrap/app.go",
+   "line": 36,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:Zm91bmRhdGlvbg",
+   "kind": "native-capability",
+   "label": "foundation",
+   "detail": "github.com/arandu-io/hesape/foundation",
+   "file": "file:///ROOT/app/Providers/AppServiceProvider.go",
+   "line": 19,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:ZmFrZXI",
+   "kind": "native-capability",
+   "label": "faker",
+   "detail": "github.com/arandu-io/hesape/faker",
+   "file": "file:///ROOT/database/factories/NoteFactory.go",
+   "line": 10,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:aGFzaGluZw",
+   "kind": "native-capability",
+   "label": "hashing",
+   "detail": "github.com/arandu-io/hesape/hashing",
+   "file": "file:///ROOT/app/Http/Requests/Auth.go",
+   "line": 10,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:aHR0cA",
+   "kind": "native-capability",
+   "label": "http",
+   "detail": "github.com/arandu-io/hesape/http",
+   "file": "file:///ROOT/app/Http/Controllers/HomeController.go",
+   "line": 5,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:b25ldGltZQ",
+   "kind": "native-capability",
+   "label": "onetime",
+   "detail": "github.com/arandu-io/hesape/onetime",
+   "file": "file:///ROOT/bootstrap/app.go",
+   "line": 40,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:b3Rw",
+   "kind": "native-capability",
+   "label": "otp",
+   "detail": "github.com/arandu-io/hesape/otp",
+   "file": "file:///ROOT/app/Services/TwoFactorService.go",
+   "line": 18,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:bG9n",
+   "kind": "native-capability",
+   "label": "log",
+   "detail": "github.com/arandu-io/hesape/log",
+   "file": "file:///ROOT/app/Listeners/EventLog.go",
+   "line": 12,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:bWFpbA",
+   "kind": "native-capability",
+   "label": "mail",
+   "detail": "github.com/arandu-io/hesape/mail",
+   "file": "file:///ROOT/bootstrap/app.go",
+   "line": 29,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:c2Vzc2lvbg",
+   "kind": "native-capability",
+   "label": "session",
+   "detail": "github.com/arandu-io/hesape/session",
+   "file": "file:///ROOT/bootstrap/app.go",
+   "line": 43,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:cGFnaW5hdGlvbg",
+   "kind": "native-capability",
+   "label": "pagination",
+   "detail": "github.com/arandu-io/hesape/pagination",
+   "file": "file:///ROOT/app/Http/Controllers/NoteController.go",
+   "line": 9,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:cHVibGlzaA",
+   "kind": "native-capability",
+   "label": "publish",
+   "detail": "github.com/arandu-io/hesape/publish",
+   "file": "file:///ROOT/bootstrap/publish.go",
+   "line": 11,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:cXVldWU",
+   "kind": "native-capability",
+   "label": "queue",
+   "detail": "github.com/arandu-io/hesape/queue",
+   "file": "file:///ROOT/bootstrap/app.go",
+   "line": 28,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:cm91dGluZw",
+   "kind": "native-capability",
+   "label": "routing",
+   "detail": "github.com/arandu-io/hesape/routing",
+   "file": "file:///ROOT/bootstrap/app.go",
+   "line": 42,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:dmFsaWRhdGlvbg",
+   "kind": "native-capability",
+   "label": "validation",
+   "detail": "github.com/arandu-io/hesape/validation",
+   "file": "file:///ROOT/app/Http/Requests/Auth.go",
+   "line": 11,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "native-capability:dmlldw",
+   "kind": "native-capability",
+   "label": "view",
+   "detail": "github.com/arandu-io/hesape/view",
+   "file": "file:///ROOT/app/Http/Controllers/HomeController.go",
+   "line": 8,
+   "column": 1,
+   "level": ""
+  },
+  {
+   "id": "policy:YXBwL1BvbGljaWVzL05vdGVQb2xpY3kuZ28",
+   "kind": "policy",
+   "label": "NotePolicy",
+   "detail": "app/Policies/NotePolicy.go",
+   "file": "file:///ROOT/app/Policies/NotePolicy.go",
+   "line": 19,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "policy:YXBwL1BvbGljaWVzL1R3b0ZhY3RvclBvbGljeS5nbw",
+   "kind": "policy",
+   "label": "TwoFactorPolicy",
+   "detail": "app/Policies/TwoFactorPolicy.go",
+   "file": "file:///ROOT/app/Policies/TwoFactorPolicy.go",
+   "line": 11,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "policy:YXBwL1BvbGljaWVzL1VzZXJQb2xpY3kuZ28",
+   "kind": "policy",
+   "label": "UserPolicy",
+   "detail": "app/Policies/UserPolicy.go",
+   "file": "file:///ROOT/app/Policies/UserPolicy.go",
+   "line": 13,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "provider:YXBwL1Byb3ZpZGVycy9BcHBTZXJ2aWNlUHJvdmlkZXIuZ28",
+   "kind": "provider",
+   "label": "AppServiceProvider",
+   "detail": "app/Providers/AppServiceProvider.go",
+   "file": "file:///ROOT/app/Providers/AppServiceProvider.go",
+   "line": 31,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "repository:YXBwL1JlcG9zaXRvcmllcy9Ud29GYWN0b3JSZXBvc2l0b3J5Lmdv",
+   "kind": "repository",
+   "label": "TwoFactorRepository",
+   "detail": "app/Repositories/TwoFactorRepository.go",
+   "file": "file:///ROOT/app/Repositories/TwoFactorRepository.go",
+   "line": 20,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "request:YXBwL0h0dHAvUmVxdWVzdHMvQXV0aC5nbw",
+   "kind": "request",
+   "label": "Auth",
+   "detail": "app/Http/Requests/Auth.go",
+   "file": "file:///ROOT/app/Http/Requests/Auth.go",
+   "line": 14,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "request:YXBwL0h0dHAvUmVxdWVzdHMvTm90ZVJlcXVlc3QuZ28",
+   "kind": "request",
+   "label": "NoteRequest",
+   "detail": "app/Http/Requests/NoteRequest.go",
+   "file": "file:///ROOT/app/Http/Requests/NoteRequest.go",
+   "line": 10,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "route:cm91dGVzL3dlYi5nbw",
+   "kind": "route",
+   "label": "web",
+   "detail": "routes/web.go",
+   "file": "file:///ROOT/routes/web.go",
+   "line": 22,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "seeder:ZGF0YWJhc2Uvc2VlZGVycy9EYXRhYmFzZVNlZWRlci5nbw",
+   "kind": "seeder",
+   "label": "DatabaseSeeder",
+   "detail": "database/seeders/DatabaseSeeder.go",
+   "file": "file:///ROOT/database/seeders/DatabaseSeeder.go",
+   "line": 8,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "seeder:ZGF0YWJhc2Uvc2VlZGVycy9Ob3RlU2VlZGVyLmdv",
+   "kind": "seeder",
+   "label": "NoteSeeder",
+   "detail": "database/seeders/NoteSeeder.go",
+   "file": "file:///ROOT/database/seeders/NoteSeeder.go",
+   "line": 29,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "seeder:ZGF0YWJhc2Uvc2VlZGVycy9Vc2VyU2VlZGVyLmdv",
+   "kind": "seeder",
+   "label": "UserSeeder",
+   "detail": "database/seeders/UserSeeder.go",
+   "file": "file:///ROOT/database/seeders/UserSeeder.go",
+   "line": 30,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "seeder:ZGF0YWJhc2Uvc2VlZGVycy9zZWVkZXJzLmdv",
+   "kind": "seeder",
+   "label": "seeders",
+   "detail": "database/seeders/seeders.go",
+   "file": "file:///ROOT/database/seeders/seeders.go",
+   "line": 20,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "service:YXBwL1NlcnZpY2VzL05vdGVTZXJ2aWNlLmdv",
+   "kind": "service",
+   "label": "NoteService",
+   "detail": "app/Services/NoteService.go",
+   "file": "file:///ROOT/app/Services/NoteService.go",
+   "line": 20,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "service:YXBwL1NlcnZpY2VzL1R3b0ZhY3RvclNlcnZpY2UuZ28",
+   "kind": "service",
+   "label": "TwoFactorService",
+   "detail": "app/Services/TwoFactorService.go",
+   "file": "file:///ROOT/app/Services/TwoFactorService.go",
+   "line": 26,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "service:YXBwL1NlcnZpY2VzL1VzZXJTZXJ2aWNlLmdv",
+   "kind": "service",
+   "label": "UserService",
+   "detail": "app/Services/UserService.go",
+   "file": "file:///ROOT/app/Services/UserService.go",
+   "line": 29,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "view:cmVzb3VyY2VzL3ZpZXdzL25vdGVzL2NyZWF0ZS5reXNlLmdv",
+   "kind": "view",
+   "label": "notes.create",
+   "detail": "resources/views/notes/create.kyse.go",
+   "file": "file:///ROOT/resources/views/notes/create.kyse.go",
+   "line": 0,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "view:cmVzb3VyY2VzL3ZpZXdzL25vdGVzL2VkaXQua3lzZS5nbw",
+   "kind": "view",
+   "label": "notes.edit",
+   "detail": "resources/views/notes/edit.kyse.go",
+   "file": "file:///ROOT/resources/views/notes/edit.kyse.go",
+   "line": 0,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "view:cmVzb3VyY2VzL3ZpZXdzL25vdGVzL2luZGV4Lmt5c2UuZ28",
+   "kind": "view",
+   "label": "notes.index",
+   "detail": "resources/views/notes/index.kyse.go",
+   "file": "file:///ROOT/resources/views/notes/index.kyse.go",
+   "line": 0,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "view:cmVzb3VyY2VzL3ZpZXdzL25vdGVzL3Nob3cua3lzZS5nbw",
+   "kind": "view",
+   "label": "notes.show",
+   "detail": "resources/views/notes/show.kyse.go",
+   "file": "file:///ROOT/resources/views/notes/show.kyse.go",
+   "line": 0,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "view:cmVzb3VyY2VzL3ZpZXdzL2hvbWUua3lzZS5nbw",
+   "kind": "view",
+   "label": "home",
+   "detail": "resources/views/home.kyse.go",
+   "file": "file:///ROOT/resources/views/home.kyse.go",
+   "line": 0,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "view:cmVzb3VyY2VzL3ZpZXdzL2xheW91dHMvYXBwLmt5c2UuZ28",
+   "kind": "view",
+   "label": "layouts.app",
+   "detail": "resources/views/layouts/app.kyse.go",
+   "file": "file:///ROOT/resources/views/layouts/app.kyse.go",
+   "line": 0,
+   "column": 0,
+   "level": ""
+  },
+  {
+   "id": "view:cmVzb3VyY2VzL3ZpZXdzL3BhcnRpYWxzL25vdGVzX3RhYmxlLmt5c2UuZ28",
+   "kind": "view",
+   "label": "partials.notes_table",
+   "detail": "resources/views/partials/notes_table.kyse.go",
+   "file": "file:///ROOT/resources/views/partials/notes_table.kyse.go",
+   "line": 0,
+   "column": 0,
+   "level": ""
+  }
+ ],
+ "edges": [
+  {
+   "from": "feature:QXBwU2VydmljZQ",
+   "to": "provider:YXBwL1Byb3ZpZGVycy9BcHBTZXJ2aWNlUHJvdmlkZXIuZ28",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:QXV0aA",
+   "to": "request:YXBwL0h0dHAvUmVxdWVzdHMvQXV0aC5nbw",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:RXZlbnRMb2c",
+   "to": "listener:YXBwL0xpc3RlbmVycy9FdmVudExvZy5nbw",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:SG9tZQ",
+   "to": "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvSG9tZUNvbnRyb2xsZXIuZ28",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:SG9tZQ",
+   "to": "view:cmVzb3VyY2VzL3ZpZXdzL2hvbWUua3lzZS5nbw",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:Tm90ZQ",
+   "to": "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvTm90ZUNvbnRyb2xsZXIuZ28",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:Tm90ZQ",
+   "to": "model:YXBwL01vZGVscy9Ob3RlLmdv",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:Tm90ZQ",
+   "to": "model:YXBwL01vZGVscy9Ob3RlUXVlcnkuZ28",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:Tm90ZQ",
+   "to": "policy:YXBwL1BvbGljaWVzL05vdGVQb2xpY3kuZ28",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:Tm90ZQ",
+   "to": "request:YXBwL0h0dHAvUmVxdWVzdHMvTm90ZVJlcXVlc3QuZ28",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:Tm90ZQ",
+   "to": "service:YXBwL1NlcnZpY2VzL05vdGVTZXJ2aWNlLmdv",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:Tm90ZQ",
+   "to": "view:cmVzb3VyY2VzL3ZpZXdzL25vdGVzL2NyZWF0ZS5reXNlLmdv",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:Tm90ZQ",
+   "to": "view:cmVzb3VyY2VzL3ZpZXdzL25vdGVzL2VkaXQua3lzZS5nbw",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:Tm90ZQ",
+   "to": "view:cmVzb3VyY2VzL3ZpZXdzL25vdGVzL2luZGV4Lmt5c2UuZ28",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:Tm90ZQ",
+   "to": "view:cmVzb3VyY2VzL3ZpZXdzL25vdGVzL3Nob3cua3lzZS5nbw",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:VHdvRmFjdG9y",
+   "to": "model:YXBwL01vZGVscy9SZWNvdmVyeUNvZGVRdWVyeS5nbw",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:VHdvRmFjdG9y",
+   "to": "model:YXBwL01vZGVscy9Ud29GYWN0b3IuZ28",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:VHdvRmFjdG9y",
+   "to": "model:YXBwL01vZGVscy9Ud29GYWN0b3JRdWVyeS5nbw",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:VHdvRmFjdG9y",
+   "to": "policy:YXBwL1BvbGljaWVzL1R3b0ZhY3RvclBvbGljeS5nbw",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:VHdvRmFjdG9y",
+   "to": "repository:YXBwL1JlcG9zaXRvcmllcy9Ud29GYWN0b3JSZXBvc2l0b3J5Lmdv",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:VHdvRmFjdG9y",
+   "to": "service:YXBwL1NlcnZpY2VzL1R3b0ZhY3RvclNlcnZpY2UuZ28",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:VXNlcg",
+   "to": "event:YXBwL0V2ZW50cy9Vc2VyLmdv",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:VXNlcg",
+   "to": "model:YXBwL01vZGVscy9Vc2VyLmdv",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:VXNlcg",
+   "to": "model:YXBwL01vZGVscy9Vc2VyUXVlcnkuZ28",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:VXNlcg",
+   "to": "policy:YXBwL1BvbGljaWVzL1VzZXJQb2xpY3kuZ28",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:VXNlcg",
+   "to": "service:YXBwL1NlcnZpY2VzL1VzZXJTZXJ2aWNlLmdv",
+   "kind": "contains"
+  },
+  {
+   "from": "feature:ZG9j",
+   "to": "controller:YXBwL0h0dHAvQ29udHJvbGxlcnMvQXV0aC9kb2MuZ28",
+   "kind": "contains"
+  }
+ ]
+}

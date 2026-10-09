@@ -1,0 +1,167 @@
+import type { ProjectGraph, ProjectGraphEdge, ProjectGraphLocation, ProjectGraphNode } from "./projectGraphSchema";
+
+// The shape of the Project Map, kept apart from the editor so it can be run
+// and tested without one.
+
+// Relation is one typed edge seen from one of its two ends.
+export interface Relation {
+  readonly edge: ProjectGraphEdge;
+  readonly other: ProjectGraphNode;
+  readonly direction: "outgoing" | "incoming";
+}
+
+// RelationGroup is every edge of one kind that touches a node, with the
+// meaning the server gives that kind.
+export interface RelationGroup {
+  readonly kind: string;
+  readonly meaning?: string;
+  readonly relations: readonly Relation[];
+}
+
+// ProjectMapModel is the graph indexed the way the tree reads it.
+export interface ProjectMapModel {
+  readonly nodes: ReadonlyMap<string, ProjectGraphNode>;
+  // children are what a node contains: the containment edges going out of it.
+  readonly children: ReadonlyMap<string, readonly string[]>;
+  // relations are the other edges, grouped by kind, in the order the server
+  // describes the kinds; an undescribed kind comes after, by name.
+  readonly relations: ReadonlyMap<string, readonly RelationGroup[]>;
+}
+
+export const containmentKind = "contains";
+
+export function buildProjectMapModel(graph: ProjectGraph): ProjectMapModel {
+  const nodes = new Map(graph.nodes.map((node) => [node.id, node]));
+  const children = new Map<string, string[]>();
+  const touching = new Map<string, Map<string, Relation[]>>();
+  const add = (nodeID: string, relation: Relation): void => {
+    const byKind = touching.get(nodeID) ?? new Map<string, Relation[]>();
+    const list = byKind.get(relation.edge.kind) ?? [];
+    list.push(relation);
+    byKind.set(relation.edge.kind, list);
+    touching.set(nodeID, byKind);
+  };
+  for (const edge of graph.edges) {
+    if (edge.kind === containmentKind) {
+      const list = children.get(edge.from) ?? [];
+      list.push(edge.to);
+      children.set(edge.from, list);
+      continue;
+    }
+    const from = nodes.get(edge.from);
+    const to = nodes.get(edge.to);
+    if (from === undefined || to === undefined) {
+      continue;
+    }
+    add(edge.from, { edge, other: to, direction: "outgoing" });
+    add(edge.to, { edge, other: from, direction: "incoming" });
+  }
+
+  const order = new Map(graph.edgeKinds.map((entry, index) => [entry.kind, index]));
+  const meanings = new Map(graph.edgeKinds.map((entry) => [entry.kind, entry.meaning]));
+  const relations = new Map<string, RelationGroup[]>();
+  for (const [nodeID, byKind] of touching) {
+    const groups = [...byKind.entries()]
+      .sort(([left], [right]) => {
+        const leftOrder = order.get(left) ?? Number.MAX_SAFE_INTEGER;
+        const rightOrder = order.get(right) ?? Number.MAX_SAFE_INTEGER;
+        return leftOrder !== rightOrder ? leftOrder - rightOrder : left.localeCompare(right);
+      })
+      .map(([kind, list]) => {
+        const outgoing = list.filter((relation) => relation.direction === "outgoing");
+        const incoming = list.filter((relation) => relation.direction === "incoming");
+        const group: { kind: string; meaning?: string; relations: Relation[] } = {
+          kind,
+          relations: [...outgoing, ...incoming],
+        };
+        const meaning = meanings.get(kind);
+        if (meaning !== undefined) {
+          group.meaning = meaning;
+        }
+        return group;
+      });
+    relations.set(nodeID, groups);
+  }
+  return { nodes, children, relations };
+}
+
+// NodePresentation is what a tree row shows for a node.
+export interface NodePresentation {
+  readonly label: string;
+  readonly description?: string;
+  readonly tooltip: string;
+}
+
+export function presentNode(node: ProjectGraphNode): NodePresentation {
+  const label = node.method !== undefined && node.pattern !== undefined
+    ? `${node.method} ${node.pattern}`
+    : node.label;
+  const parts: string[] = [];
+  if (node.kind === "route" && node.name !== undefined) {
+    parts.push(node.name);
+  } else if (node.rule !== undefined) {
+    parts.push(node.rule);
+  } else if (node.variant !== undefined) {
+    parts.push(node.variant);
+  } else if (node.detail !== undefined) {
+    parts.push(node.detail);
+  }
+  if (node.nestedUnder !== undefined) {
+    parts.push(`under ${node.nestedUnder}`);
+  }
+  if (node.generated === true) {
+    parts.push("generated");
+  }
+  const tooltip = [label];
+  if (node.kind === "route") {
+    if (node.name !== undefined) {
+      tooltip.push(`Name: ${node.name}`);
+    }
+  } else if (node.detail !== undefined) {
+    tooltip.push(node.detail);
+  }
+  if (node.variant !== undefined) {
+    tooltip.push(`Variant: ${node.variant}`);
+  }
+  if (node.nestedUnder !== undefined) {
+    tooltip.push(`Nested under: ${node.nestedUnder}`);
+  }
+  if (node.rule !== undefined) {
+    tooltip.push(`Rule: ${node.rule}`);
+  }
+  if (node.generated === true) {
+    tooltip.push("Generated by a tool; edit its source instead.");
+  }
+  const presentation: { label: string; description?: string; tooltip: string } = {
+    label,
+    tooltip: tooltip.join("\n"),
+  };
+  if (parts.length > 0) {
+    presentation.description = parts.join(" · ");
+  }
+  return presentation;
+}
+
+// nodeLocation is where opening a node lands. A node of the first schema
+// carries a start only; one of the typed schema carries the whole range of
+// what it names, and the whole range is what gets revealed.
+export function nodeLocation(node: ProjectGraphNode): ProjectGraphLocation | undefined {
+  if (node.file === undefined) {
+    return undefined;
+  }
+  const line = node.line ?? 0;
+  const column = node.column ?? 0;
+  return {
+    file: node.file,
+    line,
+    column,
+    endLine: node.endLine ?? line,
+    endColumn: node.endLine === undefined ? column : node.endColumn ?? column,
+  };
+}
+
+// relationLocation is where opening an edge lands: the place in the code the
+// edge was read from, and the other node when the edge carries none.
+export function relationLocation(relation: Relation): ProjectGraphLocation | undefined {
+  return relation.edge.at ?? nodeLocation(relation.other);
+}

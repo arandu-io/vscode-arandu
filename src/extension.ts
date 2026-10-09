@@ -9,6 +9,14 @@ import { isRelevantProjectPath } from "./projectPaths";
 import { AranduProjects } from "./projects";
 import type { AranduProject } from "./projects";
 import graphContract from "./projectGraphContract.json";
+import {
+  doctorFindings,
+  firstSchemaServer,
+  initializationOptions,
+  projectGraphParams,
+  readServerFeatures,
+  type ServerFeatures,
+} from "./projectGraphProtocol";
 import { parseProjectGraph } from "./projectGraphSchema";
 
 const configureAction = "Configure Aru Path";
@@ -48,6 +56,7 @@ class AranduController implements vscode.Disposable {
   private readonly permanentDisposables: vscode.Disposable[] = [];
   private runtimeDisposables: vscode.Disposable[] = [];
   private client: LanguageClient | undefined;
+  private serverFeatures: ServerFeatures = firstSchemaServer;
   private refreshTimer: NodeJS.Timeout | undefined;
   private devTerminal: vscode.Terminal | undefined;
   private nativeTerminal: vscode.Terminal | undefined;
@@ -192,6 +201,7 @@ class AranduController implements vscode.Disposable {
         pattern: { baseUri: folder.uri.toString(), pattern: "**/*.go" },
       }],
       diagnosticCollectionName: "arandu",
+      initializationOptions,
       outputChannel: this.output,
       workspaceFolder: folder,
     };
@@ -211,6 +221,14 @@ class AranduController implements vscode.Disposable {
       watcher,
     );
     await client.start();
+    this.serverFeatures = readServerFeatures(client.initializeResult?.capabilities);
+    this.output.info(
+      `aru lsp answers project graph schema ${this.serverFeatures.projectGraphSchema}`
+        + `${this.serverFeatures.doctorDiagnostics ? " and the doctor's diagnostics" : ""}.`,
+    );
+    if (this.serverFeatures.doctorDiagnostics) {
+      this.doctorDiagnostics.clear();
+    }
     this.setReady(aru.executable);
     await this.refreshGraph();
   }
@@ -225,6 +243,7 @@ class AranduController implements vscode.Disposable {
     }
     const client = this.client;
     this.client = undefined;
+    this.serverFeatures = firstSchemaServer;
     if (client !== undefined) {
       this.stopping = true;
       try {
@@ -251,17 +270,21 @@ class AranduController implements vscode.Disposable {
       return;
     }
     try {
-      const response = await client.sendRequest<unknown>(graphContract.request);
+      const features = this.serverFeatures;
+      const params = projectGraphParams(features);
+      const response = params === undefined
+        ? await client.sendRequest<unknown>(graphContract.request)
+        : await client.sendRequest<unknown>(graphContract.request, params);
       if (this.client !== client) {
         return;
       }
-      const graph = parseProjectGraph(response);
+      const graph = parseProjectGraph(response, features.projectGraphSchema);
       this.provider.setGraph(graph);
       this.publishDoctorDiagnostics(graph);
       this.setNativeAvailable(graph);
       this.tree.message = undefined;
       this.tree.description = `${graph.nodes.length}`;
-      this.output.info(`Project Map refreshed: ${graph.nodes.length} nodes.`);
+      this.output.info(`Project Map refreshed: ${graph.nodes.length} nodes, schema ${graph.schemaVersion}.`);
     } catch (error: unknown) {
       if (this.client !== client || this.stopping || this.disposed) {
         return;
@@ -575,29 +598,22 @@ class AranduController implements vscode.Disposable {
     void vscode.commands.executeCommand("setContext", "arandu.native.available", available);
   }
 
+  // publishDoctorDiagnostics draws the doctor's findings from the map, but
+  // only for an aru that does not publish them itself; doctorFindings answers
+  // nothing for one that does, so a finding is never in Problems twice.
   private publishDoctorDiagnostics(graph: ReturnType<typeof parseProjectGraph>): void {
     this.doctorDiagnostics.clear();
-    const diagnosticsGroup = graph.groups.find((group) => group.id === "diagnostics");
-    if (diagnosticsGroup === undefined) {
-      return;
-    }
-    const nodes = new Map(graph.nodes.map((node) => [node.id, node]));
     const diagnosticsByURI = new Map<string, { uri: vscode.Uri; diagnostics: vscode.Diagnostic[] }>();
-    for (const nodeID of diagnosticsGroup.nodeIds) {
-      const node = nodes.get(nodeID);
-      if (node?.file === undefined) {
-        continue;
-      }
-      const uri = vscode.Uri.parse(node.file, true);
-      const start = new vscode.Position(node.line ?? 0, node.column ?? 0);
-      const end = new vscode.Position(start.line, start.character + 1);
-      const severity = node.level === "error"
+    for (const finding of doctorFindings(graph, this.serverFeatures)) {
+      const uri = vscode.Uri.parse(finding.file, true);
+      const range = new vscode.Range(finding.line, finding.column, finding.endLine, finding.endColumn);
+      const severity = finding.level === "error"
         ? vscode.DiagnosticSeverity.Error
         : vscode.DiagnosticSeverity.Warning;
-      const message = node.detail === undefined ? node.label : `${node.label}: ${node.detail}`;
-      const diagnostic = new vscode.Diagnostic(new vscode.Range(start, end), message, severity);
+      const diagnostic = new vscode.Diagnostic(range, finding.message, severity);
       diagnostic.source = adapterContract.diagnosticsCollection;
-      diagnostic.code = node.kind;
+      const target = finding.codeHref === undefined ? undefined : this.ruleDocUri(finding.codeHref);
+      diagnostic.code = target === undefined ? finding.code : { value: finding.code, target };
       const key = uri.toString();
       const entry = diagnosticsByURI.get(key) ?? { uri, diagnostics: [] };
       entry.diagnostics.push(diagnostic);
@@ -606,6 +622,20 @@ class AranduController implements vscode.Disposable {
     for (const entry of diagnosticsByURI.values()) {
       this.doctorDiagnostics.set(entry.uri, entry.diagnostics);
     }
+  }
+
+  // ruleDocUri reads where a rule is documented: an address, or a path inside
+  // the project with a line fragment.
+  private ruleDocUri(href: string): vscode.Uri | undefined {
+    if (/^[A-Za-z][A-Za-z\d+.-]*:/.test(href)) {
+      return vscode.Uri.parse(href, true);
+    }
+    const root = this.projects.active?.root;
+    if (root === undefined) {
+      return undefined;
+    }
+    const [file, fragment] = href.split("#", 2);
+    return vscode.Uri.joinPath(root, file ?? "").with({ fragment: fragment ?? "" });
   }
 }
 
