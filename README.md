@@ -20,6 +20,11 @@ Install the current Aru CLI first:
 brew install arandu-io/tap/aru
 ```
 
+The typed Project Map, Doctor findings published by the language server, the
+directive and command catalogue, and the generator command need Aru v0.65.0 or
+later. With an older Aru the extension keeps the first map schema, draws Doctor
+findings itself, and uses its own directive list.
+
 The release process attaches a reproducible `arandu-*.vsix` to every
 [GitHub release](https://github.com/arandu-io/vscode-arandu/releases). Download
 it and install it from VS Code with **Extensions: Install from VSIX**, or run:
