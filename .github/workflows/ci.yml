@@ -24,7 +24,7 @@ jobs:
           node-version: 24
 
       - name: Install pinned editor adapter dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Audit editor adapter dependencies
         run: npm audit --audit-level=low

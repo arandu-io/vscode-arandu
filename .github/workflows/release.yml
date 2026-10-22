@@ -12,9 +12,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # No token is left in .git/config: npm and the build run with this
+      # job's write permission, and only the changelog step below pushes.
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          persist-credentials: false
+
+      - name: Refuse a tag that is not on main
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          tag_commit="$(git rev-list -n 1 "refs/tags/${TAG}")"
+          if ! git merge-base --is-ancestor "$tag_commit" refs/remotes/origin/main; then
+            echo "refusing release: tag ${TAG} points to ${tag_commit}, which is not in origin/main" >&2
+            exit 1
+          fi
 
       - uses: actions/setup-go@v7
         with:
@@ -24,9 +39,12 @@ jobs:
         with:
           node-version: 24
 
+      # Install scripts are not run: the lockfile pins every package, the
+      # extension bundles none of them, and esbuild's binary arrives as its
+      # platform package.
       - name: Install and audit pinned editor adapter dependencies
         run: |
-          npm ci
+          npm ci --ignore-scripts
           npm audit --audit-level=low
 
       - name: Build and audit the VSIX
@@ -78,8 +96,8 @@ jobs:
           } > CHANGELOG.next
           mv CHANGELOG.next CHANGELOG.md
           git config user.name "HYZIS"
-          git config user.email "paulorlima@hyz.is"
+          git config user.email "admin@hyz.is"
           git add CHANGELOG.md
           git diff --cached --quiet && exit 0
           git commit -s -m "Write ${TAG} into the changelog"
-          git push origin main
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" main
