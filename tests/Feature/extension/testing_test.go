@@ -127,16 +127,27 @@ same(parsed.packageName, "e2e_test", "package");
 same(parsed.constraint, "e2e && !windows", "constraint");
 same(parsed.tags, ["e2e"], "the tags the constraint requires");
 same(parsed.tests, [
-  { name: "TestCheckout", line: 6 },
-  { name: "Test_underscore", line: 23 },
-  { name: "Test", line: 24 },
-  { name: "TestAlias", line: 25 },
-  { name: "TestLogin", line: 26 },
-  { name: "TestAfterString", line: 27 },
-], "the functions go test runs, with their lines");
+  { name: "TestCheckout", line: 7 },
+  { name: "TestMain", line: 19 },
+  { name: "Test_underscore", line: 24 },
+  { name: "Test", line: 25 },
+  { name: "TestAlias", line: 26 },
+  { name: "TestLogin", line: 27 },
+  { name: "TestAfterString", line: 28 },
+], "the functions go test runs, with their 1-based lines; a TestMain taking *testing.T is a test to the go tool");
+same(m.editorLine(7), 6, "the editor counts from zero");
+same(m.editorLine(0), 0, "a line before the first is the first");
+same(m.parseTestFile("package unit\nfunc TestResult(t *testing.T) error { return nil }\nfunc TestNoBody(t *testing.T)\nfunc TestNoName(*testing.T) {}\nfunc Testé(t *testing.T) {}\nfunc TestÜber(t *testing.T) {}\n").tests, [
+  { name: "TestNoName", line: 4 },
+  { name: "TestÜber", line: 6 },
+], "a result or no body is no test; an unnamed parameter is one; a lower-case letter after Test is not one in any script");
 
 same(m.constraintTags("integration || (linux && amd64)"), ["integration"], "platforms are never tags to ask for");
 same(m.constraintTags("go1.22 && sqlite_ok && !cgo"), ["sqlite_ok"], "release tags and negations are left out");
+same(m.constraintTags("ignore"), ["ignore"], "only -tags ignore compiles a //go:build ignore file, so it is asked for");
+same(m.constraintTags("!(linux && slowauth) || conformance"), ["conformance"], "a tag under a negated group is negated");
+same(m.constraintTags("!!twice && sparc64 || riscv || armbe"), ["twice"], "a double negation asks; every architecture the toolchain knows is the machine's");
+same(m.constraintTags("broken &&"), [], "a constraint that does not parse asks for nothing");
 same(m.parseTestFile("package unit\nfunc TestX(t *testing.T) {}\n").tags, [], "no constraint, no tags");
 same(m.moduleOf("// comment\nmodule github.com/acme/shop // the shop\n\ngo 1.26\n"), "github.com/acme/shop", "module path");
 same(m.packagePath("github.com/acme/shop", "tests/Feature/billing"), "github.com/acme/shop/tests/Feature/billing", "package import path");

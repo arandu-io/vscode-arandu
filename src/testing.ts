@@ -11,6 +11,7 @@ import type { AranduProject } from "./projects";
 import contract from "./testingContract.json";
 import {
   debugConfiguration,
+  editorLine,
   failureLine,
   isE2E,
   layerOf,
@@ -211,7 +212,7 @@ export class AranduTesting implements vscode.Disposable {
     const children: vscode.TestItem[] = [];
     for (const test of parsed.tests) {
       const item = this.controller.createTestItem(`${uri.toString()}#${test.name}`, test.name, uri);
-      item.range = new vscode.Range(test.line, 0, test.line, 0);
+      item.range = new vscode.Range(editorLine(test.line), 0, editorLine(test.line), 0);
       this.data.set(item, { kind: "test", layer, relative, name: test.name, tags: parsed.tags });
       children.push(item);
     }
@@ -572,7 +573,7 @@ export class AranduTesting implements vscode.Disposable {
     }
     const lenses: vscode.CodeLens[] = [];
     for (const test of parseTestFile(document.getText()).tests) {
-      const range = new vscode.Range(test.line, 0, test.line, 0);
+      const range = new vscode.Range(editorLine(test.line), 0, editorLine(test.line), 0);
       const args = [document.uri.toString(), test.name];
       lenses.push(
         new vscode.CodeLens(range, { title: "$(play) Run", command: "arandu.e2e.runJourney", arguments: args }),

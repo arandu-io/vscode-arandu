@@ -10,11 +10,17 @@ export interface TestLayer {
 
 export const testLayers: readonly TestLayer[] = contract.layers;
 
-// A test function found in a file: its name and the zero-based line of its
-// declaration.
+// A test function found in a file: its name and the 1-based line of its func
+// keyword, the numbering aru test --list uses.
 export interface DiscoveredTest {
   readonly name: string;
   readonly line: number;
+}
+
+// editorLine is the zero-based line the editor's positions count in, for a
+// 1-based line as aru and the scanner report it.
+export function editorLine(line: number): number {
+  return Math.max(0, line - 1);
 }
 
 // What a test file declares: its package, the build constraint it opens with,
@@ -43,18 +49,25 @@ export function isE2E(layer: TestLayer | string): boolean {
 }
 
 // Tags a constraint can name that select a platform or toolchain rather than a
-// part of the suite. They are satisfied by the machine, never passed to -tags.
+// part of the suite: operating systems, architectures, compilers and cgo. They
+// are satisfied by the machine, never passed to -tags. ignore is not one of
+// them: a file that opens with //go:build ignore compiles only under
+// -tags ignore, so it is a tag like any other.
 const platformTags = new Set([
   "aix", "android", "darwin", "dragonfly", "freebsd", "hurd", "illumos", "ios", "js", "linux", "nacl",
   "netbsd", "openbsd", "plan9", "solaris", "wasip1", "windows", "zos", "unix",
-  "386", "amd64", "arm", "arm64", "loong64", "mips", "mips64", "mips64le", "mipsle", "ppc64", "ppc64le",
-  "riscv64", "s390x", "wasm", "cgo", "gc", "gccgo", "ignore",
+  "386", "amd64", "amd64p32", "arm", "armbe", "arm64", "arm64be", "loong64", "mips", "mipsle", "mips64",
+  "mips64le", "mips64p32", "mips64p32le", "ppc", "ppc64", "ppc64le", "riscv", "riscv64", "s390", "s390x",
+  "sparc", "sparc64", "wasm", "cgo", "gc", "gccgo",
 ]);
 
 // parseTestFile reads a Go test file the way the go tool lists its tests: the
 // top-level functions named Test followed by anything but a lower-case letter,
-// with a single *testing.T parameter. A declaration inside a block comment or a
-// raw string is not one, and neither is a method, TestMain, or Testify.
+// with a single *testing.T parameter, no result and a body. A declaration
+// inside a block comment or a raw string is not one, and neither is a method,
+// TestMain(m *testing.M), or Testify; a TestMain taking *testing.T is an
+// ordinary test to the go tool, and so it is here. Lines are 1-based, as aru
+// test --list reports them.
 export function parseTestFile(source: string): TestFile {
   const lines = topLevelLines(source);
   let constraint = "";
@@ -74,12 +87,12 @@ export function parseTestFile(source: string): TestFile {
       }
       continue;
     }
-    const declaration = /^func\s+(Test(?:[^a-z\s(][A-Za-z0-9_]*)?)\s*\(\s*[A-Za-z_][A-Za-z0-9_]*\s+\*\s*(?:[A-Za-z_][A-Za-z0-9_]*\.)?T\s*\)/.exec(text);
+    const declaration = /^func\s+(Test(?:(?!\p{Ll})[\p{L}\p{Nd}_][\p{L}\p{Nd}_]*)?)\s*\(\s*(?:[\p{L}_][\p{L}\p{Nd}_]*\s*)?\*\s*(?:[\p{L}_][\p{L}\p{Nd}_]*\s*\.\s*)?T\s*,?\s*\)\s*\{/u.exec(text);
     if (declaration === null) {
       continue;
     }
     const name = declaration[1];
-    if (name === "TestMain" || seen.has(name)) {
+    if (seen.has(name)) {
       continue;
     }
     seen.add(name);
@@ -88,29 +101,99 @@ export function parseTestFile(source: string): TestFile {
   return { packageName, constraint, tags: constraintTags(constraint), tests };
 }
 
+// A build constraint expression, as the go tool parses it.
+type ConstraintExpr =
+  | { readonly kind: "tag"; readonly tag: string }
+  | { readonly kind: "not"; readonly x: ConstraintExpr }
+  | { readonly kind: "and" | "or"; readonly x: ConstraintExpr; readonly y: ConstraintExpr };
+
 // constraintTags answers the tags a build constraint requires that the suite
-// has to be asked for: identifiers that are not negated and are not a platform.
+// has to be asked for: every tag it names, left to right, that is not under an
+// odd number of negations and is not a platform or a Go version. A tag inside
+// !(a && b) is negated like one written !a. A constraint that does not parse
+// asks for nothing, as aru test --list reads it.
 export function constraintTags(constraint: string): readonly string[] {
+  const expr = parseConstraint(constraint);
   const tags: string[] = [];
-  const pattern = /(!?)\s*([A-Za-z0-9_.]+)/g;
-  for (let match = pattern.exec(constraint); match !== null; match = pattern.exec(constraint)) {
-    const [, negated, tag] = match;
-    if (negated === "!" || platformTags.has(tag) || /^go1\.\d+$/.test(tag) || tags.includes(tag)) {
-      continue;
+  const collect = (e: ConstraintExpr, negated: boolean): void => {
+    switch (e.kind) {
+      case "tag":
+        if (!negated && !platformTags.has(e.tag) && !/^go1\.[0-9]+$/.test(e.tag) && !tags.includes(e.tag)) {
+          tags.push(e.tag);
+        }
+        return;
+      case "not":
+        collect(e.x, !negated);
+        return;
+      default:
+        collect(e.x, negated);
+        collect(e.y, negated);
     }
-    tags.push(tag);
+  };
+  if (expr !== undefined) {
+    collect(expr, false);
   }
   return tags;
 }
 
+// parseConstraint reads a //go:build expression -- tags, !, &&, || and
+// parentheses, with && binding tighter than || -- or answers undefined when it
+// is not one.
+function parseConstraint(text: string): ConstraintExpr | undefined {
+  const tokens = text.match(/\s+|&&|\|\||[!()]|[A-Za-z0-9_.]+|./g)?.filter((token) => token.trim() !== "") ?? [];
+  let at = 0;
+  const or = (): ConstraintExpr | undefined => {
+    let left = and();
+    while (left !== undefined && tokens[at] === "||") {
+      at++;
+      const right = and();
+      left = right === undefined ? undefined : { kind: "or", x: left, y: right };
+    }
+    return left;
+  };
+  const and = (): ConstraintExpr | undefined => {
+    let left = not();
+    while (left !== undefined && tokens[at] === "&&") {
+      at++;
+      const right = not();
+      left = right === undefined ? undefined : { kind: "and", x: left, y: right };
+    }
+    return left;
+  };
+  const not = (): ConstraintExpr | undefined => {
+    const token = tokens[at];
+    if (token === "!") {
+      at++;
+      const x = not();
+      return x === undefined ? undefined : { kind: "not", x };
+    }
+    if (token === "(") {
+      at++;
+      const x = or();
+      if (x === undefined || tokens[at] !== ")") {
+        return undefined;
+      }
+      at++;
+      return x;
+    }
+    if (token !== undefined && /^[A-Za-z0-9_.]+$/.test(token)) {
+      at++;
+      return { kind: "tag", tag: token };
+    }
+    return undefined;
+  };
+  const expr = or();
+  return expr !== undefined && at === tokens.length ? expr : undefined;
+}
+
 // topLevelLines answers the lines of the source that start outside a block
-// comment and outside a raw string, with their zero-based numbers. Only those
+// comment and outside a raw string, with their 1-based numbers. Only those
 // can open a declaration the go tool would list.
 function topLevelLines(source: string): Array<{ text: string; line: number }> {
   const out: Array<{ text: string; line: number }> = [];
   let state: "code" | "block" | "raw" | "string" | "rune" = "code";
   let lineStart = 0;
-  let line = 0;
+  let line = 1;
   let startsInCode = true;
   for (let i = 0; i <= source.length; i++) {
     const c = source[i];
