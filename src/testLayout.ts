@@ -292,15 +292,16 @@ export interface TestBatch {
 
 // testBatches groups the tests into the fewest aru test invocations: the
 // end-to-end tests run apart, with --e2e and the driver chosen, and the rest run
-// together per set of build tags. Each invocation asks go test for JSON and
-// anchors -run to the exact names, so a name that is a prefix of another does
-// not run both.
+// together per set of build tags. A subtest runs in an invocation of its own,
+// because -run narrows every top-level test of a batch by the same subtest
+// pattern. Each invocation asks go test for JSON and anchors -run to the exact
+// names, so a name that is a prefix of another does not run both.
 export function testBatches(tests: readonly TestSelection[], choice: DriverChoice | undefined): TestBatch[] {
   const groups = new Map<string, { e2e: boolean; tags: readonly string[]; tests: TestSelection[] }>();
   for (const test of tests) {
     const e2e = isE2E(test.layer);
     const tags = e2e ? [] : [...test.tags].sort();
-    const key = `${e2e ? "e2e" : "plain"}|${tags.join(",")}`;
+    const key = `${e2e ? "e2e" : "plain"}|${tags.join(",")}|${test.name.includes("/") ? test.name : ""}`;
     const group = groups.get(key) ?? { e2e, tags, tests: [] };
     group.tests.push(test);
     groups.set(key, group);
@@ -322,11 +323,23 @@ export function testBatches(tests: readonly TestSelection[], choice: DriverChoic
   return batches.sort((left, right) => Number(left.e2e) - Number(right.e2e));
 }
 
-// runPattern is the -run expression that matches exactly the named top-level
-// tests and every subtest under them.
+// runPattern is the -run expression that matches exactly the named tests and
+// every subtest under them. go test splits -run at each slash and matches one
+// level of a test's name per part, so a subtest TestX/a/b is ^(TestX)$/^(a)$/^(b)$.
+// Names of different depths share each level's alternatives, which is why a
+// subtest is given to it alone.
 export function runPattern(names: readonly string[]): string {
-  const unique = [...new Set(names)].sort();
-  return `^(${unique.map(escapeRegExp).join("|")})$`;
+  const levels: string[][] = [];
+  for (const name of new Set(names)) {
+    name.split("/").forEach((part, depth) => {
+      const level = levels[depth] ?? [];
+      if (!level.includes(part)) {
+        level.push(part);
+      }
+      levels[depth] = level;
+    });
+  }
+  return levels.map((level) => `^(${[...level].sort().map(escapeRegExp).join("|")})$`).join("/");
 }
 
 function escapeRegExp(value: string): string {
@@ -385,7 +398,21 @@ export function topLevelTest(name: string): string {
 // package and the top-level name, because two packages may hold tests with
 // the same name and -run matches both.
 export function selectionKey(packagePathValue: string, name: string): string {
-  return `${packagePathValue}#${topLevelTest(name)}`;
+  return resultKey(packagePathValue, topLevelTest(name));
+}
+
+// resultKey is how a reported result finds the exact test or subtest it is
+// about: the package and the full name, TestX/sub/inner for a subtest.
+export function resultKey(packagePathValue: string, name: string): string {
+  return `${packagePathValue}#${name}`;
+}
+
+// parentKey is the key of the test a result key's subtest runs under, or
+// undefined for a top-level test.
+export function parentKey(key: string): string | undefined {
+  const hash = key.indexOf("#");
+  const slash = key.lastIndexOf("/");
+  return slash > hash && hash >= 0 ? key.slice(0, slash) : undefined;
 }
 
 // failureLine answers the zero-based line the first "file_test.go:N:" of a

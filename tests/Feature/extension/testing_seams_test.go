@@ -315,7 +315,8 @@ func TestTheTestingViewFollowsTheSelectedProject(t *testing.T) {
 		"vscode.TestRunProfileKind.Run",
 		"vscode.TestRunProfileKind.Debug",
 		"configureHandler = () => void this.selectDriver()",
-		"new vscode.RelativePattern(project.root, `${contract.testsRoot}/**/*${contract.testFileSuffix}`)",
+		// Every test file, because aru lists the tests beside the code too.
+		"new vscode.RelativePattern(project.root, `**/*${contract.testFileSuffix}`)",
 		"new vscode.RelativePattern(project.root, `${layer.directory}/**/*${contract.testFileSuffix}`)",
 		"adapterContract.projectDiscoveryExclude",
 	} {
@@ -328,6 +329,80 @@ func TestTheTestingViewFollowsTheSelectedProject(t *testing.T) {
 		if !strings.Contains(record, seam) {
 			t.Errorf("recording does not reuse the running server: missing %q", seam)
 		}
+	}
+}
+
+// TestTheTestingViewAsksAruBeforeReadingTheSources fixes the order of the
+// discovery: aru test --list --json first, the editor's own reading only when
+// aru gives no listing; aru never started before the workspace is trusted, and
+// asked again once it is; and every line aru or the scanner reports turned
+// into the editor's zero-based line in one place.
+func TestTheTestingViewAsksAruBeforeReadingTheSources(t *testing.T) {
+	source := readFile(t, "src/testing.ts")
+
+	discover := methodBody(t, source, "private async discover(")
+	if !strings.Contains(discover, "await this.listWithAru(project) ?? await this.scanProject(project)") {
+		t.Error("discovery does not ask aru first and read the sources only without a listing")
+	}
+	if !strings.Contains(discover, "generation !== this.generation") {
+		t.Error("an older discovery that ends late can replace a newer one")
+	}
+
+	ask := methodBody(t, source, "private async listWithAru(")
+	trust := strings.Index(ask, "!vscode.workspace.isTrusted")
+	resolve := strings.Index(ask, "resolveAruExecutable(")
+	start := strings.Index(ask, "await listWithAru(executable, project.root.fsPath)")
+	if trust < 0 || resolve < 0 || start < 0 || trust > resolve || resolve > start {
+		t.Error("aru is resolved or started before the workspace's trust is checked")
+	}
+	if !strings.Contains(ask[trust:resolve], "return undefined;") {
+		t.Error("an untrusted workspace does not fall back to the sources")
+	}
+	if !strings.Contains(source, "vscode.workspace.onDidGrantWorkspaceTrust(() => void this.discover())") {
+		t.Error("granting trust does not ask aru for the tests")
+	}
+
+	changed := methodBody(t, source, "private fileChanged(")
+	for _, seam := range []string{`this.source === "aru"`, "contract.rediscoverDelayMilliseconds", "void this.discover()", "this.updateFile(uri)", "this.removeFile(uri)"} {
+		if !strings.Contains(changed, seam) {
+			t.Errorf("a changed test file is not followed by its listing's source: missing %q", seam)
+		}
+	}
+
+	if regexp.MustCompile(`new vscode\.Range\((test|subtest)\.line`).MatchString(source) {
+		t.Error("a 1-based line reaches an editor range without editorLine")
+	}
+	for _, seam := range []string{
+		"new vscode.Range(editorLine(test.line), 0, editorLine(test.line), 0)",
+		"new vscode.Range(editorLine(subtest.line), 0, editorLine(subtest.line), 0)",
+	} {
+		if !strings.Contains(source, seam) {
+			t.Errorf("testing.ts does not contain %q", seam)
+		}
+	}
+
+	inventory := readFile(t, "src/testInventory.ts")
+	list := strings.Index(inventory, "captureAru(executable, contract.listArgs")
+	gate := strings.Index(inventory, "if (!listsTests(reported))")
+	if gate < 0 || list < 0 || gate > list {
+		t.Error("aru test --list --json is asked before aru's version says it has it")
+	}
+
+	var contract struct {
+		VersionArgs      []string `json:"versionArgs"`
+		ListArgs         []string `json:"listArgs"`
+		ListSince        string   `json:"listSince"`
+		InventoryVersion int      `json:"inventoryVersion"`
+	}
+	readJSON(t, "src/testingContract.json", &contract)
+	if got := strings.Join(contract.ListArgs, " "); got != "test --list --json" {
+		t.Errorf("the listing runs aru %s", got)
+	}
+	if got := strings.Join(contract.VersionArgs, " "); got != "version" {
+		t.Errorf("the version is read with aru %s", got)
+	}
+	if contract.ListSince != "0.79.0" || contract.InventoryVersion != 1 {
+		t.Errorf("listing since %q at format %d; aru v0.79.0 writes format 1", contract.ListSince, contract.InventoryVersion)
 	}
 }
 

@@ -35,6 +35,7 @@ func runTestingModules(t *testing.T, script string, env ...string) {
 		`export * from "./src/traceView";`,
 		`export * from "./src/devServer";`,
 		`export * from "./src/testRunner";`,
+		`export * from "./src/testInventory";`,
 	}, "\n"))
 	if output, err := build.CombinedOutput(); err != nil {
 		t.Fatalf("bundle testing modules: %v\n%s", err, output)
@@ -178,6 +179,21 @@ same(batches.map((batch) => batch.e2e), [false, false, true], "the journeys run 
 same(m.testBatches([tests[4]], undefined)[0].args, ["test", "--e2e", "-json", "-run", "^(TestCheckout)$"], "no choice leaves the driver to the test case");
 same(m.runPattern(["TestA", "TestA", "TestB"]), "^(TestA|TestB)$", "names are anchored and unique");
 assert(new RegExp(m.runPattern(["TestA"])).test("TestA") && !new RegExp(m.runPattern(["TestA"])).test("TestAB"), "a prefix does not run its longer neighbour");
+
+same(m.runPattern(["TestMoney/adds_cents#01/carries"]), "^(TestMoney)$/^(adds_cents#01)$/^(carries)$", "a subtest is one anchored level per part of its name");
+same(m.runPattern(["TestX/a.b+c"]), "^(TestX)$/^(a\\.b\\+c)$", "each level is escaped");
+const withSubtests = m.testBatches([
+  tests[0],
+  { layer: "unit", packagePath: pkg + "Unit", name: "TestMoney/adds_cents", tags: [] },
+  { layer: "unit", packagePath: pkg + "Unit", name: "TestMoney/adds_cents#01", tags: [] },
+  { layer: "e2e", packagePath: pkg + "E2E", name: "TestCheckout/pays_with_card", tags: ["e2e"] },
+], undefined);
+same(withSubtests.map((batch) => batch.args), [
+  ["test", "-json", "-run", "^(TestMoney)$"],
+  ["test", "-json", "-run", "^(TestMoney)$/^(adds_cents)$"],
+  ["test", "-json", "-run", "^(TestMoney)$/^(adds_cents#01)$"],
+  ["test", "--e2e", "-json", "-run", "^(TestCheckout)$/^(pays_with_card)$"],
+], "each subtest runs alone, so its pattern narrows no other test");
 `)
 }
 
@@ -213,14 +229,21 @@ const updates = lines.map(m.parseTestEvent).filter(Boolean).map((event) => colle
 const finals = updates.filter((update) => update.kind !== "output");
 same(finals.map((update) => [update.kind, update.key ?? update.packagePath]), [
   ["started", pkgA + "#TestIndex"],
+  ["started", pkgA + "#TestIndex/empty"],
+  ["failed", pkgA + "#TestIndex/empty"],
   ["failed", pkgA + "#TestIndex"],
   ["started", pkgB + "#TestIndex"],
   ["passed", pkgB + "#TestIndex"],
   ["package-failed", "github.com/acme/shop/tests/Unit"],
-], "results keyed by package and top-level test; a package whose test failed is not a broken build");
-const failed = finals.find((update) => update.kind === "failed");
+], "results keyed by package and full name, a subtest's its own; a package whose test failed is not a broken build");
+const failed = finals.find((update) => update.kind === "failed" && update.key === pkgA + "#TestIndex");
 same(failed.elapsedMs, 250, "elapsed in milliseconds");
-assert(failed.output.includes("want 2 rows, got 0"), "a subtest's output belongs to its parent: " + failed.output);
+assert(failed.output.includes("=== RUN   TestIndex") && failed.output.includes("want 2 rows, got 0"), "a subtest's output belongs to its parent: " + failed.output);
+const subtest = finals.find((update) => update.kind === "failed" && update.key === pkgA + "#TestIndex/empty");
+same([subtest.elapsedMs, subtest.output], [10, "    invoice_test.go:42: want 2 rows, got 0\n"], "a subtest's result carries its own output only");
+same(updates.filter((update) => update.kind === "output" && update.key !== undefined).map((update) => update.key), [pkgA + "#TestIndex", pkgA + "#TestIndex/empty"], "output names the test that printed it");
+same([m.resultKey(pkgA, "TestIndex/empty"), m.parentKey(pkgA + "#TestIndex/empty/deeper"), m.parentKey(pkgA + "#TestIndex/empty"), m.parentKey(pkgA + "#TestIndex")],
+  [pkgA + "#TestIndex/empty", pkgA + "#TestIndex/empty", pkgA + "#TestIndex", undefined], "a result key and the test above it");
 same(finals.at(-1).output, "tests/Unit/money_test.go:3:1: syntax error\n", "a broken build carries what the compiler said");
 same(m.failureLine(failed.output, "invoice_test.go"), 41, "the failure points at its line, zero-based");
 same(m.failureLine(failed.output, "other_test.go"), undefined, "a line in another file is not this test's");

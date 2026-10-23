@@ -1,0 +1,224 @@
+{
+  "version": 1,
+  "module": "example.com/shop",
+  "layers": [
+    {
+      "name": "Unit",
+      "dir": "tests/Unit",
+      "tag": ""
+    },
+    {
+      "name": "Feature",
+      "dir": "tests/Feature",
+      "tag": ""
+    },
+    {
+      "name": "Contract",
+      "dir": "tests/Contract",
+      "tag": ""
+    },
+    {
+      "name": "E2E",
+      "dir": "tests/E2E",
+      "tag": "e2e"
+    },
+    {
+      "name": "Conformance",
+      "dir": "tests/Conformance",
+      "tag": ""
+    },
+    {
+      "name": "Other",
+      "dir": "",
+      "tag": ""
+    }
+  ],
+  "tests": [
+    {
+      "layer": "Unit",
+      "package": "example.com/shop/tests/Unit",
+      "file": "tests/Unit/main_test.go",
+      "line": 6,
+      "name": "TestMain",
+      "constraint": "",
+      "tags": [],
+      "subtests": []
+    },
+    {
+      "layer": "Unit",
+      "package": "example.com/shop/tests/Unit",
+      "file": "tests/Unit/main_test.go",
+      "line": 8,
+      "name": "TestAlias",
+      "constraint": "",
+      "tags": [],
+      "subtests": []
+    },
+    {
+      "layer": "Unit",
+      "package": "example.com/shop/tests/Unit",
+      "file": "tests/Unit/money_test.go",
+      "line": 7,
+      "name": "TestMoney",
+      "constraint": "",
+      "tags": [],
+      "subtests": [
+        {
+          "name": "TestMoney/adds_cents",
+          "line": 8
+        },
+        {
+          "name": "TestMoney/adds_cents/carries",
+          "line": 9
+        },
+        {
+          "name": "TestMoney/adds_cents#01",
+          "line": 11
+        }
+      ]
+    },
+    {
+      "layer": "Unit",
+      "package": "example.com/shop/tests/Unit",
+      "file": "tests/Unit/money_test.go",
+      "line": 35,
+      "name": "Test_underscore",
+      "constraint": "",
+      "tags": [],
+      "subtests": []
+    },
+    {
+      "layer": "Unit",
+      "package": "example.com/shop/tests/Unit",
+      "file": "tests/Unit/money_test.go",
+      "line": 37,
+      "name": "Test",
+      "constraint": "",
+      "tags": [],
+      "subtests": []
+    },
+    {
+      "layer": "Unit",
+      "package": "example.com/shop/tests/Unit",
+      "file": "tests/Unit/money_test.go",
+      "line": 39,
+      "name": "TestNoName",
+      "constraint": "",
+      "tags": [],
+      "subtests": []
+    },
+    {
+      "layer": "Unit",
+      "package": "example.com/shop/tests/Unit",
+      "file": "tests/Unit/money_test.go",
+      "line": 45,
+      "name": "TestLogin",
+      "constraint": "",
+      "tags": [],
+      "subtests": []
+    },
+    {
+      "layer": "Unit",
+      "package": "example.com/shop/tests/Unit",
+      "file": "tests/Unit/money_test.go",
+      "line": 47,
+      "name": "TestAfterString",
+      "constraint": "",
+      "tags": [],
+      "subtests": []
+    },
+    {
+      "layer": "Feature",
+      "package": "example.com/shop/tests/Feature/billing",
+      "file": "tests/Feature/billing/invoice_test.go",
+      "line": 7,
+      "name": "TestInvoice",
+      "constraint": "integration \u0026\u0026 !windows",
+      "tags": [
+        "integration"
+      ],
+      "subtests": [
+        {
+          "name": "TestInvoice/total",
+          "line": 8
+        }
+      ]
+    },
+    {
+      "layer": "Contract",
+      "package": "example.com/shop/tests/Contract",
+      "file": "tests/Contract/legacy_test.go",
+      "line": 8,
+      "name": "TestLegacyContract",
+      "constraint": "ignore",
+      "tags": [
+        "ignore"
+      ],
+      "subtests": []
+    },
+    {
+      "layer": "Contract",
+      "package": "example.com/shop/tests/Contract",
+      "file": "tests/Contract/openapi_test.go",
+      "line": 7,
+      "name": "TestOpenAPI",
+      "constraint": "sparc64 || openapi_strict",
+      "tags": [
+        "openapi_strict"
+      ],
+      "subtests": []
+    },
+    {
+      "layer": "E2E",
+      "package": "example.com/shop/tests/E2E",
+      "file": "tests/E2E/checkout_test.go",
+      "line": 7,
+      "name": "TestCheckout",
+      "constraint": "e2e",
+      "tags": [
+        "e2e"
+      ],
+      "subtests": [
+        {
+          "name": "TestCheckout/pays_with_card",
+          "line": 8
+        }
+      ]
+    },
+    {
+      "layer": "E2E",
+      "package": "example.com/shop/tests/E2E",
+      "file": "tests/E2E/checkout_test.go",
+      "line": 11,
+      "name": "TestSmokeLogin",
+      "constraint": "e2e",
+      "tags": [
+        "e2e"
+      ],
+      "subtests": []
+    },
+    {
+      "layer": "Conformance",
+      "package": "example.com/shop/tests/Conformance",
+      "file": "tests/Conformance/auth_test.go",
+      "line": 7,
+      "name": "TestAuthKit",
+      "constraint": "!(linux \u0026\u0026 slowauth) || conformance",
+      "tags": [
+        "conformance"
+      ],
+      "subtests": []
+    },
+    {
+      "layer": "Other",
+      "package": "example.com/shop/app/models",
+      "file": "app/models/user_internal_test.go",
+      "line": 5,
+      "name": "TestUserName",
+      "constraint": "",
+      "tags": [],
+      "subtests": []
+    }
+  ],
+  "unreadable": []
+}

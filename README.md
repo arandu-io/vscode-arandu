@@ -91,8 +91,11 @@ runs migrations or seeders or edits the wiring.
 The Testing view lists the selected project's tests by layer — Unit, Feature,
 Contract, E2E and Conformance, from `tests/Unit`, `tests/Feature`,
 `tests/Contract`, `tests/E2E` and `tests/Conformance` — with one entry per test
-function. **Run** goes through `aru test` with JSON output and an anchored
-`-run`; end-to-end tests run apart with `aru test --e2e`, plus `--driver` and
+function. In a trusted workspace with aru v0.79.0 or later the list comes from
+`aru test --list --json`, which adds the subtests named by a string literal and
+the tests beside the code under Other; otherwise the extension reads the five
+layer directories itself. **Run** goes through `aru test` with JSON output and
+an anchored `-run`; end-to-end tests run apart with `aru test --e2e`, plus `--driver` and
 `--browser` when you chose them. **Debug** starts the test under Delve through
 the Go extension (`golang.go`), with `-tags e2e` and a visible browser
 (`ARANDU_E2E_HEADED=1`) for a journey.

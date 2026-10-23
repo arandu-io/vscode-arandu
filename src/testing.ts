@@ -9,6 +9,7 @@ import { devServerURL, isListening, recordTarget } from "./devServer";
 import { describeChoice, driverChoices, e2eEnvironment, resolveChoice } from "./e2eDrivers";
 import type { AranduProject } from "./projects";
 import contract from "./testingContract.json";
+import { listWithAru, scannedFile, scannedListing, type ListedFile, type TestListing } from "./testInventory";
 import {
   debugConfiguration,
   editorLine,
@@ -16,9 +17,9 @@ import {
   isE2E,
   layerOf,
   moduleOf,
-  packagePath,
+  parentKey,
   parseTestFile,
-  selectionKey,
+  resultKey,
   testBatches,
   testLayers,
   type DriverChoice,
@@ -38,11 +39,15 @@ export interface TestingHost {
 }
 
 interface TestData {
-  readonly kind: "layer" | "file" | "test";
+  readonly kind: "layer" | "file" | "test" | "subtest";
   readonly layer: TestLayer;
   readonly relative: string;
+  // name is the test's full name, TestX/sub for a subtest, and empty above.
   readonly name: string;
   readonly tags: readonly string[];
+  // packagePath is the import path go test reports for the file's package,
+  // or empty when it is not known.
+  readonly packagePath: string;
 }
 
 interface TracePick extends vscode.QuickPickItem {
@@ -66,6 +71,13 @@ export class AranduTesting implements vscode.Disposable {
   private readonly debugProfile: vscode.TestRunProfile;
   private projectDisposables: vscode.Disposable[] = [];
   private projectKey: string | undefined;
+  // layers is the layers of the last listing, in the order the view shows them.
+  private layers: readonly TestLayer[] = testLayers;
+  // source is where the last listing came from: aru, which is asked again when
+  // a test file changes, or the editor's own reading, which rereads the file.
+  private source: TestListing["source"] = "scanner";
+  private generation = 0;
+  private rediscoverTimer: ReturnType<typeof setTimeout> | undefined;
 
   public constructor(private readonly host: TestingHost) {
     this.controller.resolveHandler = async (item) => {
@@ -100,6 +112,8 @@ export class AranduTesting implements vscode.Disposable {
           provideCodeLenses: (document) => this.journeyLenses(document),
         },
       ),
+      // Trust is what lets aru list the tests; until then the editor reads them.
+      vscode.workspace.onDidGrantWorkspaceTrust(() => void this.discover()),
       vscode.commands.registerCommand("arandu.testing.refresh", () => this.discover()),
       vscode.commands.registerCommand("arandu.e2e.selectDriver", () => this.selectDriver()),
       vscode.commands.registerCommand("arandu.e2e.record", () => this.record()),
@@ -111,6 +125,7 @@ export class AranduTesting implements vscode.Disposable {
   }
 
   public dispose(): void {
+    this.cancelRediscover();
     for (const disposable of this.projectDisposables.splice(0)) {
       disposable.dispose();
     }
@@ -129,6 +144,7 @@ export class AranduTesting implements vscode.Disposable {
       return;
     }
     this.projectKey = project?.key;
+    this.cancelRediscover();
     for (const disposable of this.projectDisposables.splice(0)) {
       disposable.dispose();
     }
@@ -137,39 +153,119 @@ export class AranduTesting implements vscode.Disposable {
     if (project === undefined) {
       return;
     }
+    // Every test file of the project, because aru lists the tests beside the
+    // code too, under Other.
     const watcher = vscode.workspace.createFileSystemWatcher(
-      new vscode.RelativePattern(project.root, `${contract.testsRoot}/**/*${contract.testFileSuffix}`),
+      new vscode.RelativePattern(project.root, `**/*${contract.testFileSuffix}`),
     );
     this.projectDisposables.push(
       watcher,
-      watcher.onDidCreate((uri) => void this.updateFile(uri)),
-      watcher.onDidChange((uri) => void this.updateFile(uri)),
-      watcher.onDidDelete((uri) => this.removeFile(uri)),
+      watcher.onDidCreate((uri) => this.fileChanged(uri, false)),
+      watcher.onDidChange((uri) => this.fileChanged(uri, false)),
+      watcher.onDidDelete((uri) => this.fileChanged(uri, true)),
     );
     void this.discover();
   }
 
   // ---- discovery ---------------------------------------------------------
 
+  // discover lists the selected project's tests and shows them: from aru test
+  // --list --json when the workspace is trusted and aru has it, and otherwise
+  // from the editor's own reading of the five layer directories.
   private async discover(): Promise<void> {
+    this.cancelRediscover();
+    const generation = ++this.generation;
     const project = this.host.project();
     if (project === undefined) {
       this.controller.items.replace([]);
       return;
     }
-    const files: vscode.Uri[] = [];
-    for (const layer of testLayers) {
-      const pattern = new vscode.RelativePattern(project.root, `${layer.directory}/**/*${contract.testFileSuffix}`);
-      files.push(...await vscode.workspace.findFiles(pattern, adapterContract.projectDiscoveryExclude));
-    }
-    if (this.host.project()?.key !== project.key) {
+    const listing = await this.listWithAru(project) ?? await this.scanProject(project);
+    if (generation !== this.generation || this.host.project()?.key !== project.key) {
       return;
     }
+    this.source = listing.source;
+    this.layers = listing.layers;
     this.controller.items.replace([]);
-    for (const uri of files.sort((left, right) => left.fsPath < right.fsPath ? -1 : left.fsPath > right.fsPath ? 1 : 0)) {
-      await this.updateFile(uri);
+    for (const file of listing.files) {
+      this.showFile(project, file);
+    }
+    for (const unreadable of listing.unreadable) {
+      this.host.output.warn(`aru test --list could not parse ${unreadable.file}, so its tests are not shown: ${unreadable.error}`);
     }
     await this.describeE2ELayer();
+  }
+
+  // listWithAru asks aru for the tests, and answers undefined -- after saying
+  // why -- when the editor has to read them itself. aru is never started in an
+  // untrusted workspace.
+  private async listWithAru(project: AranduProject): Promise<TestListing | undefined> {
+    if (!vscode.workspace.isTrusted || project.root.scheme !== "file") {
+      return undefined;
+    }
+    let executable: string;
+    try {
+      executable = (await resolveAruExecutable(project.folder)).executable;
+    } catch (error: unknown) {
+      this.host.output.info(`Reading the tests from the sources: ${errorMessage(error)}`);
+      return undefined;
+    }
+    const answer = await listWithAru(executable, project.root.fsPath);
+    if (answer.listing === undefined) {
+      this.host.output.info(`Reading the tests from the sources: ${answer.reason}.`);
+      return undefined;
+    }
+    this.host.output.info(`Listed ${answer.listing.files.reduce((sum, file) => sum + file.tests.length, 0)} tests with ${executable} test --list --json (${answer.version}).`);
+    return answer.listing;
+  }
+
+  // scanProject reads the tests of the five layer directories itself, for an
+  // aru that cannot list them.
+  private async scanProject(project: AranduProject): Promise<TestListing> {
+    const uris: vscode.Uri[] = [];
+    for (const layer of testLayers) {
+      const pattern = new vscode.RelativePattern(project.root, `${layer.directory}/**/*${contract.testFileSuffix}`);
+      uris.push(...await vscode.workspace.findFiles(pattern, adapterContract.projectDiscoveryExclude));
+    }
+    const files: Array<{ relative: string; source: string }> = [];
+    for (const uri of uris.sort((left, right) => left.fsPath < right.fsPath ? -1 : left.fsPath > right.fsPath ? 1 : 0)) {
+      const relative = this.relativeToProject(uri);
+      if (relative === undefined) {
+        continue;
+      }
+      try {
+        files.push({ relative, source: await readFile(uri.fsPath, "utf8") });
+      } catch {
+        // A file that went away between the search and the read has no tests.
+      }
+    }
+    return scannedListing(files, moduleOf(await readText(path.join(project.root.fsPath, "go.mod"))));
+  }
+
+  // fileChanged follows a test file that was written, created or deleted: aru
+  // is asked again a moment later, so a save that touches several files lists
+  // once, and the editor's own reading rereads the one file.
+  private fileChanged(uri: vscode.Uri, deleted: boolean): void {
+    if (this.source === "aru") {
+      this.cancelRediscover();
+      this.rediscoverTimer = setTimeout(() => {
+        this.rediscoverTimer = undefined;
+        void this.discover();
+      }, contract.rediscoverDelayMilliseconds);
+      return;
+    }
+    if (deleted) {
+      this.removeFile(uri);
+    } else {
+      void this.updateFile(uri);
+    }
+  }
+
+  private cancelRediscover(): void {
+    if (this.rediscoverTimer !== undefined) {
+      clearTimeout(this.rediscoverTimer);
+      this.rediscoverTimer = undefined;
+    }
   }
 
   private relativeToProject(uri: vscode.Uri): string | undefined {
@@ -184,10 +280,11 @@ export class AranduTesting implements vscode.Disposable {
     return relative.split(path.sep).join("/");
   }
 
+  // updateFile rereads one test file with the editor's own reading.
   private async updateFile(uri: vscode.Uri): Promise<void> {
+    const project = this.host.project();
     const relative = this.relativeToProject(uri);
-    const layer = relative === undefined ? undefined : layerOf(relative);
-    if (relative === undefined || layer === undefined) {
+    if (project === undefined || relative === undefined || layerOf(relative) === undefined) {
       return;
     }
     let source: string;
@@ -197,23 +294,43 @@ export class AranduTesting implements vscode.Disposable {
       this.removeFile(uri);
       return;
     }
-    const parsed = parseTestFile(source);
-    const layerItem = this.layerItem(layer);
-    if (parsed.tests.length === 0) {
-      layerItem.children.delete(uri.toString());
-      if (layerItem.children.size === 0) {
-        this.controller.items.delete(layerItem.id);
-      }
+    const file = scannedFile(relative, moduleOf(await readText(path.join(project.root.fsPath, "go.mod"))), source);
+    if (file === undefined || file.tests.length === 0) {
+      this.removeFile(uri);
       return;
     }
-    const label = relative.slice(layer.directory.length + 1);
+    this.showFile(project, file);
+  }
+
+  // showFile puts a file's tests, and their subtests, under its layer.
+  private showFile(project: AranduProject, file: ListedFile): void {
+    const uri = vscode.Uri.joinPath(project.root, ...file.relative.split("/"));
+    const layerItem = this.layerItem(file.layer);
+    const base = { layer: file.layer, relative: file.relative, tags: file.tags, packagePath: file.packagePath };
+    const label = file.layer.directory === "" ? file.relative : file.relative.slice(file.layer.directory.length + 1);
     const fileItem = layerItem.children.get(uri.toString()) ?? this.controller.createTestItem(uri.toString(), label, uri);
-    this.data.set(fileItem, { kind: "file", layer, relative, name: "", tags: parsed.tags });
+    this.data.set(fileItem, { ...base, kind: "file", name: "" });
     const children: vscode.TestItem[] = [];
-    for (const test of parsed.tests) {
+    for (const test of file.tests) {
       const item = this.controller.createTestItem(`${uri.toString()}#${test.name}`, test.name, uri);
       item.range = new vscode.Range(editorLine(test.line), 0, editorLine(test.line), 0);
-      this.data.set(item, { kind: "test", layer, relative, name: test.name, tags: parsed.tags });
+      this.data.set(item, { ...base, kind: "test", name: test.name });
+      // Subtests come depth first, so each one's parent is already shown: the
+      // nearest one whose name is a prefix of its own.
+      const shown = new Map<string, vscode.TestItem>([[test.name, item]]);
+      for (const subtest of test.subtests) {
+        let parent: string | undefined = subtest.name.slice(0, subtest.name.lastIndexOf("/"));
+        while (parent !== undefined && !shown.has(parent)) {
+          parent = parent.includes("/") ? parent.slice(0, parent.lastIndexOf("/")) : undefined;
+        }
+        const parentItem = shown.get(parent ?? test.name) ?? item;
+        const label = subtest.name.slice((parent ?? test.name).length + 1);
+        const child = this.controller.createTestItem(`${uri.toString()}#${subtest.name}`, label, uri);
+        child.range = new vscode.Range(editorLine(subtest.line), 0, editorLine(subtest.line), 0);
+        this.data.set(child, { ...base, kind: "subtest", name: subtest.name });
+        parentItem.children.add(child);
+        shown.set(subtest.name, child);
+      }
       children.push(item);
     }
     fileItem.children.replace(children);
@@ -221,15 +338,13 @@ export class AranduTesting implements vscode.Disposable {
   }
 
   private removeFile(uri: vscode.Uri): void {
-    const relative = this.relativeToProject(uri);
-    const layer = relative === undefined ? undefined : layerOf(relative);
-    if (layer === undefined) {
-      return;
-    }
-    const layerItem = this.controller.items.get(`layer:${layer.id}`);
-    layerItem?.children.delete(uri.toString());
-    if (layerItem !== undefined && layerItem.children.size === 0) {
-      this.controller.items.delete(layerItem.id);
+    const layerItems: vscode.TestItem[] = [];
+    this.controller.items.forEach((layerItem) => layerItems.push(layerItem));
+    for (const layerItem of layerItems) {
+      layerItem.children.delete(uri.toString());
+      if (layerItem.children.size === 0) {
+        this.controller.items.delete(layerItem.id);
+      }
     }
   }
 
@@ -240,8 +355,8 @@ export class AranduTesting implements vscode.Disposable {
       return existing;
     }
     const item = this.controller.createTestItem(id, layer.label);
-    item.sortText = String(testLayers.indexOf(layer));
-    this.data.set(item, { kind: "layer", layer, relative: layer.directory, name: "", tags: [] });
+    item.sortText = String(this.layers.findIndex((candidate) => candidate.id === layer.id)).padStart(3, "0");
+    this.data.set(item, { kind: "layer", layer, relative: layer.directory, name: "", tags: [], packagePath: "" });
     // Items are added in layer order, and the Testing view keeps it.
     const ordered: vscode.TestItem[] = [];
     this.controller.items.forEach((candidate) => ordered.push(candidate));
@@ -272,7 +387,8 @@ export class AranduTesting implements vscode.Disposable {
       if (excluded.has(item.id)) {
         return;
       }
-      if (this.data.get(item)?.kind === "test") {
+      const kind = this.data.get(item)?.kind;
+      if (kind === "test" || kind === "subtest") {
         out.push(item);
         return;
       }
@@ -284,6 +400,34 @@ export class AranduTesting implements vscode.Disposable {
       request.include.forEach(visit);
     }
     return out;
+  }
+
+  // collectSubtests adds the subtests shown under a test to the items results
+  // are matched to, keeping an item already there.
+  private collectSubtests(item: vscode.TestItem, byKey: Map<string, vscode.TestItem>): void {
+    item.children.forEach((child) => {
+      const data = this.data.get(child);
+      if (data?.kind !== "subtest") {
+        return;
+      }
+      const key = resultKey(data.packagePath, data.name);
+      if (!byKey.has(key)) {
+        byKey.set(key, child);
+      }
+      this.collectSubtests(child, byKey);
+    });
+  }
+
+  // itemFor answers the item a result key belongs to or, for output, the
+  // nearest test above it that has one.
+  private static itemFor(byKey: ReadonlyMap<string, vscode.TestItem>, key: string | undefined, nearest: boolean): vscode.TestItem | undefined {
+    for (let candidate = key; candidate !== undefined; candidate = nearest ? parentKey(candidate) : undefined) {
+      const item = byKey.get(candidate);
+      if (item !== undefined) {
+        return item;
+      }
+    }
+    return undefined;
   }
 
   // refuse answers why tests cannot run here, or undefined when they can. An
@@ -312,13 +456,6 @@ export class AranduTesting implements vscode.Disposable {
         return;
       }
       const root = project.root.fsPath;
-      const modulePath = moduleOf(await readText(path.join(root, "go.mod")));
-      if (modulePath === undefined) {
-        for (const item of leaves) {
-          run.errored(item, new vscode.TestMessage(`${path.join(root, "go.mod")} declares no module, so the tests cannot be matched to their package.`));
-        }
-        return;
-      }
       const byKey = new Map<string, vscode.TestItem>();
       const selections: TestSelection[] = [];
       for (const item of leaves) {
@@ -326,16 +463,22 @@ export class AranduTesting implements vscode.Disposable {
         if (data === undefined) {
           continue;
         }
-        const pkg = packagePath(modulePath, path.posix.dirname(data.relative));
-        byKey.set(selectionKey(pkg, data.name), item);
-        selections.push({ layer: data.layer.id, packagePath: pkg, name: data.name, tags: data.tags });
+        if (data.packagePath === "") {
+          run.errored(item, new vscode.TestMessage(`${path.join(root, "go.mod")} declares no module, so the test cannot be matched to its package.`));
+          finished.add(item);
+          continue;
+        }
+        byKey.set(resultKey(data.packagePath, data.name), item);
+        selections.push({ layer: data.layer.id, packagePath: data.packagePath, name: data.name, tags: data.tags });
       }
+      // The subtests under a test that runs report their own results.
+      leaves.forEach((item) => this.collectSubtests(item, byKey));
       const choice = await this.currentChoice();
       const aru = await resolveAruExecutable(project.folder);
       const traceDir = await this.runTraceDir();
       for (const batch of testBatches(selections, choice)) {
         const entries = batch.tests.flatMap((test) => {
-          const item = byKey.get(selectionKey(test.packagePath, test.name));
+          const item = byKey.get(resultKey(test.packagePath, test.name));
           return item === undefined ? [] : [{ test, item }];
         });
         const items = entries.map((entry) => entry.item);
@@ -365,7 +508,7 @@ export class AranduTesting implements vscode.Disposable {
               failedPackages.set(update.packagePath, update.output);
               return;
             }
-            const item = update.key === undefined ? undefined : byKey.get(update.key);
+            const item = AranduTesting.itemFor(byKey, update.key, update.kind === "output");
             switch (update.kind) {
               case "output":
                 run.appendOutput(crlf(update.text), undefined, item);
@@ -475,7 +618,8 @@ export class AranduTesting implements vscode.Disposable {
         if (data === undefined) {
           continue;
         }
-        const key = `${path.posix.dirname(data.relative)}|${[...data.tags].sort().join(",")}`;
+        // A subtest is debugged alone, as it runs alone.
+        const key = `${path.posix.dirname(data.relative)}|${[...data.tags].sort().join(",")}|${data.name.includes("/") ? data.name : ""}`;
         const group = groups.get(key) ?? { data, items: [] };
         group.items.push(item);
         groups.set(key, group);
@@ -538,7 +682,7 @@ export class AranduTesting implements vscode.Disposable {
     const fileUri = vscode.Uri.parse(uri, true);
     let item = this.findTest(fileUri, name);
     if (item === undefined) {
-      await this.updateFile(fileUri);
+      await (this.source === "aru" ? this.discover() : this.updateFile(fileUri));
       item = this.findTest(fileUri, name);
     }
     if (item === undefined) {
@@ -555,12 +699,11 @@ export class AranduTesting implements vscode.Disposable {
   }
 
   private findTest(uri: vscode.Uri, name: string): vscode.TestItem | undefined {
-    const relative = this.relativeToProject(uri);
-    const layer = relative === undefined ? undefined : layerOf(relative);
-    if (layer === undefined) {
-      return undefined;
-    }
-    return this.controller.items.get(`layer:${layer.id}`)?.children.get(uri.toString())?.children.get(`${uri.toString()}#${name}`);
+    let found: vscode.TestItem | undefined;
+    this.controller.items.forEach((layerItem) => {
+      found ??= layerItem.children.get(uri.toString())?.children.get(`${uri.toString()}#${name}`);
+    });
+    return found;
   }
 
   // journeyLenses puts Run, Debug headed and Open last trace over every journey
