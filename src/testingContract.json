@@ -1,0 +1,44 @@
+{
+  "controllerId": "arandu",
+  "controllerLabel": "Arandu",
+  "testsRoot": "tests",
+  "testFileSuffix": "_test.go",
+  "layers": [
+    { "id": "unit", "label": "Unit", "directory": "tests/Unit" },
+    { "id": "feature", "label": "Feature", "directory": "tests/Feature" },
+    { "id": "contract", "label": "Contract", "directory": "tests/Contract" },
+    { "id": "e2e", "label": "E2E", "directory": "tests/E2E" },
+    { "id": "conformance", "label": "Conformance", "directory": "tests/Conformance" }
+  ],
+  "e2eLayer": "e2e",
+  "e2eTag": "e2e",
+  "testArgs": ["test"],
+  "testJsonFlag": "-json",
+  "testRunFlag": "-run",
+  "testTagsFlag": "-tags",
+  "e2eFlag": "--e2e",
+  "driverFlag": "--driver",
+  "browserFlag": "--browser",
+  "recordArgs": ["e2e:record"],
+  "explainArgs": ["e2e:explain"],
+  "drivers": [
+    { "driver": "cdp", "browsers": ["chromium"], "module": "" },
+    { "driver": "playwright", "browsers": ["chromium", "firefox", "webkit"], "module": "github.com/hyz-is/arandu-playwright" }
+  ],
+  "defaultDriver": "cdp",
+  "driverStateKey": "arandu.e2e.driver",
+  "env": {
+    "driver": "ARANDU_E2E_DRIVER",
+    "browser": "ARANDU_E2E_BROWSER",
+    "headed": "ARANDU_E2E_HEADED",
+    "trace": "ARANDU_E2E_TRACE",
+    "traceDir": "ARANDU_E2E_TRACE_DIR"
+  },
+  "traceFile": "trace.json",
+  "traceVersion": 1,
+  "traceDefaultBase": "arandu-e2e",
+  "traceDomLimitBytes": 524288,
+  "goExtensionId": "golang.go",
+  "devServerDefaultUrl": "http://localhost:8080",
+  "devServerProbeMilliseconds": 400
+}

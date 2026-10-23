@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "test": "TestCheckout/pays_with_card",
+  "driver": "cdp",
+  "browser": "chromium",
+  "started": "2026-10-23T16:06:33.760263-03:00",
+  "finished": "2026-10-23T16:06:33.76029-03:00",
+  "failed": true,
+  "steps": [
+    {
+      "index": 1,
+      "action": "visit",
+      "target": "route:checkout.show",
+      "url": "http://127.0.0.1:52011/checkout",
+      "started": "2026-10-23T15:00:00.123456789-03:00",
+      "duration_ns": 42000000,
+      "screenshot": "steps/001-visit.png",
+      "dom": "steps/001-visit.html"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "target": "role=button[name=\"Pay\"]",
+      "url": "http://127.0.0.1:52011/checkout",
+      "started": "2026-10-23T15:00:01.123456789-03:00",
+      "duration_ns": 1500000,
+      "error": "expected the toast \"Paid\" to be visible: the page answered 500",
+      "screenshot": "steps/002-click.png",
+      "dom": "steps/002-click.html"
+    }
+  ],
+  "network": [
+    {
+      "id": "1",
+      "method": "GET",
+      "url": "http://127.0.0.1:52011/checkout",
+      "type": "Document",
+      "status": 200,
+      "server_request_id": "req-aaa",
+      "started": "2026-10-23T15:00:00.128456789-03:00",
+      "finished": "2026-10-23T15:00:00.153456789-03:00"
+    },
+    {
+      "id": "2",
+      "method": "POST",
+      "url": "http://127.0.0.1:52011/checkout/pay",
+      "type": "XHR",
+      "status": 500,
+      "server_request_id": "req-bbb",
+      "started": "2026-10-23T15:00:01.223456789-03:00",
+      "finished": "2026-10-23T15:00:01.303456789-03:00"
+    }
+  ],
+  "console": [
+    {
+      "time": "2026-10-23T15:00:01.313456789-03:00",
+      "level": "error",
+      "source": "network",
+      "text": "Failed to load resource: the server responded with a status of 500",
+      "url": "http://127.0.0.1:52011/checkout/pay"
+    }
+  ],
+  "failures": [
+    {
+      "time": "2026-10-23T15:00:01.303456789-03:00",
+      "kind": "5xx",
+      "text": "POST /checkout/pay answered 500"
+    }
+  ],
+  "server": {
+    "req-aaa": {
+      "logs": [
+        {
+          "time": "2026-10-23T15:00:00.133456789-03:00",
+          "level": "INFO",
+          "message": "request",
+          "attrs": {
+            "path": "/checkout"
+          }
+        }
+      ],
+      "queries": [
+        {
+          "sql": "SELECT id, total FROM carts WHERE tenant_id = $1 AND id = $2",
+          "duration_ns": 800000
+        }
+      ],
+      "decisions": [
+        {
+          "policy": "CartPolicy",
+          "action": "view",
+          "allowed": true,
+          "grant": "grant:cart:view:tenant=7"
+        }
+      ]
+    },
+    "req-bbb": {
+      "logs": [
+        {
+          "time": "2026-10-23T15:00:01.273456789-03:00",
+          "level": "ERROR",
+          "message": "charge failed",
+          "attrs": {
+            "error": "insert into payments: duplicate key"
+          }
+        }
+      ],
+      "queries": [
+        {
+          "sql": "INSERT INTO payments (tenant_id, cart_id, amount) VALUES ($1, $2, $3)",
+          "duration_ns": 2000000,
+          "error": "duplicate key value violates unique constraint \"payments_cart_id_key\""
+        }
+      ],
+      "decisions": [
+        {
+          "policy": "PaymentPolicy",
+          "action": "create",
+          "allowed": false,
+          "reason": "the cart belongs to another member"
+        }
+      ]
+    }
+  }
+}
