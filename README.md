@@ -86,6 +86,39 @@ the generator has `--dry-run`, you can preview it first without writing
 anything. Nothing runs a generator on open or save, and the extension never
 runs migrations or seeders or edits the wiring.
 
+## Testing
+
+The Testing view lists the selected project's tests by layer — Unit, Feature,
+Contract, E2E and Conformance, from `tests/Unit`, `tests/Feature`,
+`tests/Contract`, `tests/E2E` and `tests/Conformance` — with one entry per test
+function. **Run** goes through `aru test` with JSON output and an anchored
+`-run`; end-to-end tests run apart with `aru test --e2e`, plus `--driver` and
+`--browser` when you chose them. **Debug** starts the test under Delve through
+the Go extension (`golang.go`), with `-tags e2e` and a visible browser
+(`ARANDU_E2E_HEADED=1`) for a journey.
+
+`Arandu: Select E2E Driver and Browser`, also behind the gear of the Testing
+view, picks the driver: the native `cdp` driver always, and the `playwright`
+driver's Chromium, Firefox and WebKit only when `go.mod` requires
+`github.com/hyz-is/arandu-playwright`.
+
+Each journey in `tests/E2E` carries three lenses: **Run**, **Debug headed** and
+**Open last trace**. Runs from the editor write a trace after every test, so
+the last one can be opened after a pass too. The trace viewer shows the steps
+as a timeline and, for the selected step, its screenshot, its DOM as source,
+the network, the console, and the server's side of each request: its log, its
+SQL and its Policy decisions. A failed trace offers **Explain failure**, which
+runs `aru e2e:explain` on it; `Arandu: Explain Failure` and `Arandu: Open
+Trace` choose from the recent traces.
+
+`Arandu: Record Journey` runs `aru e2e:record` in a terminal. When a
+development server already answers at the address the project's `.env` gives
+it, recording starts there; otherwise aru serves the application for the
+recording.
+
+Tests, recordings and explanations run only in a trusted workspace, and every
+process starts without a shell.
+
 ## Aru discovery
 
 Open a trusted local workspace containing one or more `arandu.toml` files. The

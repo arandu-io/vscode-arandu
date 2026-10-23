@@ -1,7 +1,7 @@
 {
   "name": "arandu",
   "displayName": "Arandu Intelligence",
-  "description": "Language intelligence, project navigation, and development tools for Arandu.",
+  "description": "Language intelligence, project navigation, testing, and development tools for Arandu.",
   "version": "0.1.8",
   "publisher": "arandu-io",
   "license": "MIT",
@@ -46,19 +46,22 @@
   },
   "categories": [
     "Programming Languages",
-    "Snippets"
+    "Snippets",
+    "Testing"
   ],
   "keywords": [
     "arandu",
+    "e2e",
     "go",
     "htmx",
     "kyse",
-    "templates"
+    "templates",
+    "testing"
   ],
   "capabilities": {
     "untrustedWorkspaces": {
       "supported": "limited",
-      "description": "The Project Map and language server start after the workspace is trusted.",
+      "description": "The Project Map and language server start, and tests run, only after the workspace is trusted.",
       "restrictedConfigurations": [
         "arandu.aru.path"
       ]
@@ -166,6 +169,48 @@
         "title": "Run Generator",
         "category": "Arandu",
         "icon": "$(wand)"
+      },
+      {
+        "command": "arandu.testing.refresh",
+        "title": "Refresh Tests",
+        "category": "Arandu",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "arandu.e2e.selectDriver",
+        "title": "Select E2E Driver and Browser",
+        "category": "Arandu",
+        "icon": "$(browser)"
+      },
+      {
+        "command": "arandu.e2e.record",
+        "title": "Record Journey",
+        "category": "Arandu",
+        "icon": "$(record)"
+      },
+      {
+        "command": "arandu.e2e.explain",
+        "title": "Explain Failure",
+        "category": "Arandu",
+        "icon": "$(lightbulb)"
+      },
+      {
+        "command": "arandu.e2e.openTrace",
+        "title": "Open Trace",
+        "category": "Arandu",
+        "icon": "$(history)"
+      },
+      {
+        "command": "arandu.e2e.runJourney",
+        "title": "Run Journey",
+        "category": "Arandu",
+        "icon": "$(play)"
+      },
+      {
+        "command": "arandu.e2e.debugJourney",
+        "title": "Debug Journey Headed",
+        "category": "Arandu",
+        "icon": "$(debug-alt)"
       }
     ],
     "viewsContainers": {
@@ -199,12 +244,12 @@
       },
       {
         "view": "arandu.development",
-        "contents": "Start the development server or inspect the project.\n[Start aru dev](command:arandu.dev.start)\n[Run Doctor](command:arandu.doctor.run)\n[Configure Aru](command:arandu.aru.configure)",
+        "contents": "Start the development server or inspect the project.\n[Start aru dev](command:arandu.dev.start)\n[Run Doctor](command:arandu.doctor.run)\n[Configure Aru](command:arandu.aru.configure)\nEnd-to-end journeys run from the Testing view.\n[Record Journey](command:arandu.e2e.record)\n[Open Trace](command:arandu.e2e.openTrace)",
         "when": "arandu.project.selected && !arandu.dev.running"
       },
       {
         "view": "arandu.development",
-        "contents": "The development server is running.\n[Stop](command:arandu.dev.stop)\n[Restart](command:arandu.dev.restart)\n[Run Doctor](command:arandu.doctor.run)",
+        "contents": "The development server is running.\n[Stop](command:arandu.dev.stop)\n[Restart](command:arandu.dev.restart)\n[Run Doctor](command:arandu.doctor.run)\nEnd-to-end journeys run from the Testing view.\n[Record Journey](command:arandu.e2e.record)\n[Open Trace](command:arandu.e2e.openTrace)",
         "when": "arandu.project.selected && arandu.dev.running"
       }
     ],
@@ -249,6 +294,16 @@
           "command": "arandu.make.run",
           "when": "view == arandu.projectMap && arandu.project.selected && arandu.generators.available",
           "group": "navigation@7"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "arandu.e2e.runJourney",
+          "when": "false"
+        },
+        {
+          "command": "arandu.e2e.debugJourney",
+          "when": "false"
         }
       ]
     },

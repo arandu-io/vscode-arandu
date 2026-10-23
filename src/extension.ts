@@ -32,6 +32,7 @@ import {
   type ServerFeatures,
 } from "./projectGraphProtocol";
 import { parseProjectGraph } from "./projectGraphSchema";
+import { AranduTesting } from "./testing";
 
 const configureAction = "Configure Aru Path";
 const retryAction = "Retry";
@@ -69,6 +70,7 @@ class AranduController implements vscode.Disposable {
   private readonly devStatus = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
   private readonly projects: AranduProjects;
   private readonly aruUpdates: AruUpdateManager;
+  private readonly testing: AranduTesting;
   private readonly permanentDisposables: vscode.Disposable[] = [];
   private runtimeDisposables: vscode.Disposable[] = [];
   private client: LanguageClient | undefined;
@@ -85,6 +87,15 @@ class AranduController implements vscode.Disposable {
   public constructor(context: vscode.ExtensionContext) {
     this.projects = new AranduProjects(context);
     this.aruUpdates = new AruUpdateManager(context, this.output, async () => this.projects.active?.folder);
+    // The tests read the same selected project as every other capability, and
+    // know whether this editor's development server is running so a recording
+    // starts from it.
+    this.testing = new AranduTesting({
+      context,
+      output: this.output,
+      project: () => this.projects.active,
+      devRunning: () => this.devTerminal !== undefined,
+    });
     this.status.name = "Arandu";
     this.status.show();
     this.devStatus.name = "Arandu Development Server";
@@ -99,6 +110,7 @@ class AranduController implements vscode.Disposable {
       this.status,
       this.devStatus,
       this.aruUpdates,
+      this.testing,
       vscode.commands.registerCommand("arandu.project.select", () => this.selectProject()),
       vscode.commands.registerCommand("arandu.projectMap.refresh", () => this.refresh()),
       vscode.commands.registerCommand("arandu.doctor.run", () => this.refresh()),
@@ -369,6 +381,7 @@ class AranduController implements vscode.Disposable {
 
   private syncProject(project: AranduProject | undefined): void {
     this.provider.setProject(project);
+    this.testing.setProject(project);
     this.tree.description = project?.label;
     this.developmentTree.description = project?.label;
     this.developmentTree.message = project === undefined
